@@ -1,0 +1,12 @@
+htmlmin
+csscompressor
+libsass
+pillow
+pygments
+numpy
+bokeh
+plotly
+daemonocle
+click
+nodeenv
+requests
