@@ -26,6 +26,10 @@ def yabs_cli():
 
 @yabs_cli.command()
 def build():
+	"""YABS build
+
+	Builds website from recipe
+	"""
 
 	with open(CONFIG_FILE, 'r') as f:
 		config = load(f.read(), Loader = Loader)
