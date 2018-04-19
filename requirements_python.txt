@@ -1,12 +1,6 @@
-htmlmin
-csscompressor
-libsass
-pillow
-pygments
-numpy
-bokeh
-plotly
-daemonocle
-click
+beautifulsoup4
+Jinja2
+mistune
 nodeenv
-requests
+Pygments
+PyYAML

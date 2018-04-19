@@ -1,0 +1,10 @@
+htmlmin
+csscompressor
+libsass
+pillow
+numpy
+bokeh
+plotly
+daemonocle
+click
+requests
