@@ -13,8 +13,19 @@ except ImportError:
 from .const import CONFIG_FILE
 from .project import project_class
 
-@click.command()
+# @click.command()
+
+@click.group()
 def yabs_cli():
+	"""YABS
+
+	Yet Another Build System
+	"""
+	pass
+
+
+@yabs_cli.command()
+def build():
 
 	with open(CONFIG_FILE, 'r') as f:
 		config = load(f.read(), Loader = Loader)
