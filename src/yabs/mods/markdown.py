@@ -73,7 +73,6 @@ class MathInlineGrammar(mistune.InlineGrammar):
 	text = re.compile(r'^[\s\S]+?(?=[\\<!\[_*`~$]|https?://| {2,}\n|$)')
 
 
-
 class MathInlineLexer(mistune.InlineLexer):
 	"""This interprets the content of LaTeX style math objects using the rules
 	defined by the MathInlineGrammar.
