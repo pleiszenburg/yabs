@@ -15,7 +15,7 @@ from .const import (
 class project_class:
 
 
-	def __init__(self, **config):
+	def __init__(self, config):
 
 		self.config = config
 		self.config[KEY_CONTEXT] = self
@@ -40,6 +40,6 @@ class project_class:
 				print('Plugin "%s" not found!' % step)
 				continue
 
-			current_plugin = plugin.plugin(**self.config)
+			current_plugin = plugin.plugin(self.config)
 			current_plugin.run()
 			del current_plugin

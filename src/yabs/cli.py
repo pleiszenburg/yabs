@@ -38,5 +38,5 @@ def build():
 		config = load(f.read(), Loader = Loader)
 	config[KEY_PATHS][KEY_CWD] = os.path.abspath(os.getcwd())
 
-	current_project = project_class(**config)
+	current_project = project_class(config)
 	current_project.build()

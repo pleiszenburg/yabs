@@ -7,7 +7,7 @@ from pprint import pprint as pp
 class plugin:
 
 
-	def __init__(self, **config):
+	def __init__(self, config):
 
 		self.config = config
 

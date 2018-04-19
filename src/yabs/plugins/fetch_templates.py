@@ -20,7 +20,7 @@ from yabs.const import (
 class plugin:
 
 
-	def __init__(self, **config):
+	def __init__(self, config):
 
 		self.config = config
 
