@@ -17,7 +17,6 @@ from .const import (
 	)
 from .project import project_class
 
-# @click.command()
 
 @click.group()
 def yabs_cli():
