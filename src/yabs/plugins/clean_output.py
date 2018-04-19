@@ -22,7 +22,7 @@ class plugin:
 
 	def run(self):
 
-		folder = os.path.join(self.config[KEY_CWD], self.config[KEY_PATHS][KEY_OUTPUT])
+		folder = os.path.join(self.config[KEY_PATHS][KEY_CWD], self.config[KEY_PATHS][KEY_OUTPUT])
 
 		for entry in os.listdir(folder):
 

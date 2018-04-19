@@ -10,7 +10,11 @@ try:
 except ImportError:
 	from yaml import Loader
 
-from .const import CONFIG_FILE
+from .const import (
+	CONFIG_FILE,
+	KEY_CWD,
+	KEY_PATHS
+	)
 from .project import project_class
 
 # @click.command()
@@ -33,7 +37,7 @@ def build():
 
 	with open(CONFIG_FILE, 'r') as f:
 		config = load(f.read(), Loader = Loader)
-	config['cwd'] = os.getcwd()
+	config[KEY_PATHS][KEY_CWD] = os.path.abspath(os.getcwd())
 
 	current_project = project_class(**config)
 	current_project.build()

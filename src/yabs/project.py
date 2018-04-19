@@ -7,6 +7,7 @@ import os
 from .const import (
 	KEY_CONTEXT,
 	KEY_CWD,
+	KEY_PATHS,
 	KEY_RECIPE
 	)
 
@@ -24,7 +25,7 @@ class project_class:
 
 		for step in self.config[KEY_RECIPE]:
 
-			os.chdir(self.config[KEY_CWD])
+			os.chdir(self.config[KEY_PATHS][KEY_CWD])
 
 			try:
 

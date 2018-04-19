@@ -27,7 +27,7 @@ class plugin:
 
 	def run(self):
 
-		template_path = os.path.join(self.config[KEY_CWD], self.config[KEY_PATHS][KEY_TEMPLATES])
+		template_path = os.path.join(self.config[KEY_PATHS][KEY_CWD], self.config[KEY_PATHS][KEY_TEMPLATES])
 		jinja_env = jinja2.Environment(
 			loader = jinja2.FileSystemLoader(
 				template_path, encoding = 'utf-8', followlinks = False
