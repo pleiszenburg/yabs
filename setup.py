@@ -29,9 +29,7 @@ setup(
 	download_url = 'https://github.com/pleiszenburg/yabs',
 	entry_points = '''
 		[console_scripts]
-		web_build = build.core:web_build
-		web_server = build.server:web_server
-		web_install_js_libs = build.install:web_install_js_libs
+		yabs = yabs:yabs_cli
 		''',
 	extras_require = {},
 	include_package_data = True,
@@ -40,8 +38,8 @@ setup(
 	license = 'NONE',
 	long_description = '',
 	name = 'yabs',
-	packages = find_packages('modules'),
-	package_dir = {'': 'modules'},
+	packages = find_packages('src'),
+	package_dir = {'': 'src'},
 	url = 'https://github.com/pleiszenburg/yabs',
 	version = '0.0.0',
 	zip_safe = False

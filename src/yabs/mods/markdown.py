@@ -1,3 +1,9 @@
+# -*- coding: utf-8 -*-
+
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# IMPORTS
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 from pprint import pprint as pp
 import re
@@ -10,7 +16,7 @@ from pygments import highlight
 from pygments.lexers import get_lexer_by_name
 from pygments.formatters import html
 
-from yaml import load, dump # PyYAML
+from yaml import load, dump
 try:
 	from yaml import CLoader as Loader, CDumper as Dumper
 except ImportError:
@@ -105,7 +111,6 @@ class MarkdownWithMath(mistune.Markdown):
 
 	def output_multiline_math(self):
 		return self.inline(self.token["text"])
-
 
 
 class RendererWithMath(mistune.Renderer):

@@ -6,5 +6,4 @@ numpy
 bokeh
 plotly
 daemonocle
-click
 requests
