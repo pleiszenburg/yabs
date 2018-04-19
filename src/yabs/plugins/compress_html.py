@@ -7,9 +7,9 @@ from pprint import pprint as pp
 class plugin:
 
 
-	def __init__(self, config):
+	def __init__(self, context):
 
-		self.config = config
+		self.context = context
 
 
 	def run(self):

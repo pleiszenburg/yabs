@@ -5,9 +5,9 @@ import importlib.util
 import os
 
 from .const import (
-	KEY_CONTEXT,
 	KEY_CWD,
 	KEY_PATHS,
+	KEY_PROJECT,
 	KEY_RECIPE
 	)
 
@@ -15,17 +15,17 @@ from .const import (
 class project_class:
 
 
-	def __init__(self, config):
+	def __init__(self, context):
 
-		self.config = config
-		self.config[KEY_CONTEXT] = self
+		self.context = context
+		self.context[KEY_PROJECT] = self
 
 
 	def build(self):
 
-		for step in self.config[KEY_RECIPE]:
+		for step in self.context[KEY_RECIPE]:
 
-			os.chdir(self.config[KEY_PATHS][KEY_CWD])
+			os.chdir(self.context[KEY_PATHS][KEY_CWD])
 
 			try:
 
@@ -40,6 +40,6 @@ class project_class:
 				print('Plugin "%s" not found!' % step)
 				continue
 
-			current_plugin = plugin.plugin(self.config)
+			current_plugin = plugin.plugin(self.context)
 			current_plugin.run()
 			del current_plugin

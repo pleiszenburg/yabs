@@ -15,14 +15,14 @@ from yabs.const import (
 class plugin:
 
 
-	def __init__(self, config):
+	def __init__(self, context):
 
-		self.config = config
+		self.context = context
 
 
 	def run(self):
 
-		folder = os.path.join(self.config[KEY_PATHS][KEY_CWD], self.config[KEY_PATHS][KEY_OUTPUT])
+		folder = os.path.join(self.context[KEY_PATHS][KEY_CWD], self.context[KEY_PATHS][KEY_OUTPUT])
 
 		for entry in os.listdir(folder):
 
