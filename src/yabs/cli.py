@@ -31,4 +31,5 @@ def build():
 		config = load(f.read(), Loader = Loader)
 	config['cwd'] = os.getcwd()
 
-	print(config)
+	current_project = project_class(**config)
+	current_project.build()
