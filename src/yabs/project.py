@@ -4,6 +4,12 @@
 import importlib.util
 import os
 
+from .const import (
+	KEY_CONTEXT,
+	KEY_CWD,
+	KEY_RECIPE
+	)
+
 
 class project_class:
 
@@ -11,12 +17,14 @@ class project_class:
 	def __init__(self, **config):
 
 		self.config = config
-		self.config['context'] = self
+		self.config[KEY_CONTEXT] = self
 
 
 	def build(self):
 
-		for step in self.config['recipe']:
+		for step in self.config[KEY_RECIPE]:
+
+			os.chdir(self.config[KEY_CWD])
 
 			try:
 
