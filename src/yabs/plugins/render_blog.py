@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 
 
+from pprint import pprint as pp
+
+
 class plugin:
 
 
@@ -12,3 +15,4 @@ class plugin:
 	def run(self):
 
 		print('render_blog!')
+		pp(self.config)

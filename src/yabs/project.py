@@ -3,7 +3,6 @@
 
 import importlib.util
 import os
-from pprint import pprint as pp
 
 
 class project_class:
