@@ -5,9 +5,6 @@ import glob
 import os
 
 
-import jinja2
-
-
 from yabs.const import (
 	KEY_OUT,
 	KEY_SRC,
