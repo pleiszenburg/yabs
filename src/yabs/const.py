@@ -3,6 +3,7 @@
 CONFIG_FILE = 'site.yaml'
 
 FLD_SCRIPTS = 'js'
+FLD_STYLES = 'css'
 
 KEY_CWD = 'cwd'
 KEY_HTML = 'html'
