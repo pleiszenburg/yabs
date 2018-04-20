@@ -1,4 +1,3 @@
-htmlmin
 csscompressor
 libsass
 pillow

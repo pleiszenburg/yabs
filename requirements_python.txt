@@ -1,5 +1,6 @@
 click
 beautifulsoup4
+htmlmin
 Jinja2
 mistune
 nodeenv

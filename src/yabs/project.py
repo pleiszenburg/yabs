@@ -20,6 +20,11 @@ class project_class:
 		self.context = context
 		self.context[KEY_PROJECT] = self
 
+		for path_id in self.context[KEY_PATHS]:
+			self.context[KEY_PATHS][path_id] = os.path.join(
+				self.context[KEY_PATHS][KEY_CWD], self.context[KEY_PATHS][path_id]
+				)
+
 
 	def build(self):
 
