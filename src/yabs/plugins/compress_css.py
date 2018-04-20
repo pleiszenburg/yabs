@@ -49,7 +49,7 @@ def compress_css_in_html_file(file_path):
 
 def run(context):
 
-	for file_path in glob.glob(os.path.join(context[KEY_OUT][KEY_ROOT], '*.css')):
+	for file_path in glob.glob(os.path.join(context[KEY_OUT][KEY_STYLES], '*.css')):
 		compress_css_file(file_path)
 
 	for file_path in glob.iglob(os.path.join(context[KEY_OUT][KEY_ROOT], '**/*.htm*'), recursive = True):
