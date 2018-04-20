@@ -2,6 +2,7 @@ click
 beautifulsoup4
 htmlmin
 Jinja2
+libsass
 mistune
 nodeenv
 Pygments

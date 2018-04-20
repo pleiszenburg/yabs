@@ -1,5 +1,4 @@
 csscompressor
-libsass
 pillow
 numpy
 bokeh

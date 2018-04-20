@@ -7,6 +7,7 @@ import os
 
 from yabs.const import (
 	KEY_OUT,
+	KEY_ROOT,
 	KEY_SRC,
 	KEY_STYLES
 	)
@@ -16,9 +17,11 @@ def run(context):
 
 	os.mkdir(context[KEY_OUT][KEY_STYLES])
 
+	suffix_list = ['css', 'sass', 'scss']
+
 	file_list = []
-	for suffix in ['css', 'sass', 'scss']:
-		file_list += glob.glob(os.path.join(context[KEY_SRC][KEY_STYLES], '*.%s' % suffix))
+	for suffix in suffix_list:
+		file_list.extend(glob.glob(os.path.join(context[KEY_OUT][KEY_ROOT], '*.%s' % suffix)))
 
 	for src_file_path in file_list:
 
