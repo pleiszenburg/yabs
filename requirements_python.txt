@@ -1,4 +1,5 @@
 click
+csscompressor
 beautifulsoup4
 htmlmin
 Jinja2
