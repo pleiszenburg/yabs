@@ -31,18 +31,18 @@ def compress_html(content):
 		)
 
 
-def compress_html_file(fn):
+def compress_html_file(file_path):
 
-	with open(fn, 'r') as f:
+	with open(file_path, 'r') as f:
 		cnt = f.read()
 
 	cnt = compress_html(cnt)
 
-	with open(fn, 'w') as f:
+	with open(file_path, 'w') as f:
 		f.write(cnt)
 
 
 def run(context):
 
-	for fn in glob.iglob(os.path.join(context[KEY_PATHS][KEY_OUTPUT], '**/*.htm?'), recursive = True):
-		compress_html_file(fn)
+	for file_path in glob.iglob(os.path.join(context[KEY_PATHS][KEY_OUTPUT], '**/*.htm?'), recursive = True):
+		compress_html_file(file_path)

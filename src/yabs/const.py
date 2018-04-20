@@ -3,6 +3,7 @@
 CONFIG_FILE = 'site.yaml'
 
 KEY_CWD = 'cwd'
+KEY_HTML = 'html'
 KEY_OUTPUT = 'output'
 KEY_PATHS = 'paths'
 KEY_PROJECT = 'project'
