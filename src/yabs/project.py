@@ -4,11 +4,14 @@
 import importlib.util
 import os
 
+
 from .const import (
 	KEY_CWD,
-	KEY_PATHS,
+	KEY_OUT,
 	KEY_PROJECT,
-	KEY_RECIPE
+	KEY_RECIPE,
+	KEY_ROOT,
+	KEY_SRC
 	)
 
 
@@ -20,17 +23,28 @@ class project_class:
 		self.context = context
 		self.context[KEY_PROJECT] = self
 
-		for path_id in self.context[KEY_PATHS]:
-			self.context[KEY_PATHS][path_id] = os.path.join(
-				self.context[KEY_PATHS][KEY_CWD], self.context[KEY_PATHS][path_id]
-				)
+		for group_id in [KEY_SRC, KEY_OUT]:
+			self.__compile_paths__(group_id)
+
+
+	def __compile_paths__(self, group_id):
+
+		group_root_key = '%s_%s' % (group_id, KEY_ROOT)
+
+		for path_id in self.context[group_id]:
+			self.context[group_id][path_id] = os.path.abspath(os.path.join(
+				self.context[KEY_CWD], self.context[group_root_key], self.context[group_id][path_id]
+				))
+
+		self.context[group_id][KEY_ROOT] = os.path.abspath(os.path.join(self.context[KEY_CWD], self.context[group_root_key]))
+		self.context.pop(group_root_key)
 
 
 	def build(self):
 
 		for step in self.context[KEY_RECIPE]:
 
-			os.chdir(self.context[KEY_PATHS][KEY_CWD])
+			os.chdir(self.context[KEY_CWD])
 
 			try:
 

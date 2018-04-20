@@ -12,8 +12,7 @@ except ImportError:
 
 from .const import (
 	CONFIG_FILE,
-	KEY_CWD,
-	KEY_PATHS
+	KEY_CWD
 	)
 from .project import project_class
 
@@ -36,7 +35,7 @@ def build():
 
 	with open(CONFIG_FILE, 'r') as f:
 		config = load(f.read(), Loader = Loader)
-	config[KEY_PATHS][KEY_CWD] = os.path.abspath(os.getcwd())
+	config[KEY_CWD] = os.path.abspath(os.getcwd())
 
 	current_project = project_class(config)
 	current_project.build()

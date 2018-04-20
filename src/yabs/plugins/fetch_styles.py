@@ -9,20 +9,19 @@ import jinja2
 
 
 from yabs.const import (
-	FLD_STYLES,
-	KEY_OUTPUT,
-	KEY_PATHS,
+	KEY_OUT,
+	KEY_SRC,
 	KEY_STYLES
 	)
 
 
 def run(context):
 
-	os.mkdir(os.path.join(context[KEY_PATHS][KEY_OUTPUT], FLD_STYLES))
+	os.mkdir(context[KEY_OUT][KEY_STYLES])
 
 	file_list = []
 	for suffix in ['css', 'sass', 'scss']:
-		file_list += glob.glob(os.path.join(context[KEY_PATHS][KEY_STYLES], '*.%s' % suffix))
+		file_list += glob.glob(os.path.join(context[KEY_SRC][KEY_STYLES], '*.%s' % suffix))
 
 	for src_file_path in file_list:
 
@@ -31,5 +30,5 @@ def run(context):
 		with open(src_file_path, 'r') as f:
 			cnt = f.read()
 
-		with open(os.path.join(context[KEY_PATHS][KEY_OUTPUT], FLD_STYLES, fn), 'w') as f:
+		with open(os.path.join(context[KEY_OUT][KEY_STYLES], fn), 'w') as f:
 			f.write(cnt)

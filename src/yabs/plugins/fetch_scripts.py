@@ -9,23 +9,22 @@ import jinja2
 
 
 from yabs.const import (
-	FLD_SCRIPTS,
-	KEY_OUTPUT,
-	KEY_PATHS,
-	KEY_SCRIPTS
+	KEY_OUT,
+	KEY_SCRIPTS,
+	KEY_SRC
 	)
 
 
 def run(context):
 
-	os.mkdir(os.path.join(context[KEY_PATHS][KEY_OUTPUT], FLD_SCRIPTS))
+	os.mkdir(context[KEY_OUT][KEY_SCRIPTS])
 
-	for src_file_path in glob.glob(os.path.join(context[KEY_PATHS][KEY_SCRIPTS], '*.js')):
+	for src_file_path in glob.glob(os.path.join(context[KEY_SRC][KEY_SCRIPTS], '*.js')):
 
 		fn = os.path.basename(src_file_path)
 
 		with open(src_file_path, 'r') as f:
 			cnt = f.read()
 
-		with open(os.path.join(context[KEY_PATHS][KEY_OUTPUT], FLD_SCRIPTS, fn), 'w') as f:
+		with open(os.path.join(context[KEY_SRC][KEY_SCRIPTS], fn), 'w') as f:
 			f.write(cnt)

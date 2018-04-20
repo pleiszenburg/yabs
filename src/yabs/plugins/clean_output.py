@@ -6,16 +6,16 @@ import shutil
 
 
 from yabs.const import (
-	KEY_OUTPUT,
-	KEY_PATHS
+	KEY_OUT,
+	KEY_ROOT
 	)
 
 
 def run(context):
 
-	for entry in os.listdir(context[KEY_PATHS][KEY_OUTPUT]):
+	for entry in os.listdir(context[KEY_OUT][KEY_ROOT]):
 
-		entry_path = os.path.join(context[KEY_PATHS][KEY_OUTPUT], entry)
+		entry_path = os.path.join(context[KEY_OUT][KEY_ROOT], entry)
 
 		if os.path.isfile(entry_path):
 			os.unlink(entry_path)

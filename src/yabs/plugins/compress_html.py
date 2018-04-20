@@ -10,8 +10,8 @@ import htmlmin
 
 
 from yabs.const import (
-	KEY_PATHS,
-	KEY_OUTPUT
+	KEY_OUT,
+	KEY_ROOT
 	)
 
 
@@ -44,5 +44,5 @@ def compress_html_file(file_path):
 
 def run(context):
 
-	for file_path in glob.iglob(os.path.join(context[KEY_PATHS][KEY_OUTPUT], '**/*.htm?'), recursive = True):
+	for file_path in glob.iglob(os.path.join(context[KEY_OUT][KEY_ROOT], '**/*.htm?'), recursive = True):
 		compress_html_file(file_path)

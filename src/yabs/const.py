@@ -2,15 +2,13 @@
 
 CONFIG_FILE = 'site.yaml'
 
-FLD_SCRIPTS = 'js'
-FLD_STYLES = 'css'
-
 KEY_CWD = 'cwd'
 KEY_HTML = 'html'
-KEY_OUTPUT = 'output'
-KEY_PATHS = 'paths'
+KEY_OUT = 'out'
 KEY_PROJECT = 'project'
 KEY_RECIPE = 'recipe'
+KEY_ROOT = 'root'
 KEY_SCRIPTS = 'scripts'
+KEY_SRC = 'src'
 KEY_STYLES = 'styles'
 KEY_TEMPLATES = 'templates'
