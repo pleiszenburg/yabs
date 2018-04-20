@@ -4,14 +4,6 @@
 from pprint import pprint as pp
 
 
-class plugin:
+def run(context):
 
-
-	def __init__(self, context):
-
-		self.context = context
-
-
-	def run(self):
-
-		print('compres_html!')
+	print('compres_html!')

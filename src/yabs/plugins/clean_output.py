@@ -12,25 +12,17 @@ from yabs.const import (
 	)
 
 
-class plugin:
+def run(context):
 
+	folder = os.path.join(context[KEY_PATHS][KEY_CWD], context[KEY_PATHS][KEY_OUTPUT])
 
-	def __init__(self, context):
+	for entry in os.listdir(folder):
 
-		self.context = context
+		entry_path = os.path.join(folder, entry)
 
-
-	def run(self):
-
-		folder = os.path.join(self.context[KEY_PATHS][KEY_CWD], self.context[KEY_PATHS][KEY_OUTPUT])
-
-		for entry in os.listdir(folder):
-
-			entry_path = os.path.join(folder, entry)
-
-			if os.path.isfile(entry_path):
-				os.unlink(entry_path)
-			elif os.path.isdir(entry_path):
-				shutil.rmtree(entry_path)
-			else:
-				raise # TODO
+		if os.path.isfile(entry_path):
+			os.unlink(entry_path)
+		elif os.path.isdir(entry_path):
+			shutil.rmtree(entry_path)
+		else:
+			raise # TODO

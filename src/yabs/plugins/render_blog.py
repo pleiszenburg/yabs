@@ -4,15 +4,7 @@
 from pprint import pprint as pp
 
 
-class plugin:
+def run(context):
 
-
-	def __init__(self, context):
-
-		self.context = context
-
-
-	def run(self):
-
-		print('render_blog!')
-		pp(self.context)
+	print('render_blog!')
+	pp(context)

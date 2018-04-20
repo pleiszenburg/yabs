@@ -40,6 +40,4 @@ class project_class:
 				print('Plugin "%s" not found!' % step)
 				continue
 
-			current_plugin = plugin.plugin(self.context)
-			current_plugin.run()
-			del current_plugin
+			plugin.run(self.context)
