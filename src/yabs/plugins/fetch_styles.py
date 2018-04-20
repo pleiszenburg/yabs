@@ -20,7 +20,11 @@ def run(context):
 
 	os.mkdir(os.path.join(context[KEY_PATHS][KEY_OUTPUT], FLD_STYLES))
 
-	for src_file_path in glob.glob(os.path.join(context[KEY_PATHS][KEY_STYLES], '*.css')):
+	file_list = []
+	for suffix in ['css', 'sass', 'scss']:
+		file_list += glob.glob(os.path.join(context[KEY_PATHS][KEY_STYLES], '*.%s' % suffix))
+
+	for src_file_path in file_list:
 
 		fn = os.path.basename(src_file_path)
 
