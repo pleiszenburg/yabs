@@ -10,7 +10,6 @@ import jinja2
 
 
 from yabs.const import (
-	KEY_CWD,
 	KEY_PATHS,
 	KEY_TEMPLATES
 	)

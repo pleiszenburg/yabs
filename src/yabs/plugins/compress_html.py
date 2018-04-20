@@ -10,7 +10,6 @@ import htmlmin
 
 
 from yabs.const import (
-	KEY_CWD,
 	KEY_PATHS,
 	KEY_OUTPUT
 	)
