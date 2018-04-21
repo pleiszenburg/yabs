@@ -3,6 +3,8 @@
 
 import importlib.util
 import os
+import sys
+import time
 
 
 from .const import (
@@ -42,6 +44,8 @@ class project_class:
 
 	def build(self):
 
+		timer = timer_class()
+
 		for step in self.context[KEY_RECIPE]:
 
 			os.chdir(self.context[KEY_CWD])
@@ -66,4 +70,27 @@ class project_class:
 				print('Plugin "%s" not found!' % plugin_name)
 				continue
 
+			sys.stdout.write('[%03.2f sec] Plugin "%s" ... ' % (timer()[0], plugin_name))
+			sys.stdout.flush()
+
 			plugin.run(self.context, plugin_options)
+
+			sys.stdout.write('done in %.2f sec.\n' % timer()[1])
+			sys.stdosys.stdout.flush()ut.flush()
+
+
+class timer_class:
+
+
+	def __init__(self):
+
+		self.start = time.time()
+		self.last = self.start
+
+
+	def __call__(self):
+
+		current = time.time() - self.start
+		diff = current - self.last
+		self.last = current
+		return current, diff
