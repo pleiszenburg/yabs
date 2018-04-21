@@ -4,6 +4,7 @@ CONFIG_FILE = 'site.yaml'
 
 KEY_CWD = 'cwd'
 KEY_HTML = 'html'
+KEY_IMAGES = 'images'
 KEY_JINJA = 'jinja'
 KEY_OUT = 'out'
 KEY_PROJECT = 'project'

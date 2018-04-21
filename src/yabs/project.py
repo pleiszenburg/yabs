@@ -76,7 +76,7 @@ class project_class:
 			plugin.run(self.context, plugin_options)
 
 			sys.stdout.write('done in %.2f sec.\n' % timer()[1])
-			sys.stdosys.stdout.flush()ut.flush()
+			sys.stdout.flush()
 
 
 class timer_class:
