@@ -42,7 +42,7 @@ def compress_html_file(file_path):
 		f.write(cnt)
 
 
-def run(context):
+def run(context, options = None):
 
 	for file_path in glob.iglob(os.path.join(context[KEY_OUT][KEY_ROOT], '**/*.htm*'), recursive = True):
 		compress_html_file(file_path)

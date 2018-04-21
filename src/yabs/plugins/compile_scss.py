@@ -14,7 +14,7 @@ from yabs.const import (
 	)
 
 
-def run(context):
+def run(context, options = None):
 
 	suffix_list = ['sass', 'scss']
 

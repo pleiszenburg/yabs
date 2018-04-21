@@ -47,7 +47,7 @@ def compress_css_in_html_file(file_path):
 		f.write(cnt)
 
 
-def run(context):
+def run(context, options = None):
 
 	for file_path in glob.glob(os.path.join(context[KEY_OUT][KEY_STYLES], '*.css')):
 		compress_css_file(file_path)

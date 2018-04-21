@@ -12,7 +12,7 @@ from yabs.const import (
 	)
 
 
-def run(context):
+def run(context, options = None):
 
 	for entry in os.listdir(context[KEY_OUT][KEY_ROOT]):
 

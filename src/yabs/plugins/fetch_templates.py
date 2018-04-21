@@ -16,7 +16,7 @@ from yabs.const import (
 	)
 
 
-def run(context):
+def run(context, options = None):
 
 	context[KEY_JINJA] = jinja2.Environment(
 		loader = jinja2.ChoiceLoader([

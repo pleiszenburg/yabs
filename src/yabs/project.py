@@ -46,17 +46,24 @@ class project_class:
 
 			os.chdir(self.context[KEY_CWD])
 
+			if isinstance(step, str):
+				plugin_name = step
+				plugin_options = None
+			elif isinstance(step, dict) and len(list(step.keys())) == 1:
+				plugin_name = list(step.keys())[0]
+				plugin_options = step[plugin_name]
+
 			try:
 
 				plugin_spec = importlib.util.spec_from_file_location(
-					'plugins.%s' % step, os.path.join(os.path.dirname(__file__), 'plugins/%s.py' % step)
+					'plugins.%s' % plugin_name, os.path.join(os.path.dirname(__file__), 'plugins/%s.py' % plugin_name)
 					)
 				plugin = importlib.util.module_from_spec(plugin_spec)
 				plugin_spec.loader.exec_module(plugin)
 
 			except FileNotFoundError:
 
-				print('Plugin "%s" not found!' % step)
+				print('Plugin "%s" not found!' % plugin_name)
 				continue
 
-			plugin.run(self.context)
+			plugin.run(self.context, plugin_options)

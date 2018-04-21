@@ -13,7 +13,7 @@ from yabs.const import (
 	)
 
 
-def run(context):
+def run(context, options = None):
 
 	os.mkdir(context[KEY_OUT][KEY_STYLES])
 

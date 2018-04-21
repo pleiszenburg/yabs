@@ -14,7 +14,7 @@ from yabs.const import (
 	)
 
 
-def run(context):
+def run(context, options = None):
 
 	for file_path in glob.glob(os.path.join(context[KEY_SRC][KEY_HTML], '*.htm*')):
 

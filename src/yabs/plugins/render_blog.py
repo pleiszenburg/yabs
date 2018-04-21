@@ -4,7 +4,7 @@
 from pprint import pprint as pp
 
 
-def run(context):
+def run(context, options = None):
 
 	print('render_blog!')
 	#pp(context)
