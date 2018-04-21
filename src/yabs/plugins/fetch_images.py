@@ -6,6 +6,7 @@ import os
 
 
 from yabs.const import (
+	IMAGE_SUFFIX_LIST,
 	KEY_IMAGES,
 	KEY_OUT,
 	KEY_ROOT,
@@ -17,10 +18,8 @@ def run(context, options = None):
 
 	os.mkdir(context[KEY_OUT][KEY_IMAGES])
 
-	suffix_list = ['gif', 'jpg', 'jpeg', 'png']
-
 	file_list = []
-	for suffix in suffix_list:
+	for suffix in IMAGE_SUFFIX_LIST:
 		file_list.extend(glob.iglob(os.path.join(context[KEY_SRC][KEY_IMAGES], '**/*.%s' % suffix)))
 
 	for src_file_path in file_list:

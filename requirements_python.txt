@@ -8,3 +8,4 @@ mistune
 nodeenv
 Pygments
 PyYAML
+pillow

@@ -2,6 +2,8 @@ build:
 	web_build
 
 install:
+	pip install --upgrade pip
+	pip install --upgrade setuptools
 	pip install -r requirements_python.txt
 	nodeenv -p
 	npm i -g npm

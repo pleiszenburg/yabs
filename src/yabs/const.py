@@ -2,6 +2,8 @@
 
 CONFIG_FILE = 'site.yaml'
 
+IMAGE_SUFFIX_LIST = ['gif', 'jpg', 'jpeg', 'png']
+
 KEY_CWD = 'cwd'
 KEY_FONTS = 'fonts'
 KEY_HTML = 'html'
