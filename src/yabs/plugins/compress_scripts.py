@@ -3,6 +3,7 @@
 
 import glob
 import os
+import subprocess
 
 
 from bs4 import BeautifulSoup
@@ -17,9 +18,20 @@ from yabs.const import (
 
 def compress_scripts(cnt):
 
-	print(cnt)
+	proc = subprocess.Popen(
+		['uglifyjs', '--compress', '--mangle'],
+		stdin = subprocess.PIPE,
+		stdout = subprocess.PIPE,
+		stderr = subprocess.PIPE,
+		)
+	out, err = proc.communicate(
+		input = cnt.encode(encoding = 'UTF-8')
+		)
 
-	return cnt
+	if err.decode(encoding = 'UTF-8').strip() != '':
+		print(err.decode(encoding = 'UTF-8'))
+
+	return out.decode(encoding = 'UTF-8')
 
 
 def compress_scripts_file(file_path):
