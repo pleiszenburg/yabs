@@ -3,6 +3,7 @@
 CONFIG_FILE = 'site.yaml'
 
 KEY_CWD = 'cwd'
+KEY_FONTS = 'fonts'
 KEY_HTML = 'html'
 KEY_IMAGES = 'images'
 KEY_JINJA = 'jinja'
