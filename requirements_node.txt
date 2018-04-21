@@ -3,3 +3,4 @@ babel-cli
 babel-preset-env
 core-js
 whatwg-fetch
+browserify

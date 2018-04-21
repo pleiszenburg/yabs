@@ -23,5 +23,5 @@ def run(context, options = None):
 		with open(src_file_path, 'r') as f:
 			cnt = f.read()
 
-		with open(os.path.join(context[KEY_SRC][KEY_SCRIPTS], fn), 'w') as f:
+		with open(os.path.join(context[KEY_OUT][KEY_SCRIPTS], fn), 'w') as f:
 			f.write(cnt)
