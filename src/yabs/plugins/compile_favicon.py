@@ -20,7 +20,10 @@ def run(context, options = None):
 
 	file_list = []
 	for suffix in IMAGE_SUFFIX_LIST:
-		file_list.extend(glob.iglob(os.path.join(context[KEY_OUT][KEY_IMAGES], '**/favicon.%s' % suffix)))
+		file_list.extend(glob.iglob(
+			os.path.join(context[KEY_OUT][KEY_IMAGES], '**', 'favicon.%s' % suffix),
+			recursive = True
+			))
 	if len(file_list) > 1:
 		raise
 	elif len(file_list) == 0:

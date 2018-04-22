@@ -20,7 +20,10 @@ def run(context, options = None):
 
 	file_list = []
 	for suffix in IMAGE_SUFFIX_LIST:
-		file_list.extend(glob.iglob(os.path.join(context[KEY_SRC][KEY_IMAGES], '**/*.%s' % suffix)))
+		file_list.extend(glob.glob(
+			os.path.join(context[KEY_SRC][KEY_IMAGES], '**', '*.%s' % suffix),
+			recursive = True
+			))
 
 	for src_file_path in file_list:
 
