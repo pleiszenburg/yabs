@@ -16,6 +16,7 @@ from yabs.const import (
 	KEY_OUT,
 	KEY_SCRIPTS,
 	KEY_SRC,
+	KEY_STYLES,
 	KEY_UPDATE
 	)
 
@@ -49,16 +50,27 @@ def fetch_library(context, library):
 	with open(os.path.join(context[KEY_SRC][KEY_LIBRARIES], library, VERSION_FN), 'r') as f:
 		current_version = f.read().strip()
 
-	for src_file_path in glob.glob(os.path.join(context[KEY_SRC][KEY_LIBRARIES], library, '*.js')):
+	file_list = []
+	for ext in ['css', 'js']:
+		file_list.extend(glob.glob(os.path.join(context[KEY_SRC][KEY_LIBRARIES], library, '*.%s' % ext)))
+
+	for src_file_path in file_list:
 
 		with open(src_file_path, 'r') as f:
 			cnt = f.read()
 
 		fn = os.path.basename(src_file_path).replace(
-			'-' + current_version + '.min.js', '.min.js'
+			'-%s.min.' % current_version, '.min.'
 			)
 
-		with open(os.path.join(context[KEY_OUT][KEY_SCRIPTS], fn), 'w') as f:
+		if fn.endswith('.css'):
+			deployment_path = context[KEY_OUT][KEY_STYLES]
+		elif fn.endswith('.js'):
+			deployment_path = context[KEY_OUT][KEY_SCRIPTS]
+		else:
+			raise # TODO
+
+		with open(os.path.join(deployment_path, fn), 'w') as f:
 			f.write(cnt)
 
 
@@ -110,7 +122,7 @@ def update_library(context, library):
 	print('Requires update: "%s"' % library)
 
 	# Remove library files of previous versions
-	for src_file_path in glob.glob(os.path.join(library_path, '*.js')):
+	for src_file_path in glob.glob(os.path.join(library_path, '*.*')):
 		os.unlink(src_file_path)
 
 	with open(version_file_path, 'w+') as f:
