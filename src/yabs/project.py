@@ -100,6 +100,17 @@ class project_class:
 			sys.stdout.flush()
 
 
+	def run(self, plugin_list):
+
+		print(plugin_list)
+
+		for plugin_name in plugin_list:
+
+			plugin = self.__get_plugin__(plugin_name)
+
+			plugin.run(self.context, options = None)
+
+
 	def serve(self):
 
 		self.__init_logger__(KEY_SERVER)

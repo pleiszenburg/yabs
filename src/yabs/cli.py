@@ -48,6 +48,17 @@ def build():
 	__get_project__().build()
 
 
+@yabs_cli.command()
+@click.argument('plugins', nargs = -1)
+def run(plugins):
+	"""YABS run
+
+	Runs any given plugin or list of plugins with default options
+	"""
+
+	__get_project__().run(plugins)
+
+
 @yabs_cli.command(cls = DaemonCLI,
 	daemon_params = {
 		'workdir': os.getcwd(),

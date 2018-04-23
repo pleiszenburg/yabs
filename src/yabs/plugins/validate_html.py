@@ -118,7 +118,10 @@ def validate_files(file_list, ignore_list):
 
 def run(context, options = None):
 
-	if options[KEY_UPDATE]:
+	if options is None:
+		options = {}
+
+	if (KEY_UPDATE in options.keys() and options[KEY_UPDATE]) or KEY_UPDATE not in options.keys():
 		update_validator(context)
 
 	file_list = glob.glob(os.path.join(context[KEY_OUT][KEY_ROOT], '**', '*.htm*'), recursive = True)
