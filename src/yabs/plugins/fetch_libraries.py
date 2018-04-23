@@ -4,6 +4,7 @@
 from distutils.version import StrictVersion
 import glob
 import os
+import sys
 import urllib.request
 
 
@@ -116,10 +117,12 @@ def update_library(context, library):
 		with open(version_file_path, 'r') as f:
 			old_library_version = f.read().strip()
 		if old_library_version == new_library_version:
-			print('Up-to-date: "%s"' % library)
+			sys.stdout.write('%s ... ' % library)
+			sys.stdout.flush()
 			return
 
-	print('Requires update: "%s"' % library)
+	sys.stdout.write('%s (updating) ... ' % library)
+	sys.stdout.flush()
 
 	# Remove library files of previous versions
 	for src_file_path in glob.glob(os.path.join(library_path, '*.*')):
