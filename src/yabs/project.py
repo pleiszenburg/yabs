@@ -65,20 +65,13 @@ class project_class:
 
 	def __get_plugin__(self, plugin_name):
 
-		try:
-			
-			plugin_spec = importlib.util.spec_from_file_location(
-				'plugins.%s' % plugin_name,
-				os.path.join(os.path.dirname(__file__), 'plugins/%s.py' % plugin_name)
-				)
-			plugin = importlib.util.module_from_spec(plugin_spec)
-			plugin_spec.loader.exec_module(plugin)
+		for pattern in ['yabs.plugins.%s', '%s']:
+			try:
+				return importlib.import_module(pattern % plugin_name)
+			except ModuleNotFoundError as e:
+				pass
 
-		except FileNotFoundError as e:
-
-			raise PluginNotFound('"%s": Plugin not found!' % plugin_name) from e
-
-		return plugin
+		raise PluginNotFound('"%s": Plugin not found!' % plugin_name)
 
 
 	def build(self):
