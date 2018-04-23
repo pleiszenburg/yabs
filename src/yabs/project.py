@@ -45,7 +45,8 @@ class project_class:
 		logging.basicConfig(
 			filename = os.path.join(self.context[KEY_LOG], logger_name) if logger_name is not None else None,
 			level = logger_level,
-			format = '%(asctime)s [%(levelname)s] %(message)s',
+			format = '[%(asctime)s %(levelname)s] %(message)s',
+			datefmt = '%H:%M:%S'
 			)
 
 

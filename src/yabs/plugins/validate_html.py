@@ -6,7 +6,6 @@ import io
 import json
 import os
 import subprocess
-import sys
 import zipfile
 
 
@@ -20,6 +19,7 @@ from yabs.const import (
 	KEY_ROOT,
 	KEY_UPDATE
 	)
+from yabs.log import log
 
 
 BIN_FLD = 'bin'
@@ -42,12 +42,10 @@ def update_validator(context):
 		with open(version_file_path, 'r') as f:
 			current_version = f.read().strip()
 		if current_version == latest_version:
-			sys.stdout.write('validator up to date ... ')
-			sys.stdout.flush()
+			log.info('Validator up to date ... ')
 			return
 
-	sys.stdout.write('updating validator ... ')
-	sys.stdout.flush()
+	log.info('Updating validator ... ')
 
 	latest_url = None
 	for item in latest_dict['assets']:
@@ -86,7 +84,7 @@ def validate_files(file_list, ignore_list):
 	out, err = vnu_proc.communicate()
 
 	if out.decode('utf-8').strip() != '':
-		print(out.decode('utf-8'))
+		log.error(out.decode('utf-8'))
 
 	vnu_out = json.loads(err.decode('utf-8'))
 	vnu_by_file = {}
@@ -94,7 +92,7 @@ def validate_files(file_list, ignore_list):
 	for key in vnu_out.keys():
 
 		if key != 'messages':
-			print('Unknown VNU JSON key: ' + key)
+			log.error('Unknown VNU JSON key: ' + key)
 			continue
 
 		for vnu_problem in vnu_out[key]:
@@ -111,9 +109,9 @@ def validate_files(file_list, ignore_list):
 	vnu_files = list(vnu_by_file.keys())
 	vnu_files.sort()
 	for vnu_file in vnu_files:
-		print(' in file: %s' % vnu_file.split('/')[-1])
+		log.warning('In file: %s' % vnu_file.split('/')[-1])
 		for line in vnu_by_file[vnu_file]:
-			print('  %s' % line)
+			log.warning(' %s' % line)
 
 
 def run(context, options = None):
