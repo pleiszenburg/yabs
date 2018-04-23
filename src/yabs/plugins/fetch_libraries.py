@@ -139,7 +139,6 @@ def update_library(context, library):
 		if new_library_version not in fn:
 			fn = fn.replace('.min', '-%s.min' % new_library_version)
 
-		print('Loading: "%s"' % fn)
 		urllib.request.urlretrieve(url, os.path.join(library_path, fn))
 
 
