@@ -66,7 +66,7 @@ class project_class:
 	def __get_plugin__(self, plugin_name):
 
 		try:
-
+			
 			plugin_spec = importlib.util.spec_from_file_location(
 				'plugins.%s' % plugin_name,
 				os.path.join(os.path.dirname(__file__), 'plugins/%s.py' % plugin_name)
@@ -79,27 +79,6 @@ class project_class:
 			raise PluginNotFound('"%s": Plugin not found!' % plugin_name) from e
 
 		return plugin
-
-
-	def __run_plugin__(self, plugin_name, plugin_options):
-
-		try:
-			plugin = self.__get_plugin__(plugin_name)
-		except PluginNotFound as e:
-			logging.error(str(e))
-			return
-
-		self.context[KEY_TIMER]()
-
-		logging.info('"%s": Running ...' % plugin_name)
-
-		os.chdir(self.context[KEY_CWD])
-
-		plugin.run(self.context, plugin_options)
-
-		logging.info('"%s": Done in %.2f sec.' % (
-			plugin_name, self.context[KEY_TIMER]()[1]
-			))
 
 
 	def build(self):
@@ -115,7 +94,7 @@ class project_class:
 				plugin_name = list(step.keys())[0]
 				plugin_options = step[plugin_name]
 
-			self.__run_plugin__(plugin_name, plugin_options)
+			self.run_plugin(plugin_name, plugin_options)
 
 
 	def run(self, plugin_list):
@@ -124,14 +103,37 @@ class project_class:
 
 		for plugin_name in plugin_list:
 
-			self.__run_plugin__(plugin_name, None)
+			self.run_plugin(plugin_name, None)
+
+
+	def run_plugin(self, plugin_name, plugin_options):
+
+		try:
+			plugin = self.__get_plugin__(plugin_name)
+		except PluginNotFound as e:
+			logging.error(str(e))
+			return
+
+		self.context[KEY_TIMER]()
+
+		logging.info('"%s": Running ...' % plugin_name)
+
+		os.chdir(self.context[KEY_CWD])
+
+		ret = plugin.run(self.context, plugin_options)
+
+		logging.info('"%s": Done in %.2f sec.' % (
+			plugin_name, self.context[KEY_TIMER]()[1]
+			))
+
+		return ret
 
 
 	def serve(self):
 
 		self.__init_logger__(KEY_SERVER)
 
-		self.__run_plugin__(KEY_SERVER, self.context[KEY_SERVER])
+		self.run_plugin(KEY_SERVER, self.context[KEY_SERVER])
 
 
 class timer_class:
