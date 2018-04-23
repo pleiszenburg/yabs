@@ -67,7 +67,7 @@ def run(plugins):
 def server():
 	"""YABS server
 
-	Serves website via HTTP
+	Serves website via HTTP (default server plugin)
 	"""
 
 	__get_project__().serve()

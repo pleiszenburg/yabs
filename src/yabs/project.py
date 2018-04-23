@@ -16,8 +16,14 @@ from .const import (
 	KEY_RECIPE,
 	KEY_ROOT,
 	KEY_SERVER,
-	KEY_SRC
+	KEY_SRC,
+	KEY_TIMER
 	)
+
+
+class PluginNotFound(Exception):
+
+	pass
 
 
 class project_class:
@@ -27,17 +33,18 @@ class project_class:
 
 		self.context = context
 		self.context[KEY_PROJECT] = self
+		self.context[KEY_TIMER] = timer_class()
 
 		for group_id in [KEY_SRC, KEY_OUT]:
 			self.__compile_paths__(group_id)
 		self.context[KEY_LOG] = os.path.abspath(os.path.join(self.context[KEY_CWD], self.context[KEY_LOG]))
 
 
-	def __init_logger__(self, logger_name = None):
+	def __init_logger__(self, logger_name = None, logger_level = logging.INFO):
 
 		logging.basicConfig(
 			filename = os.path.join(self.context[KEY_LOG], logger_name) if logger_name is not None else None,
-			level = logging.DEBUG,
+			level = logger_level,
 			format = '%(asctime)s [%(levelname)s] %(message)s',
 			)
 
@@ -66,21 +73,39 @@ class project_class:
 			plugin = importlib.util.module_from_spec(plugin_spec)
 			plugin_spec.loader.exec_module(plugin)
 
-		except FileNotFoundError:
+		except FileNotFoundError as e:
 
-			print('Plugin "%s" not found!' % plugin_name)
-			return None
+			raise PluginNotFound('"%s": Plugin not found!' % plugin_name) from e
 
 		return plugin
 
 
+	def __run_plugin__(self, plugin_name, plugin_options):
+
+		try:
+			plugin = self.__get_plugin__(plugin_name)
+		except PluginNotFound as e:
+			logging.error(str(e))
+			return
+
+		self.context[KEY_TIMER]()
+
+		logging.info('"%s": Running ...' % plugin_name)
+
+		os.chdir(self.context[KEY_CWD])
+
+		plugin.run(self.context, plugin_options)
+
+		logging.info('"%s": Done in %.2f sec.' % (
+			plugin_name, self.context[KEY_TIMER]()[1]
+			))
+
+
 	def build(self):
 
-		timer = timer_class()
+		self.__init_logger__()
 
 		for step in self.context[KEY_RECIPE]:
-
-			os.chdir(self.context[KEY_CWD])
 
 			if isinstance(step, str):
 				plugin_name = step
@@ -89,33 +114,23 @@ class project_class:
 				plugin_name = list(step.keys())[0]
 				plugin_options = step[plugin_name]
 
-			plugin = self.__get_plugin__(plugin_name)
-
-			sys.stdout.write('[%03.2f sec] Plugin "%s" ... ' % (timer()[0], plugin_name))
-			sys.stdout.flush()
-
-			plugin.run(self.context, plugin_options)
-
-			sys.stdout.write('done in %.2f sec.\n' % timer()[1])
-			sys.stdout.flush()
+			self.__run_plugin__(plugin_name, plugin_options)
 
 
 	def run(self, plugin_list):
 
-		print(plugin_list)
+		self.__init_logger__()
 
 		for plugin_name in plugin_list:
 
-			plugin = self.__get_plugin__(plugin_name)
-
-			plugin.run(self.context, options = None)
+			self.__run_plugin__(plugin_name, None)
 
 
 	def serve(self):
 
 		self.__init_logger__(KEY_SERVER)
-		server = self.__get_plugin__(KEY_SERVER)
-		server.run(self.context, self.context[KEY_SERVER])
+
+		self.__run_plugin__(KEY_SERVER, self.context[KEY_SERVER])
 
 
 class timer_class:
