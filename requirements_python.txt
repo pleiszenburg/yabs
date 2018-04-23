@@ -1,3 +1,4 @@
+bokeh
 click
 csscompressor
 beautifulsoup4
@@ -6,6 +7,9 @@ Jinja2
 libsass
 mistune
 nodeenv
+numpy
+plotly
 Pygments
 PyYAML
 pillow
+requests

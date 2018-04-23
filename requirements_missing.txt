@@ -1,5 +1,1 @@
-numpy
-bokeh
-plotly
 daemonocle
-requests
