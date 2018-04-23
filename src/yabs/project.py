@@ -2,6 +2,7 @@
 
 
 import importlib.util
+import logging
 import os
 import sys
 import time
@@ -9,10 +10,12 @@ import time
 
 from .const import (
 	KEY_CWD,
+	KEY_LOG,
 	KEY_OUT,
 	KEY_PROJECT,
 	KEY_RECIPE,
 	KEY_ROOT,
+	KEY_SERVER,
 	KEY_SRC
 	)
 
@@ -27,6 +30,16 @@ class project_class:
 
 		for group_id in [KEY_SRC, KEY_OUT]:
 			self.__compile_paths__(group_id)
+		self.context[KEY_LOG] = os.path.abspath(os.path.join(self.context[KEY_CWD], self.context[KEY_LOG]))
+
+
+	def __init_logger__(self, logger_name = None):
+
+		logging.basicConfig(
+			filename = os.path.join(self.context[KEY_LOG], logger_name) if logger_name is not None else None,
+			level = logging.DEBUG,
+			format = '%(asctime)s [%(levelname)s] %(message)s',
+			)
 
 
 	def __compile_paths__(self, group_id):
@@ -40,6 +53,25 @@ class project_class:
 
 		self.context[group_id][KEY_ROOT] = os.path.abspath(os.path.join(self.context[KEY_CWD], self.context[group_root_key]))
 		self.context.pop(group_root_key)
+
+
+	def __get_plugin__(self, plugin_name):
+
+		try:
+
+			plugin_spec = importlib.util.spec_from_file_location(
+				'plugins.%s' % plugin_name,
+				os.path.join(os.path.dirname(__file__), 'plugins/%s.py' % plugin_name)
+				)
+			plugin = importlib.util.module_from_spec(plugin_spec)
+			plugin_spec.loader.exec_module(plugin)
+
+		except FileNotFoundError:
+
+			print('Plugin "%s" not found!' % plugin_name)
+			return None
+
+		return plugin
 
 
 	def build(self):
@@ -57,18 +89,7 @@ class project_class:
 				plugin_name = list(step.keys())[0]
 				plugin_options = step[plugin_name]
 
-			try:
-
-				plugin_spec = importlib.util.spec_from_file_location(
-					'plugins.%s' % plugin_name, os.path.join(os.path.dirname(__file__), 'plugins/%s.py' % plugin_name)
-					)
-				plugin = importlib.util.module_from_spec(plugin_spec)
-				plugin_spec.loader.exec_module(plugin)
-
-			except FileNotFoundError:
-
-				print('Plugin "%s" not found!' % plugin_name)
-				continue
+			plugin = self.__get_plugin__(plugin_name)
 
 			sys.stdout.write('[%03.2f sec] Plugin "%s" ... ' % (timer()[0], plugin_name))
 			sys.stdout.flush()
@@ -77,6 +98,13 @@ class project_class:
 
 			sys.stdout.write('done in %.2f sec.\n' % timer()[1])
 			sys.stdout.flush()
+
+
+	def serve(self):
+
+		self.__init_logger__(KEY_SERVER)
+		server = self.__get_plugin__(KEY_SERVER)
+		server.run(self.context, self.context[KEY_SERVER])
 
 
 class timer_class:

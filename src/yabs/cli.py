@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 
+
 import os
 
 import click
+from daemonocle.cli import DaemonCLI
 
 from yaml import load
 try:
@@ -12,9 +14,19 @@ except ImportError:
 
 from .const import (
 	CONFIG_FILE,
-	KEY_CWD
+	KEY_CWD,
+	PID_FN
 	)
 from .project import project_class
+
+
+def __get_project__():
+
+	with open(CONFIG_FILE, 'r') as f:
+		config = load(f.read(), Loader = Loader)
+	config[KEY_CWD] = os.path.abspath(os.getcwd())
+
+	return project_class(config)
 
 
 @click.group()
@@ -33,9 +45,18 @@ def build():
 	Builds website from recipe
 	"""
 
-	with open(CONFIG_FILE, 'r') as f:
-		config = load(f.read(), Loader = Loader)
-	config[KEY_CWD] = os.path.abspath(os.getcwd())
+	__get_project__().build()
 
-	current_project = project_class(config)
-	current_project.build()
+
+@yabs_cli.command(cls = DaemonCLI,
+	daemon_params = {
+		'workdir': os.getcwd(),
+		'pidfile': os.path.join(os.getcwd(), PID_FN)
+		})
+def server():
+	"""YABS server
+
+	Serves website via HTTP
+	"""
+
+	__get_project__().serve()
