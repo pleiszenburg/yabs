@@ -1,8 +1,11 @@
 # -*- coding: utf-8 -*-
 
 
+import glob
 import io
+import json
 import os
+import subprocess
 import sys
 import zipfile
 
@@ -10,7 +13,13 @@ import zipfile
 import requests
 
 
-from yabs.const import KEY_UPDATE
+from yabs.const import (
+	AJAX_PREFIX,
+	KEY_IGNORE,
+	KEY_OUT,
+	KEY_ROOT,
+	KEY_UPDATE
+	)
 
 
 BIN_FLD = 'bin'
@@ -61,7 +70,61 @@ def update_validator(context):
 		f.write(latest_version)
 
 
+def validate_files(file_list, ignore_list):
+
+	vnu_cmd = [
+		'java', '-jar',
+		os.path.join(os.environ['VIRTUAL_ENV'], BIN_FLD, VALIDATOR_FN),
+		'--format', 'json'
+		] + file_list
+
+	vnu_proc = subprocess.Popen(
+		vnu_cmd,
+		stdout = subprocess.PIPE,
+		stderr = subprocess.PIPE
+		)
+	out, err = vnu_proc.communicate()
+
+	if out.decode('utf-8').strip() != '':
+		print(out.decode('utf-8'))
+
+	vnu_out = json.loads(err.decode('utf-8'))
+	vnu_by_file = {}
+
+	for key in vnu_out.keys():
+
+		if key != 'messages':
+			print('Unknown VNU JSON key: ' + key)
+			continue
+
+		for vnu_problem in vnu_out[key]:
+
+			if any(ignore_item in vnu_problem['message'] for ignore_item in ignore_list):
+				continue
+
+			vnu_file = vnu_problem['url']
+			if vnu_file not in vnu_by_file.keys():
+				vnu_by_file.update({vnu_file: []})
+			vnu_by_file[vnu_file].append('"%s": %s' % (vnu_problem['type'], vnu_problem['message']))
+			vnu_by_file[vnu_file].append('[...]%s[...]' % vnu_problem['extract'])
+
+	vnu_files = list(vnu_by_file.keys())
+	vnu_files.sort()
+	for vnu_file in vnu_files:
+		print(' in file: %s' % vnu_file.split('/')[-1])
+		for line in vnu_by_file[vnu_file]:
+			print('  %s' + line)
+
+
 def run(context, options = None):
 
 	if options[KEY_UPDATE]:
 		update_validator(context)
+
+	file_list = glob.glob(os.path.join(context[KEY_OUT][KEY_ROOT], '**', '*.htm*'), recursive = True)
+	file_list = [fn for fn in file_list if not fn.startswith(AJAX_PREFIX)]
+
+	validate_files(
+		file_list,
+		options[KEY_IGNORE] if KEY_IGNORE in options.keys() else []
+		)

@@ -4,9 +4,12 @@ CONFIG_FILE = 'site.yaml'
 
 IMAGE_SUFFIX_LIST = ['gif', 'jpg', 'jpeg', 'png']
 
+AJAX_PREFIX = 'ajax_'
+
 KEY_CWD = 'cwd'
 KEY_FONTS = 'fonts'
 KEY_HTML = 'html'
+KEY_IGNORE = 'ignore'
 KEY_IMAGES = 'images'
 KEY_JINJA = 'jinja'
 KEY_LIBRARIES = 'libraries'
