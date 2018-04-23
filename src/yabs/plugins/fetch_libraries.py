@@ -4,7 +4,6 @@
 from distutils.version import StrictVersion
 import glob
 import os
-import sys
 import urllib.request
 
 
@@ -20,6 +19,7 @@ from yabs.const import (
 	KEY_STYLES,
 	KEY_UPDATE
 	)
+from yabs.log import log
 
 
 VERSION_FN = '.version'
@@ -117,12 +117,10 @@ def update_library(context, library):
 		with open(version_file_path, 'r') as f:
 			old_library_version = f.read().strip()
 		if old_library_version == new_library_version:
-			sys.stdout.write('%s ... ' % library)
-			sys.stdout.flush()
+			log.debug('%s up to date ...' % library)
 			return
 
-	sys.stdout.write('%s (updating) ... ' % library)
-	sys.stdout.flush()
+	log.info('Updating %s ...' % library)
 
 	# Remove library files of previous versions
 	for src_file_path in glob.glob(os.path.join(library_path, '*.*')):

@@ -42,7 +42,7 @@ def update_validator(context):
 		with open(version_file_path, 'r') as f:
 			current_version = f.read().strip()
 		if current_version == latest_version:
-			log.info('Validator up to date ... ')
+			log.debug('Validator up to date ... ')
 			return
 
 	log.info('Updating validator ... ')
