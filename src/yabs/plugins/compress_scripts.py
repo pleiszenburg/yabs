@@ -52,6 +52,8 @@ def compress_scripts_in_html_file(file_path):
 
 	soup = BeautifulSoup(cnt, 'html.parser')
 	for uncompressed_tag in soup.find_all('script'):
+		if uncompressed_tag.has_attr('src'):
+			continue
 		uncompressed_str = uncompressed_tag.decode_contents()
 		compressed_str = compress_scripts(uncompressed_str)
 		cnt = cnt.replace(uncompressed_str, compressed_str)

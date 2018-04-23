@@ -113,7 +113,7 @@ def validate_files(file_list, ignore_list):
 	for vnu_file in vnu_files:
 		print(' in file: %s' % vnu_file.split('/')[-1])
 		for line in vnu_by_file[vnu_file]:
-			print('  %s' + line)
+			print('  %s' % line)
 
 
 def run(context, options = None):
