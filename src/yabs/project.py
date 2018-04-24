@@ -99,7 +99,7 @@ class project_class:
 			self.run_plugin(plugin_name, None)
 
 
-	def run_plugin(self, plugin_name, plugin_options):
+	def run_plugin(self, plugin_name, plugin_options = None):
 
 		try:
 			plugin = self.__get_plugin__(plugin_name)
