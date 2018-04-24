@@ -27,6 +27,7 @@ VERSION_FN = '.version'
 LIB_JQUERY = 'jquery'
 LIB_PLOTLY = 'plotly'
 LIB_BOKEH = 'bokeh'
+LIB_KATEX = 'katex'
 
 LIB_URL_DICT = {
 	LIB_BOKEH: [
@@ -40,6 +41,9 @@ LIB_URL_DICT = {
 		],
 	LIB_PLOTLY: [
 		'https://github.com/plotly/plotly.js/blob/v%s/dist/plotly.min.js?raw=true'
+		],
+	LIB_KATEX: [
+		'https://cdnjs.cloudflare.com/ajax/libs/KaTeX/%s/katex.min.css'
 		]
 	}
 
@@ -93,6 +97,12 @@ def get_relevant_version(library):
 		versions = [tag['name'] for tag in tags if '-' not in tag['name']]
 		versions.sort(key = StrictVersion)
 		return versions[-1]
+
+	elif library == LIB_KATEX:
+
+		return requests.get(
+			url = 'https://api.github.com/repos/Khan/KaTeX/releases/latest'
+			).json()['name'][1:]
 
 	else:
 
