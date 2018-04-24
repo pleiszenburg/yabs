@@ -16,6 +16,7 @@ except ImportError:
 
 
 from yabs.const import (
+	KEY_ABSTRACT,
 	KEY_AUTHORS,
 	KEY_BLOG,
 	KEY_CONTENT,
@@ -128,9 +129,12 @@ class blog_entry_class:
 
 	def render(self, renderer_dict, templates):
 
-		getattr(self, '__preprocess_%s__' % self.type)() # depends on type
-		content = renderer_dict[self.type][self.language](self.content) # depends on type
-		content = getattr(self, '__postprocess_%s__' % self.type)(content) # depends on type
+		getattr(self, '__preprocess_%s__' % self.type)()
+
+		content = renderer_dict[self.type][self.language](self.content)
+		self.meta_dict[KEY_ABSTRACT] = renderer_dict[self.type][self.language](self.meta_dict[KEY_ABSTRACT])
+
+		content = getattr(self, '__postprocess_%s__' % self.type)(content)
 
 		self.meta_dict[KEY_CONTENT] = content
 

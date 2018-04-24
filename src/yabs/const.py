@@ -7,6 +7,7 @@ IMAGE_SUFFIX_LIST = ['gif', 'jpg', 'jpeg', 'png']
 AJAX_PREFIX = 'ajax_'
 PID_FN = '.pid'
 
+KEY_ABSTRACT = 'abstract'
 KEY_AUTHORS = 'authors'
 KEY_BLOG = 'blog'
 KEY_CODE = 'code'
