@@ -94,7 +94,7 @@ class blog_entry_class:
 
 		for h_level in range(5, 0, -1):
 			for h_tag in soup.find_all('h%d' % h_level):
-				h_tag.name = 'h%d' % (h_level + 1)
+				h_tag.name = 'h%d' % (h_level + 2)
 
 		return str(soup) # soup.prettify()
 
