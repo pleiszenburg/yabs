@@ -14,7 +14,6 @@ from yabs.const import (
 	KEY_CODE,
 	KEY_FORMULA,
 	KEY_MATH,
-	KEY_LANGUAGE,
 	KEY_VOCABULARY
 	)
 
@@ -203,7 +202,7 @@ class RendererWithMath(mistune.Renderer):
 				alt_attr = text,
 				alt_html = text,
 				number = self.counter_dict['fig'],
-				prefix = self.options[KEY_VOCABULARY][self.options[KEY_LANGUAGE]]['fig'],
+				prefix = self.options[KEY_VOCABULARY]['fig'],
 				src = src,
 				title = title
 				)
@@ -213,7 +212,7 @@ class RendererWithMath(mistune.Renderer):
 			return self.options[KEY_TEMPLATES]['figure_video'].render(
 				alt_html = text,
 				number = self.counter_dict['vid'],
-				prefix = self.options[KEY_VOCABULARY][self.options[KEY_LANGUAGE]]['vid'],
+				prefix = self.options[KEY_VOCABULARY]['vid'],
 				video_id = src.split(':')[1]
 				)
 
@@ -228,7 +227,6 @@ def run(context, options = None):
 	return MarkdownWithMath(
 		renderer = RendererWithMath(**options)
 			# vocabulary = options[KEY_VOCABULARY]
-			# language = options[KEY_LANGUAGE],
 			# code = options[KEY_CODE],
 			# math = options[KEY_MATH]
 			# templates = options[KEY_TEMPLATES]

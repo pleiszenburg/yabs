@@ -12,7 +12,9 @@ from yabs.const import (
 	KEY_MARKDOWN,
 	KEY_MATH,
 	KEY_PROJECT,
-	KEY_SRC
+	KEY_SRC,
+	KEY_TEMPLATES,
+	KEY_VOCABULARY
 	)
 from yabs.log import log
 
@@ -36,13 +38,15 @@ class blog_class:
 		self.language_set = set([entry.language for entry in self.entry_list])
 
 
-	def create_renderer(self, plugin_func, options):
+	def create_renderer(self, plugin_func, render_plugins, templates, vocabulary):
 
 		self.renderer_dict = {entry_type: {
 			language: plugin_func(
-				options[entry_type], {
-					KEY_CODE: plugin_func(options[KEY_CODE]),
-					KEY_MATH: plugin_func(options[KEY_MATH])
+				render_plugins[entry_type], {
+					KEY_CODE: plugin_func(render_plugins[KEY_CODE]),
+					KEY_MATH: plugin_func(render_plugins[KEY_MATH]),
+					KEY_VOCABULARY: vocabulary[language],
+					KEY_TEMPLATES: templates
 					}
 				) for language in self.language_set
 			} for entry_type in KNOWN_ENTRY_TYPES}
@@ -71,4 +75,6 @@ class blog_entry_class:
 def run(context, options = None):
 
 	blog = blog_class(context[KEY_SRC][KEY_BLOG])
-	blog.create_renderer(context[KEY_PROJECT].run_plugin, options)
+	blog.create_renderer(
+		context[KEY_PROJECT].run_plugin, options, context[KEY_TEMPLATES], context[KEY_VOCABULARY]
+		)
