@@ -16,13 +16,20 @@ except ImportError:
 
 
 from yabs.const import (
+	KEY_AUTHORS,
 	KEY_BLOG,
+	KEY_CONTENT,
 	KEY_CODE,
+	KEY_EMAIL,
+	KEY_FIRSTNAME,
+	KEY_LASTNAME,
 	KEY_MARKDOWN,
 	KEY_MATH,
 	KEY_PROJECT,
 	KEY_SRC,
+	KEY_SUBTITLE,
 	KEY_TEMPLATES,
+	KEY_TITLE,
 	KEY_VOCABULARY
 	)
 from yabs.log import log
@@ -61,10 +68,10 @@ class blog_class:
 			} for entry_type in KNOWN_ENTRY_TYPES}
 
 
-	def render_entries(self):
+	def render_entries(self, templates):
 
 		for entry in self.entry_list:
-			entry.render(self.renderer_dict)
+			entry.render(self.renderer_dict, templates)
 
 
 class blog_entry_class:
@@ -84,8 +91,28 @@ class blog_entry_class:
 
 	def __preprocess_md__(self):
 
+		def process_author(in_data):
+
+			if isinstance(in_data, str):
+				lastname, firstname = in_data.split(',')
+				email = ''
+			elif isinstance(in_data, dict):
+				lastname, firstname = list(in_data.keys())[0].split(',')
+				email = list(in_data.values())[0].strip()
+			else:
+				raise # TODO
+
+			return {
+				KEY_LASTNAME: lastname.strip(),
+				KEY_FIRSTNAME: firstname.strip(),
+				KEY_EMAIL: email
+				}
+
 		meta, self.content = self.raw.split('\n\n', 1)
 		self.meta_dict = load(meta, Loader = Loader)
+		self.meta_dict[KEY_AUTHORS] = [
+			process_author(author) for author in self.meta_dict[KEY_AUTHORS]
+			]
 
 
 	def __postprocess_md__(self, html):
@@ -99,11 +126,15 @@ class blog_entry_class:
 		return str(soup) # soup.prettify()
 
 
-	def render(self, renderer_dict):
+	def render(self, renderer_dict, templates):
 
-		getattr(self, '__preprocess_%s__' % self.type)()
-		html = renderer_dict[self.type][self.language](self.content)
-		html = getattr(self, '__postprocess_%s__' % self.type)(html)
+		getattr(self, '__preprocess_%s__' % self.type)() # depends on type
+		content = renderer_dict[self.type][self.language](self.content) # depends on type
+		content = getattr(self, '__postprocess_%s__' % self.type)(content) # depends on type
+
+		self.meta_dict[KEY_CONTENT] = content
+
+		html = templates['blog_article'].render(**self.meta_dict)
 
 		print(html)
 
@@ -114,4 +145,4 @@ def run(context, options = None):
 	blog.create_renderer(
 		context[KEY_PROJECT].run_plugin, options, context[KEY_TEMPLATES], context[KEY_VOCABULARY]
 		)
-	blog.render_entries()
+	blog.render_entries(context[KEY_TEMPLATES])
