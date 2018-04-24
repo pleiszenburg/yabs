@@ -14,6 +14,7 @@ from yabs.const import (
 	KEY_CODE,
 	KEY_FORMULA,
 	KEY_MATH,
+	KEY_TEMPLATES,
 	KEY_VOCABULARY
 	)
 

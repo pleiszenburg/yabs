@@ -6,6 +6,13 @@ import os
 from pprint import pprint as pp
 
 
+from yaml import load
+try:
+	from yaml import CLoader as Loader
+except ImportError:
+	from yaml import Loader
+
+
 from yabs.const import (
 	KEY_BLOG,
 	KEY_CODE,
@@ -52,6 +59,12 @@ class blog_class:
 			} for entry_type in KNOWN_ENTRY_TYPES}
 
 
+	def render_entries(self):
+
+		for entry in self.entry_list:
+			entry.render(self.renderer_dict)
+
+
 class blog_entry_class:
 
 
@@ -67,9 +80,18 @@ class blog_entry_class:
 			self.raw = f.read()
 
 
-	def render(self, renderer):
+	def __preprocess_md__(self):
 
-		pass
+		meta, self.content = self.raw.split('\n\n', 1)
+		self.meta_dict = load(meta, Loader = Loader)
+
+
+	def render(self, renderer_dict):
+
+		getattr(self, '__preprocess_%s__' % self.type)()
+
+		html = renderer_dict[self.type][self.language](self.content)
+		print(html)
 
 
 def run(context, options = None):
@@ -78,3 +100,4 @@ def run(context, options = None):
 	blog.create_renderer(
 		context[KEY_PROJECT].run_plugin, options, context[KEY_TEMPLATES], context[KEY_VOCABULARY]
 		)
+	blog.render_entries()
