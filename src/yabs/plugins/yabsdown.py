@@ -12,9 +12,11 @@ import re
 from yabs.const import (
 	IMAGE_SUFFIX_LIST,
 	KEY_CODE,
+	KEY_FIGURE,
 	KEY_FORMULA,
 	KEY_MATH,
 	KEY_TEMPLATES,
+	KEY_VIDEO,
 	KEY_VOCABULARY
 	)
 
@@ -148,7 +150,7 @@ class RendererWithMath(mistune.Renderer):
 
 		super(RendererWithMath, self).__init__(*args, **kwargs)
 
-		self.counter_dict = {'fig': 0, 'vid': 0, KEY_FORMULA: 0}
+		self.counter_dict = {KEY_FIGURE: 0, KEY_VIDEO: 0, KEY_FORMULA: 0}
 
 
 	def block_code(self, code, lang):
@@ -198,22 +200,22 @@ class RendererWithMath(mistune.Renderer):
 	def _figure(self, src, title, text):
 
 		if any(src.endswith(item) for item in IMAGE_SUFFIX_LIST):
-			self.counter_dict['fig'] += 1
+			self.counter_dict[KEY_FIGURE] += 1
 			return self.options[KEY_TEMPLATES]['figure_image'].render(
 				alt_attr = text,
 				alt_html = text,
-				number = self.counter_dict['fig'],
-				prefix = self.options[KEY_VOCABULARY]['fig'],
+				number = self.counter_dict[KEY_FIGURE],
+				prefix = self.options[KEY_VOCABULARY][KEY_FIGURE],
 				src = src,
 				title = title
 				)
 
 		if src.startswith('youtube:'):
-			self.counter_dict['vid'] += 1
+			self.counter_dict[KEY_VIDEO] += 1
 			return self.options[KEY_TEMPLATES]['figure_video'].render(
 				alt_html = text,
-				number = self.counter_dict['vid'],
-				prefix = self.options[KEY_VOCABULARY]['vid'],
+				number = self.counter_dict[KEY_VIDEO],
+				prefix = self.options[KEY_VOCABULARY][KEY_VIDEO],
 				video_id = src.split(':')[1]
 				)
 
@@ -227,8 +229,4 @@ def run(context, options = None):
 
 	return MarkdownWithMath(
 		renderer = RendererWithMath(**options)
-			# vocabulary = options[KEY_VOCABULARY]
-			# code = options[KEY_CODE],
-			# math = options[KEY_MATH]
-			# templates = options[KEY_TEMPLATES]
 		)
