@@ -6,6 +6,8 @@ import os
 from pprint import pprint as pp
 
 
+from bs4 import BeautifulSoup
+
 from yaml import load
 try:
 	from yaml import CLoader as Loader
@@ -86,11 +88,23 @@ class blog_entry_class:
 		self.meta_dict = load(meta, Loader = Loader)
 
 
+	def __postprocess_md__(self, html):
+
+		soup = BeautifulSoup(html, 'html.parser')
+
+		for h_level in range(5, 0, -1):
+			for h_tag in soup.find_all('h%d' % h_level):
+				h_tag.name = 'h%d' % (h_level + 1)
+
+		return str(soup) # soup.prettify()
+
+
 	def render(self, renderer_dict):
 
 		getattr(self, '__preprocess_%s__' % self.type)()
-
 		html = renderer_dict[self.type][self.language](self.content)
+		html = getattr(self, '__postprocess_%s__' % self.type)(html)
+
 		print(html)
 
 
