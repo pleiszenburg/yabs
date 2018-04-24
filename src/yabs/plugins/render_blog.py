@@ -42,43 +42,47 @@ KNOWN_ENTRY_TYPES = [KEY_MARKDOWN]
 class blog_class:
 
 
-	def __init__(self, src_fld):
+	def __init__(self, context):
+
+		self.context = context
 
 		src_file_list = []
 		for suffix in KNOWN_ENTRY_TYPES:
 			src_file_list.extend(glob.glob(
-				os.path.join(src_fld, '**', '*.%s' % suffix),
+				os.path.join(self.context[KEY_SRC][KEY_BLOG], '**', '*.%s' % suffix),
 				recursive = True
 				))
 
-		self.entry_list = [blog_entry_class(file_path) for file_path in src_file_list]
+		self.entry_list = [blog_entry_class(context, file_path) for file_path in src_file_list]
 		self.language_set = set([entry.language for entry in self.entry_list])
 
 
-	def create_renderer(self, plugin_func, render_plugins, templates, vocabulary):
+	def create_renderer(self, options):
 
 		self.renderer_dict = {entry_type: {
-			language: plugin_func(
-				render_plugins[entry_type], {
-					KEY_CODE: plugin_func(render_plugins[KEY_CODE]),
-					KEY_MATH: plugin_func(render_plugins[KEY_MATH]),
-					KEY_VOCABULARY: vocabulary[language],
-					KEY_TEMPLATES: templates
+			language: self.context[KEY_PROJECT].run_plugin(
+				options[entry_type], {
+					KEY_CODE: self.context[KEY_PROJECT].run_plugin(options[KEY_CODE]),
+					KEY_MATH: self.context[KEY_PROJECT].run_plugin(options[KEY_MATH]),
+					KEY_VOCABULARY: self.context[KEY_VOCABULARY][language],
+					KEY_TEMPLATES: self.context[KEY_TEMPLATES]
 					}
 				) for language in self.language_set
 			} for entry_type in KNOWN_ENTRY_TYPES}
 
 
-	def render_entries(self, templates):
+	def render_entries(self):
 
 		for entry in self.entry_list:
-			entry.render(self.renderer_dict, templates)
+			entry.render(self.renderer_dict)
 
 
 class blog_entry_class:
 
 
-	def __init__(self, src_file_path):
+	def __init__(self, context, src_file_path):
+
+		self.context = context
 
 		fn = os.path.basename(src_file_path)
 
@@ -127,7 +131,7 @@ class blog_entry_class:
 		return str(soup) # soup.prettify()
 
 
-	def render(self, renderer_dict, templates):
+	def render(self, renderer_dict):
 
 		getattr(self, '__preprocess_%s__' % self.type)()
 
@@ -138,15 +142,13 @@ class blog_entry_class:
 
 		self.meta_dict[KEY_CONTENT] = content
 
-		html = templates['blog_article'].render(**self.meta_dict)
+		html = self.context[KEY_TEMPLATES]['blog_article'].render(**self.meta_dict)
 
 		print(html)
 
 
 def run(context, options = None):
 
-	blog = blog_class(context[KEY_SRC][KEY_BLOG])
-	blog.create_renderer(
-		context[KEY_PROJECT].run_plugin, options, context[KEY_TEMPLATES], context[KEY_VOCABULARY]
-		)
-	blog.render_entries(context[KEY_TEMPLATES])
+	blog = blog_class(context)
+	blog.create_renderer(options)
+	blog.render_entries()
