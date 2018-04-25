@@ -6,6 +6,7 @@
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 from pprint import pprint as pp
+import os
 import re
 
 
@@ -14,7 +15,10 @@ from yabs.const import (
 	KEY_CODE,
 	KEY_FIGURE,
 	KEY_FORMULA,
+	KEY_IMAGES,
 	KEY_MATH,
+	KEY_OUT,
+	KEY_ROOT,
 	KEY_TEMPLATES,
 	KEY_VIDEO,
 	KEY_VOCABULARY
@@ -206,7 +210,7 @@ class RendererWithMath(mistune.Renderer):
 				alt_html = text,
 				number = self.counter_dict[KEY_FIGURE],
 				prefix = self.options[KEY_VOCABULARY][KEY_FIGURE],
-				src = src,
+				src = os.path.join(self.options[KEY_IMAGES], src) if not src.startswith('http') else src,
 				title = title
 				)
 
@@ -226,6 +230,10 @@ def run(context, options = None):
 
 	if options is None:
 		options = {}
+
+	options.update({
+		KEY_IMAGES: os.path.relpath(context[KEY_OUT][KEY_IMAGES], context[KEY_OUT][KEY_ROOT])
+		})
 
 	return MarkdownWithMath(
 		renderer = RendererWithMath(**options)
