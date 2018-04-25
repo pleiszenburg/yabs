@@ -26,7 +26,9 @@ from yabs.const import (
 	KEY_LASTNAME,
 	KEY_MARKDOWN,
 	KEY_MATH,
+	KEY_OUT,
 	KEY_PROJECT,
+	KEY_ROOT,
 	KEY_SRC,
 	KEY_SUBTITLE,
 	KEY_TEMPLATES,
@@ -144,7 +146,17 @@ class blog_entry_class:
 
 		html = self.context[KEY_TEMPLATES]['blog_article'].render(**self.meta_dict)
 
-		print(html)
+		for template_prefix, fn_pattern in [
+			('base', 'blog_%s.htm'),
+			('ajax_base', 'ajax_%s.htm')
+			]:
+			with open(os.path.join(
+				self.context[KEY_OUT][KEY_ROOT],
+				fn_pattern % self.meta_dict[KEY_TITLE].replace(' ', '-')
+				), 'w+') as f:
+				f.write('{%% extends "%s.htm" %%}\n{%% block %s %%}%s{%% endblock %%}' % (
+					template_prefix, KEY_CONTENT, html
+					))
 
 
 def run(context, options = None):

@@ -10,7 +10,6 @@ import jinja2
 
 from yabs.const import (
 	KEY_JINJA,
-	KEY_HTML,
 	KEY_SRC,
 	KEY_TEMPLATES
 	)
@@ -19,9 +18,7 @@ from yabs.const import (
 def run(context, options = None):
 
 	context[KEY_JINJA] = jinja2.Environment(
-		loader = jinja2.ChoiceLoader([
-			jinja2.FileSystemLoader(context[KEY_SRC][path_key], encoding = 'utf-8', followlinks = False) for path_key in [KEY_TEMPLATES, KEY_HTML]
-			]),
+		loader = jinja2.FileSystemLoader(context[KEY_SRC][KEY_TEMPLATES], encoding = 'utf-8', followlinks = False),
 		autoescape = jinja2.select_autoescape(['html', 'xml'])
 		)
 	context[KEY_TEMPLATES] = {

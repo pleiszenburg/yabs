@@ -104,7 +104,7 @@ def validate_files(file_list, ignore_list):
 			if vnu_file not in vnu_by_file.keys():
 				vnu_by_file.update({vnu_file: []})
 			vnu_by_file[vnu_file].append('"%s": %s' % (vnu_problem['type'], vnu_problem['message']))
-			vnu_by_file[vnu_file].append('[...]%s[...]' % vnu_problem['extract'])
+			vnu_by_file[vnu_file].append('[...]%s[...]' % vnu_problem['extract'] if 'extract' in vnu_problem.keys() else '???')
 
 	vnu_files = list(vnu_by_file.keys())
 	vnu_files.sort()
@@ -123,7 +123,7 @@ def run(context, options = None):
 		update_validator(context)
 
 	file_list = glob.glob(os.path.join(context[KEY_OUT][KEY_ROOT], '**', '*.htm*'), recursive = True)
-	file_list = [fn for fn in file_list if not fn.startswith(AJAX_PREFIX)]
+	file_list = [fn for fn in file_list if not os.path.basename(fn).startswith(AJAX_PREFIX)]
 
 	validate_files(
 		file_list,
