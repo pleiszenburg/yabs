@@ -16,6 +16,8 @@ except ImportError:
 
 
 from yabs.const import (
+	AJAX_PREFIX,
+	BLOG_PREFIX,
 	KEY_ABSTRACT,
 	KEY_AUTHORS,
 	KEY_BLOG,
@@ -23,12 +25,14 @@ from yabs.const import (
 	KEY_CODE,
 	KEY_EMAIL,
 	KEY_FIRSTNAME,
+	KEY_FN,
 	KEY_LASTNAME,
 	KEY_MARKDOWN,
 	KEY_MATH,
 	KEY_OUT,
 	KEY_PROJECT,
 	KEY_ROOT,
+	KEY_SLUG,
 	KEY_SRC,
 	KEY_SUBTITLE,
 	KEY_TEMPLATE,
@@ -45,7 +49,7 @@ KNOWN_ENTRY_TYPES = [KEY_MARKDOWN]
 class blog_class:
 
 
-	def __init__(self, context):
+	def __init__(self, context, options):
 
 		self.context = context
 
@@ -59,9 +63,6 @@ class blog_class:
 		self.entry_list = [blog_entry_class(context, file_path) for file_path in src_file_list]
 		self.language_set = set([entry.language for entry in self.entry_list])
 
-
-	def create_renderer(self, options):
-
 		self.renderer_dict = {entry_type: {
 			language: self.context[KEY_PROJECT].run_plugin(
 				options[entry_type], {
@@ -73,11 +74,13 @@ class blog_class:
 				) for language in self.language_set
 			} for entry_type in KNOWN_ENTRY_TYPES}
 
+		self.slug = self.context[KEY_PROJECT].run_plugin(options[KEY_SLUG])
+
 
 	def render_entries(self):
 
 		for entry in self.entry_list:
-			entry.render(self.renderer_dict)
+			entry.render(self.renderer_dict, self.slug)
 
 
 class blog_entry_class:
@@ -134,7 +137,7 @@ class blog_entry_class:
 		return str(soup) # soup.prettify()
 
 
-	def render(self, renderer_dict):
+	def render(self, renderer_dict, slug_func):
 
 		getattr(self, '__preprocess_%s__' % self.type)()
 
@@ -145,13 +148,14 @@ class blog_entry_class:
 
 		self.meta_dict[KEY_CONTENT] = content
 
-		for template_prefix, fn_pattern in [
-			('base', 'blog_%s.htm'),
-			('ajax_base', 'ajax_%s.htm')
+		self.meta_dict[KEY_FN] = '%s%s.htm' % (BLOG_PREFIX, slug_func(self.meta_dict[KEY_TITLE]))
+
+		for template_prefix, prefix in [
+			('base', ''),
+			('%sbase' % AJAX_PREFIX, AJAX_PREFIX)
 			]:
 			with open(os.path.join(
-				self.context[KEY_OUT][KEY_ROOT],
-				fn_pattern % self.meta_dict[KEY_TITLE].replace(' ', '-')
+				self.context[KEY_OUT][KEY_ROOT], prefix + self.meta_dict[KEY_FN]
 				), 'w+') as f:
 
 				f.write(self.context[KEY_TEMPLATES]['blog_article'].render(
@@ -161,6 +165,5 @@ class blog_entry_class:
 
 def run(context, options = None):
 
-	blog = blog_class(context)
-	blog.create_renderer(options)
+	blog = blog_class(context, options)
 	blog.render_entries()

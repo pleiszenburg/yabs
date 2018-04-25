@@ -11,6 +11,8 @@ nodeenv
 numpy
 plotly
 Pygments
+python-slugify
 PyYAML
 pillow
 requests
+unidecode

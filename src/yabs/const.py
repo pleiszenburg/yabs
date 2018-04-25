@@ -6,6 +6,8 @@ IMAGE_SUFFIX_LIST = ['gif', 'jpg', 'jpeg', 'png']
 FONT_SUFFIX_LIST = ['ttf', 'woff', 'woff2']
 
 AJAX_PREFIX = 'ajax_'
+BLOG_PREFIX = 'blog_'
+
 PID_FN = '.pid'
 
 KEY_ABSTRACT = 'abstract'
@@ -18,6 +20,7 @@ KEY_DOMAIN = 'domain'
 KEY_EMAIL = 'email'
 KEY_FIGURE= 'fig'
 KEY_FIRSTNAME = 'firstname'
+KEY_FN = 'fn'
 KEY_FONTS = 'fonts'
 KEY_FORMULA = 'formula'
 KEY_GITHUB = 'github'
@@ -40,6 +43,7 @@ KEY_RELEASE = 'release'
 KEY_ROOT = 'root'
 KEY_SCRIPTS = 'scripts'
 KEY_SERVER = 'server'
+KEY_SLUG = 'slug'
 KEY_SRC = 'src'
 KEY_STYLES = 'styles'
 KEY_SUBTITLE = 'subtitle'
