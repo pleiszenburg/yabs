@@ -15,6 +15,7 @@ import requests
 
 
 from yabs.const import (
+	FONT_SUFFIX_LIST,
 	KEY_FONTS,
 	KEY_LIBRARIES,
 	KEY_OUT,
@@ -61,12 +62,12 @@ def fetch_library(context, library):
 		current_version = f.read().strip()
 
 	file_list = []
-	for ext in ['css', 'js']:
+	for ext in ['css', 'js'] + FONT_SUFFIX_LIST:
 		file_list.extend(glob.glob(os.path.join(context[KEY_SRC][KEY_LIBRARIES], library, '*.%s' % ext)))
 
 	for src_file_path in file_list:
 
-		with open(src_file_path, 'r') as f:
+		with open(src_file_path, 'rb') as f:
 			cnt = f.read()
 
 		fn = os.path.basename(src_file_path).replace(
@@ -77,10 +78,12 @@ def fetch_library(context, library):
 			deployment_path = context[KEY_OUT][KEY_STYLES]
 		elif fn.endswith('.js'):
 			deployment_path = context[KEY_OUT][KEY_SCRIPTS]
+		elif any(fn.endswith('.%s' % ext) for ext in FONT_SUFFIX_LIST):
+			deployment_path = context[KEY_OUT][KEY_FONTS]
 		else:
 			raise # TODO
 
-		with open(os.path.join(deployment_path, fn), 'w') as f:
+		with open(os.path.join(deployment_path, fn), 'wb') as f:
 			f.write(cnt)
 
 

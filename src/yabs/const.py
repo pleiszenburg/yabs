@@ -3,6 +3,7 @@
 CONFIG_FILE = 'site.yaml'
 
 IMAGE_SUFFIX_LIST = ['gif', 'jpg', 'jpeg', 'png']
+FONT_SUFFIX_LIST = ['ttf', 'woff', 'woff2']
 
 AJAX_PREFIX = 'ajax_'
 PID_FN = '.pid'
