@@ -17,12 +17,16 @@ import requests
 from yabs.const import (
 	FONT_SUFFIX_LIST,
 	KEY_FONTS,
+	KEY_GITHUB,
 	KEY_LIBRARIES,
 	KEY_OUT,
+	KEY_RELEASE,
 	KEY_SCRIPTS,
 	KEY_SRC,
 	KEY_STYLES,
-	KEY_UPDATE
+	KEY_TAGS,
+	KEY_UPDATE,
+	KEY_VERSION
 	)
 from yabs.log import log
 
@@ -34,26 +38,48 @@ LIB_PLOTLY = 'plotly'
 LIB_BOKEH = 'bokeh'
 LIB_KATEX = 'katex'
 
-LIB_URL_DICT = {
-	LIB_BOKEH: [
-		'http://cdn.pydata.org/bokeh/release/bokeh-%s.min.js',
-		'http://cdn.pydata.org/bokeh/release/bokeh-widgets-%s.min.js',
-		'http://cdn.pydata.org/bokeh/release/bokeh-%s.min.css',
-		'http://cdn.pydata.org/bokeh/release/bokeh-widgets-%s.min.css'
-		],
-	LIB_JQUERY: [
-		'https://code.jquery.com/jquery-%s.min.js'
-		],
-	LIB_PLOTLY: [
-		'https://github.com/plotly/plotly.js/blob/v%s/dist/plotly.min.js?raw=true'
-		],
-	LIB_KATEX: [
-		'https://cdnjs.cloudflare.com/ajax/libs/KaTeX/%s/katex.min.css',
-		'katex/fonts/*.*@https://github.com/Khan/KaTeX/releases/download/v%s/katex.zip'
-		]
+LIB_DICT = {
+	'bokeh': {
+		KEY_SRC: [
+			'http://cdn.pydata.org/bokeh/release/bokeh-%s.min.js',
+			'http://cdn.pydata.org/bokeh/release/bokeh-widgets-%s.min.js',
+			'http://cdn.pydata.org/bokeh/release/bokeh-%s.min.css',
+			'http://cdn.pydata.org/bokeh/release/bokeh-widgets-%s.min.css'
+			]
+		},
+	'jquery': {
+		KEY_GITHUB: 'jquery/jquery',
+		KEY_VERSION: KEY_TAGS,
+		KEY_SRC: [
+			'https://code.jquery.com/jquery-%s.min.js'
+			]
+		},
+	'normalize.css': {
+		KEY_GITHUB: 'necolas/normalize.css',
+		KEY_VERSION: KEY_TAGS,
+		KEY_SRC: [
+			'https://raw.githubusercontent.com/necolas/normalize.css/%s/normalize.css'
+			]
+		},
+	'plotly': {
+		KEY_GITHUB: 'plotly/plotly.js',
+		KEY_VERSION: KEY_RELEASE,
+		KEY_SRC: [
+			'https://github.com/plotly/plotly.js/blob/v%s/dist/plotly.min.js?raw=true'
+			]
+		},
+	'katex': {
+		KEY_GITHUB: 'Khan/KaTeX',
+		KEY_VERSION: KEY_RELEASE,
+		KEY_SRC: [
+			'https://cdnjs.cloudflare.com/ajax/libs/KaTeX/%s/katex.min.css',
+			'katex/fonts/*.*@https://github.com/Khan/KaTeX/releases/download/v%s/katex.zip'
+			]
+		}
 	}
 
-LIBRARY_LIST = list(LIB_URL_DICT.keys())
+
+LIBRARY_LIST = list(LIB_DICT.keys())
 
 
 def fetch_library(context, library):
@@ -89,27 +115,22 @@ def fetch_library(context, library):
 
 def get_relevant_version(library):
 
-	if library == LIB_BOKEH:
+	if library == 'bokeh':
 
 		return bokeh.__version__
 
-	elif library == LIB_PLOTLY:
+	elif LIB_DICT[library][KEY_VERSION] == KEY_TAGS:
 
-		return requests.get(
-			url = 'https://api.github.com/repos/plotly/plotly.js/releases/latest'
-			).json()['name'][1:]
-
-	elif library == LIB_JQUERY:
-
-		tags = requests.get(url = 'https://api.github.com/repos/jquery/jquery/tags').json()
+		tags = requests.get(url = 'https://api.github.com/repos/%s/tags' % LIB_DICT[library][KEY_GITHUB]).json()
 		versions = [tag['name'] for tag in tags if '-' not in tag['name']]
+		versions = [tag.lstrip('v') for tag in versions]
 		versions.sort(key = StrictVersion)
 		return versions[-1]
 
-	elif library == LIB_KATEX:
+	elif LIB_DICT[library][KEY_VERSION] == KEY_RELEASE:
 
 		return requests.get(
-			url = 'https://api.github.com/repos/Khan/KaTeX/releases/latest'
+			url = 'https://api.github.com/repos/%s/releases/latest' % LIB_DICT[library][KEY_GITHUB]
 			).json()['name'][1:]
 
 	else:
@@ -147,7 +168,7 @@ def update_library(context, library):
 	with open(version_file_path, 'w+') as f:
 		f.write(new_library_version)
 
-	for url_pattern in LIB_URL_DICT[library]:
+	for url_pattern in LIB_DICT[library][KEY_SRC]:
 
 		url = url_pattern % new_library_version
 

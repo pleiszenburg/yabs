@@ -8,6 +8,11 @@ import os
 import sass
 
 
+STYLE_SASS = 'sass'
+STYLE_SCSS = 'scss'
+STYLE_SUFFIX_LIST = [STYLE_SASS, STYLE_SCSS]
+
+
 from yabs.const import (
 	KEY_OUT,
 	KEY_STYLES
@@ -29,7 +34,11 @@ def run(context, options = None):
 
 		os.unlink(file_path)
 
-		cnt = sass.compile(string = cnt)
+		cnt = sass.compile(
+			string = cnt,
+			output_style = 'compact',
+			indented = file_path.endswith(STYLE_SASS)
+			)
 
 		for suffix in suffix_list:
 			if file_path.endswith(suffix):
