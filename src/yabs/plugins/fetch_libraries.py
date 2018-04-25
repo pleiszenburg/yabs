@@ -15,6 +15,7 @@ import requests
 
 
 from yabs.const import (
+	KEY_FONTS,
 	KEY_LIBRARIES,
 	KEY_OUT,
 	KEY_SCRIPTS,
@@ -153,7 +154,18 @@ def update_library(context, library):
 			if new_library_version not in fn:
 				fn = fn.replace('.min', '-%s.min' % new_library_version)
 
-			urllib.request.urlretrieve(url, os.path.join(library_path, fn))
+			fp = os.path.join(library_path, fn)
+			urllib.request.urlretrieve(url, fp)
+
+			if library == LIB_KATEX and fn.endswith('.css'):
+				with open(fp, 'r') as f:
+					cnt = f.read()
+				cnt = cnt.replace(
+					'url(fonts/',
+					'url(%s/' % os.path.relpath(context[KEY_OUT][KEY_FONTS], context[KEY_OUT][KEY_STYLES])
+					)
+				with open(fp, 'w+') as f:
+					f.write(cnt)
 
 		elif '@' in url:
 
