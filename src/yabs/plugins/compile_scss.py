@@ -10,7 +10,7 @@ import sass
 
 from yabs.const import (
 	KEY_OUT,
-	KEY_ROOT
+	KEY_STYLES
 	)
 
 
@@ -20,7 +20,7 @@ def run(context, options = None):
 
 	file_list = []
 	for suffix in suffix_list:
-		file_list.extend(glob.glob(os.path.join(context[KEY_OUT][KEY_ROOT], '*.%s' % suffix)))
+		file_list.extend(glob.glob(os.path.join(context[KEY_OUT][KEY_STYLES], '*.%s' % suffix)))
 
 	for file_path in file_list:
 
