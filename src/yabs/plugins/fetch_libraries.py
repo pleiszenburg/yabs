@@ -2,9 +2,12 @@
 
 
 from distutils.version import StrictVersion
+import fnmatch
 import glob
+import io
 import os
 import urllib.request
+import zipfile
 
 
 import bokeh
@@ -43,7 +46,8 @@ LIB_URL_DICT = {
 		'https://github.com/plotly/plotly.js/blob/v%s/dist/plotly.min.js?raw=true'
 		],
 	LIB_KATEX: [
-		'https://cdnjs.cloudflare.com/ajax/libs/KaTeX/%s/katex.min.css'
+		'https://cdnjs.cloudflare.com/ajax/libs/KaTeX/%s/katex.min.css',
+		'katex/fonts/*.*@https://github.com/Khan/KaTeX/releases/download/v%s/katex.zip'
 		]
 	}
 
@@ -143,11 +147,29 @@ def update_library(context, library):
 
 		url = url_pattern % new_library_version
 
-		fn = url.split('/')[-1].split('?')[0]
-		if new_library_version not in fn:
-			fn = fn.replace('.min', '-%s.min' % new_library_version)
+		if url.startswith('http'):
 
-		urllib.request.urlretrieve(url, os.path.join(library_path, fn))
+			fn = url.split('/')[-1].split('?')[0]
+			if new_library_version not in fn:
+				fn = fn.replace('.min', '-%s.min' % new_library_version)
+
+			urllib.request.urlretrieve(url, os.path.join(library_path, fn))
+
+		elif '@' in url:
+
+			path_pattern, url = url.split('@')
+			zip_bin = requests.get(url, stream = True)
+
+			with zipfile.ZipFile(io.BytesIO(zip_bin.content)) as z:
+				for fp in z.namelist():
+					if not fnmatch.fnmatch(fp, path_pattern):
+						continue
+					with open(os.path.join(library_path, os.path.basename(fp)), 'wb') as f:
+						f.write(z.read(fp))
+
+		else:
+
+			raise
 
 
 def run(context, options = None):
