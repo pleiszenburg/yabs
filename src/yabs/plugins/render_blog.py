@@ -31,6 +31,7 @@ from yabs.const import (
 	KEY_ROOT,
 	KEY_SRC,
 	KEY_SUBTITLE,
+	KEY_TEMPLATE,
 	KEY_TEMPLATES,
 	KEY_TITLE,
 	KEY_VOCABULARY
@@ -144,8 +145,6 @@ class blog_entry_class:
 
 		self.meta_dict[KEY_CONTENT] = content
 
-		html = self.context[KEY_TEMPLATES]['blog_article'].render(**self.meta_dict)
-
 		for template_prefix, fn_pattern in [
 			('base', 'blog_%s.htm'),
 			('ajax_base', 'ajax_%s.htm')
@@ -154,8 +153,9 @@ class blog_entry_class:
 				self.context[KEY_OUT][KEY_ROOT],
 				fn_pattern % self.meta_dict[KEY_TITLE].replace(' ', '-')
 				), 'w+') as f:
-				f.write('{%% extends "%s.htm" %%}\n{%% block %s %%}%s{%% endblock %%}' % (
-					template_prefix, KEY_CONTENT, html
+
+				f.write(self.context[KEY_TEMPLATES]['blog_article'].render(
+					**{KEY_TEMPLATE: template_prefix}, **self.meta_dict
 					))
 
 

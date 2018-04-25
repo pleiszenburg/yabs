@@ -6,6 +6,7 @@ import os
 
 
 from yabs.const import (
+	KEY_DOMAIN,
 	KEY_HTML,
 	KEY_JINJA,
 	KEY_OUT,
@@ -20,7 +21,9 @@ def run(context, options = None):
 		with open(os.path.join(file_path), 'r') as f:
 			cnt = f.read()
 
-		cnt = context[KEY_JINJA].from_string(cnt).render()
+		cnt = context[KEY_JINJA].from_string(cnt).render(**{
+			KEY_DOMAIN: context[KEY_DOMAIN]
+			})
 
 		with open(os.path.join(file_path), 'w+') as f:
 			f.write(cnt)
