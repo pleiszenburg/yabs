@@ -15,7 +15,10 @@ from yabs.const import (
 
 def run(context, options = None):
 
-	os.mkdir(context[KEY_OUT][KEY_STYLES])
+	try:
+		os.mkdir(context[KEY_OUT][KEY_STYLES])
+	except FileExistsError as e:
+		pass
 
 	suffix_list = ['css', 'sass', 'scss']
 
