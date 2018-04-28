@@ -175,6 +175,10 @@ class RendererWithMath(mistune.Renderer):
 			number = self.counter_dict[KEY_FORMULA]
 			)
 
+	def footnotes(self, text):
+
+		return self.options[KEY_TEMPLATES]['footnotes'].render(footnotes = text)
+
 
 	def latex_environment(self, name, text):
 
