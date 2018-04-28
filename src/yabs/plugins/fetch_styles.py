@@ -11,6 +11,7 @@ from yabs.const import (
 	KEY_SRC,
 	KEY_STYLES
 	)
+from yabs.log import log
 
 
 def run(context, options = None):
@@ -18,7 +19,7 @@ def run(context, options = None):
 	try:
 		os.mkdir(context[KEY_OUT][KEY_STYLES])
 	except FileExistsError as e:
-		pass
+		log.warning('Folder "%s" already exists.' % context[KEY_OUT][KEY_STYLES])
 
 	suffix_list = ['css', 'sass', 'scss']
 
