@@ -134,7 +134,15 @@ class blog_entry_class:
 			for h_tag in soup.find_all('h%d' % h_level):
 				h_tag.name = 'h%d' % (h_level + 2)
 
-		return str(soup) # soup.prettify()
+		out_html = str(soup) # soup.prettify()
+
+		out_html = '<div class="text">%s' % out_html
+		if '<footer' in out_html:
+			out_html = out_html.replace('<footer', '</div><footer')
+		else:
+			out_html = '%s</div>' % out_html
+
+		return out_html
 
 
 	def render(self, renderer_dict, slug_func):
