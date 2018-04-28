@@ -154,6 +154,7 @@ class blog_entry_class:
 			('base', ''),
 			('%sbase' % AJAX_PREFIX, AJAX_PREFIX)
 			]:
+
 			with open(os.path.join(
 				self.context[KEY_OUT][KEY_ROOT], prefix + self.meta_dict[KEY_FN]
 				), 'w+') as f:
