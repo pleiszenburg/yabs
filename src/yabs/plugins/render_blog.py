@@ -23,12 +23,14 @@ from yabs.const import (
 	KEY_BLOG,
 	KEY_CONTENT,
 	KEY_CODE,
+	KEY_CTIME,
 	KEY_EMAIL,
 	KEY_FIRSTNAME,
 	KEY_FN,
 	KEY_LASTNAME,
 	KEY_MARKDOWN,
 	KEY_MATH,
+	KEY_MTIME,
 	KEY_OUT,
 	KEY_PROJECT,
 	KEY_ROOT,
@@ -124,6 +126,11 @@ class blog_entry_class:
 		self.meta_dict[KEY_AUTHORS] = [
 			process_author(author) for author in self.meta_dict[KEY_AUTHORS]
 			]
+
+		for time_key in [KEY_CTIME, KEY_MTIME]:
+			if time_key not in self.meta_dict.keys():
+				continue
+			self.meta_dict['%s_datetime' % time_key] = self.meta_dict[time_key].replace(' ', 'T')
 
 
 	def __postprocess_md__(self, html):
