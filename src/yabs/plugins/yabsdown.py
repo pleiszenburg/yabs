@@ -17,7 +17,9 @@ from yabs.const import (
 	KEY_FORMULA,
 	KEY_IMAGES,
 	KEY_MATH,
+	KEY_LANGUAGE,
 	KEY_OUT,
+	KEY_PLOT,
 	KEY_ROOT,
 	KEY_TEMPLATES,
 	KEY_VIDEO,
@@ -154,7 +156,7 @@ class RendererWithMath(mistune.Renderer):
 
 		super(RendererWithMath, self).__init__(*args, **kwargs)
 
-		self.counter_dict = {KEY_FIGURE: 0, KEY_VIDEO: 0, KEY_FORMULA: 0}
+		self.counter_dict = {KEY_FIGURE: 0, KEY_PLOT: 0, KEY_VIDEO: 0, KEY_FORMULA: 0}
 
 
 	def block_code(self, code, lang):
@@ -225,6 +227,16 @@ class RendererWithMath(mistune.Renderer):
 				number = self.counter_dict[KEY_VIDEO],
 				prefix = self.options[KEY_VOCABULARY][KEY_VIDEO],
 				video_id = src.split(':')[1]
+				)
+
+		if src.startswith('plot:'):
+			self.counter_dict[KEY_PLOT] += 1
+			return self.options[KEY_TEMPLATES]['figure_plot'].render(
+				alt_html = text,
+				number = self.counter_dict[KEY_PLOT],
+				prefix = self.options[KEY_VOCABULARY][KEY_PLOT],
+				plot_id = src.split(':')[1],
+				language = self.options[KEY_LANGUAGE]
 				)
 
 		raise # handle youtube, plots, etc HERE!

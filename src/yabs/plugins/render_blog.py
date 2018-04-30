@@ -27,6 +27,7 @@ from yabs.const import (
 	KEY_EMAIL,
 	KEY_FIRSTNAME,
 	KEY_FN,
+	KEY_LANGUAGE,
 	KEY_LASTNAME,
 	KEY_MARKDOWN,
 	KEY_MATH,
@@ -71,7 +72,8 @@ class blog_class:
 					KEY_CODE: self.context[KEY_PROJECT].run_plugin(options[KEY_CODE]),
 					KEY_MATH: self.context[KEY_PROJECT].run_plugin(options[KEY_MATH]),
 					KEY_VOCABULARY: self.context[KEY_VOCABULARY][language],
-					KEY_TEMPLATES: self.context[KEY_TEMPLATES]
+					KEY_TEMPLATES: self.context[KEY_TEMPLATES],
+					KEY_LANGUAGE: language
 					}
 				) for language in self.language_set
 			} for entry_type in KNOWN_ENTRY_TYPES}
