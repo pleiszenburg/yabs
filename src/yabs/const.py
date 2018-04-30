@@ -10,9 +10,6 @@ BLOG_PREFIX = 'blog_'
 
 PID_FN = '.pid'
 
-LANG_DE = 'de'
-LANG_EN = 'en'
-
 KEY_ABSTRACT = 'abstract'
 KEY_AUTHORS = 'authors'
 KEY_BLOG = 'blog'
