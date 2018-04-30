@@ -6,6 +6,7 @@ import fnmatch
 import glob
 import io
 import os
+from pprint import pformat as pf
 import urllib.request
 import zipfile
 
@@ -122,8 +123,13 @@ def get_relevant_version(library):
 	elif LIB_DICT[library][KEY_VERSION] == KEY_TAGS:
 
 		tags = requests.get(url = 'https://api.github.com/repos/%s/tags' % LIB_DICT[library][KEY_GITHUB]).json()
-		versions = [tag['name'] for tag in tags if '-' not in tag['name']]
-		versions = [tag.lstrip('v') for tag in versions]
+		try:
+			versions = [tag['name'] for tag in tags if '-' not in tag['name']]
+			versions = [tag.lstrip('v') for tag in versions]
+		except:
+			log.error('Failed to parse version from Github response.')
+			log.error(pf(tags))
+			raise # TODO
 		versions.sort(key = StrictVersion)
 		return versions[-1]
 
