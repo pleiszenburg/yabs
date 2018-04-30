@@ -14,6 +14,7 @@ STYLE_SUFFIX_LIST = [STYLE_SASS, STYLE_SCSS]
 
 
 from yabs.const import (
+	KEY_COLORS,
 	KEY_OUT,
 	KEY_STYLES
 	)
@@ -31,6 +32,12 @@ def run(context, options = None):
 
 		with open(file_path, 'r') as f:
 			cnt = f.read()
+
+		cnt_color_list = []
+		for color_index, color in enumerate(context[KEY_COLORS]):
+			cnt_color_list.append('$color%d: rgb%s' % (color_index + 1, str(tuple(color))))
+		cnt = '\n'.join(cnt_color_list) + '\n' + cnt
+		print(cnt)
 
 		os.unlink(file_path)
 
