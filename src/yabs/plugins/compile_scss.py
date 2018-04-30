@@ -37,7 +37,6 @@ def run(context, options = None):
 		for color_index, color in enumerate(context[KEY_COLORS]):
 			cnt_color_list.append('$color%d: rgb%s' % (color_index + 1, str(tuple(color))))
 		cnt = '\n'.join(cnt_color_list) + '\n' + cnt
-		print(cnt)
 
 		os.unlink(file_path)
 
