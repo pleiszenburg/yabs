@@ -28,6 +28,7 @@ from yabs.const import (
 	KEY_FIRSTNAME,
 	KEY_FN,
 	KEY_LANGUAGE,
+	KEY_LANGUAGES,
 	KEY_LASTNAME,
 	KEY_MARKDOWN,
 	KEY_MATH,
@@ -55,6 +56,7 @@ class blog_class:
 	def __init__(self, context, options):
 
 		self.context = context
+		self.slug = self.context[KEY_PROJECT].run_plugin(options[KEY_SLUG])
 
 		src_file_list = []
 		for suffix in KNOWN_ENTRY_TYPES:
@@ -63,8 +65,9 @@ class blog_class:
 				recursive = True
 				))
 
-		self.entry_list = [blog_entry_class(context, file_path) for file_path in src_file_list]
+		self.entry_list = [blog_entry_class(context, file_path, self.slug) for file_path in src_file_list]
 		self.language_set = set([entry.language for entry in self.entry_list])
+		self.__match_language_versions__()
 
 		self.renderer_dict = {entry_type: {
 			language: self.context[KEY_PROJECT].run_plugin(
@@ -78,21 +81,33 @@ class blog_class:
 				) for language in self.language_set
 			} for entry_type in KNOWN_ENTRY_TYPES}
 
-		self.slug = self.context[KEY_PROJECT].run_plugin(options[KEY_SLUG])
+
+	def __match_language_versions__(self):
+
+		self.entry_dict = {}
+
+		for entry in self.entry_list:
+			if entry.id not in self.entry_dict.keys():
+				self.entry_dict[entry.id] = []
+			self.entry_dict[entry.id].append((entry.language, entry.meta_dict[KEY_FN]))
+
+		for entry_key in self.entry_dict.keys():
+			self.entry_dict[entry_key].sort()
 
 
 	def render_entries(self):
 
 		for entry in self.entry_list:
-			entry.render(self.renderer_dict, self.slug)
+			entry.render(self.renderer_dict, self.entry_dict[entry.id])
 
 
 class blog_entry_class:
 
 
-	def __init__(self, context, src_file_path):
+	def __init__(self, context, src_file_path, slug_func):
 
 		self.context = context
+		self.slug_func = slug_func
 
 		fn = os.path.basename(src_file_path)
 
@@ -102,6 +117,8 @@ class blog_entry_class:
 
 		with open(src_file_path, 'r') as f:
 			self.raw = f.read()
+
+		getattr(self, '__preprocess_%s__' % self.type)()
 
 
 	def __preprocess_md__(self):
@@ -134,6 +151,8 @@ class blog_entry_class:
 				continue
 			self.meta_dict['%s_datetime' % time_key] = self.meta_dict[time_key].replace(' ', 'T')
 
+		self.meta_dict[KEY_FN] = '%s%s.htm' % (BLOG_PREFIX, self.slug_func(self.meta_dict[KEY_TITLE]))
+
 
 	def __postprocess_md__(self, html):
 
@@ -146,9 +165,7 @@ class blog_entry_class:
 		return str(soup) # soup.prettify()
 
 
-	def render(self, renderer_dict, slug_func):
-
-		getattr(self, '__preprocess_%s__' % self.type)()
+	def render(self, renderer_dict, entry_language_list):
 
 		content = renderer_dict[self.type][self.language](self.content)
 		self.meta_dict[KEY_ABSTRACT] = renderer_dict[self.type][self.language](self.meta_dict[KEY_ABSTRACT])
@@ -156,8 +173,6 @@ class blog_entry_class:
 		content = getattr(self, '__postprocess_%s__' % self.type)(content)
 
 		self.meta_dict[KEY_CONTENT] = content
-
-		self.meta_dict[KEY_FN] = '%s%s.htm' % (BLOG_PREFIX, slug_func(self.meta_dict[KEY_TITLE]))
 
 		for template_prefix, prefix in [
 			('base', ''),
@@ -169,7 +184,11 @@ class blog_entry_class:
 				), 'w+') as f:
 
 				f.write(self.context[KEY_TEMPLATES]['blog_article'].render(
-					**{KEY_TEMPLATE: template_prefix}, **self.meta_dict
+					**{
+						KEY_LANGUAGES: str(entry_language_list),
+						KEY_TEMPLATE: template_prefix
+						},
+					**self.meta_dict
 					))
 
 
