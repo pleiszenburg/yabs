@@ -91,7 +91,12 @@ class blog_class:
 				self.entry_dict[entry.id] = []
 			self.entry_dict[entry.id].append((entry.language, entry.meta_dict[KEY_FN]))
 
+		languages_set = set(self.context[KEY_LANGUAGES])
 		for entry_key in self.entry_dict.keys():
+			entry_languages = set([lang for lang, _ in self.entry_dict[entry_key]])
+			missing_translations = languages_set - entry_languages
+			for lang in missing_translations:
+				self.entry_dict[entry_key].append((lang, str(None)))
 			self.entry_dict[entry_key].sort()
 
 
