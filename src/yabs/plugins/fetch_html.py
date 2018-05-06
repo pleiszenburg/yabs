@@ -27,5 +27,4 @@ def run(context, options = None):
 
 		for prefix in ['', AJAX_PREFIX]:
 			with open(os.path.join(context[KEY_OUT][KEY_ROOT], '%s%s' % (prefix, fn)), 'w') as f:
-				print('%s%s' % (prefix, KEY_BASE))
 				f.write(cnt.replace(TEMPLATE_PLACEHOLDER, '%s%s' % (prefix, KEY_BASE)))
