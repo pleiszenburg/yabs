@@ -20,6 +20,7 @@ from yabs.const import (
 	BLOG_PREFIX,
 	KEY_ABSTRACT,
 	KEY_AUTHORS,
+	KEY_BASE,
 	KEY_BLOG,
 	KEY_CONTENT,
 	KEY_CODE,
@@ -180,8 +181,8 @@ class blog_entry_class:
 		self.meta_dict[KEY_CONTENT] = content
 
 		for template_prefix, prefix in [
-			('base', ''),
-			('%sbase' % AJAX_PREFIX, AJAX_PREFIX)
+			(KEY_BASE, ''),
+			('%s%s' % (AJAX_PREFIX, KEY_BASE), AJAX_PREFIX)
 			]:
 
 			with open(os.path.join(

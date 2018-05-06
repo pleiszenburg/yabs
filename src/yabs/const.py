@@ -8,10 +8,13 @@ FONT_SUFFIX_LIST = ['ttf', 'woff', 'woff2']
 AJAX_PREFIX = 'ajax_'
 BLOG_PREFIX = 'blog_'
 
+TEMPLATE_PLACEHOLDER = '<<TEMPLATE>>'
+
 PID_FN = '.pid'
 
 KEY_ABSTRACT = 'abstract'
 KEY_AUTHORS = 'authors'
+KEY_BASE = 'base'
 KEY_BLOG = 'blog'
 KEY_BOKEH = 'bokeh'
 KEY_CODE = 'code'

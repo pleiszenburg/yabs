@@ -6,10 +6,13 @@ import os
 
 
 from yabs.const import (
+	AJAX_PREFIX,
+	KEY_BASE,
 	KEY_HTML,
 	KEY_OUT,
 	KEY_ROOT,
-	KEY_SRC
+	KEY_SRC,
+	TEMPLATE_PLACEHOLDER
 	)
 
 
@@ -22,5 +25,7 @@ def run(context, options = None):
 		with open(src_file_path, 'r') as f:
 			cnt = f.read()
 
-		with open(os.path.join(context[KEY_OUT][KEY_ROOT], fn), 'w') as f:
-			f.write(cnt)
+		for prefix in ['', AJAX_PREFIX]:
+			with open(os.path.join(context[KEY_OUT][KEY_ROOT], '%s%s' % (prefix, fn)), 'w') as f:
+				print('%s%s' % (prefix, KEY_BASE))
+				f.write(cnt.replace(TEMPLATE_PLACEHOLDER, '%s%s' % (prefix, KEY_BASE)))
