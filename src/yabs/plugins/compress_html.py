@@ -10,6 +10,8 @@ import htmlmin
 
 
 from yabs.const import (
+	AJAX_PREFIX,
+	AJAX_SEPARATOR,
 	KEY_OUT,
 	KEY_ROOT
 	)
@@ -36,7 +38,15 @@ def compress_html_file(file_path):
 	with open(file_path, 'r') as f:
 		cnt = f.read()
 
-	cnt = compress_html(cnt)
+	fn = os.path.basename(file_path)
+
+	if fn.startswith(AJAX_PREFIX):
+		self_info_json, html_cnt = cnt.split(AJAX_SEPARATOR)
+		cnt = '%s\n%s\n%s' % (
+			self_info_json.strip(), AJAX_SEPARATOR, compress_html(html_cnt)
+			)
+	else:
+		cnt = compress_html(cnt)
 
 	with open(file_path, 'w') as f:
 		f.write(cnt)
