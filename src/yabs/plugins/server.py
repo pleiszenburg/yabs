@@ -22,7 +22,7 @@ class rq_handler_class(SimpleHTTPRequestHandler):
 
 	def log_message(self, format, *args):
 
-		logging.debug(format % args)
+		logging.info(format % args)
 
 
 def run(context, options = None):
