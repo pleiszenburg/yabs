@@ -28,6 +28,7 @@ from yabs.const import (
 	KEY_EMAIL,
 	KEY_FIRSTNAME,
 	KEY_FN,
+	KEY_ID,
 	KEY_LANGUAGE,
 	KEY_LANGUAGES,
 	KEY_LASTNAME,
@@ -126,6 +127,9 @@ class blog_entry_class:
 
 		getattr(self, '__preprocess_%s__' % self.type)()
 
+		self.meta_dict[KEY_ID] = self.id
+		self.meta_dict[KEY_FN] = '%s%s.htm' % (BLOG_PREFIX, self.slug_func(self.meta_dict[KEY_TITLE]))
+
 
 	def __preprocess_md__(self):
 
@@ -156,8 +160,6 @@ class blog_entry_class:
 			if time_key not in self.meta_dict.keys():
 				continue
 			self.meta_dict['%s_datetime' % time_key] = self.meta_dict[time_key].replace(' ', 'T')
-
-		self.meta_dict[KEY_FN] = '%s%s.htm' % (BLOG_PREFIX, self.slug_func(self.meta_dict[KEY_TITLE]))
 
 
 	def __postprocess_md__(self, html):
