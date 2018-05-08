@@ -7,7 +7,7 @@ from unidecode import unidecode
 
 UMLAUT_LIST = [i for i in 'äöü']
 UMLAUT_LIST += [i.upper() for i in UMLAUT_LIST]
-UMLAUT_DICT = {i: unidecode(i) for i in UMLAUT_LIST}
+UMLAUT_DICT = {i: unidecode(i) + 'e' for i in UMLAUT_LIST}
 
 
 def slugify_costom(slug_str):
