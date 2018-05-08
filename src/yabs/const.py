@@ -8,6 +8,7 @@ FONT_SUFFIX_LIST = ['ttf', 'woff', 'woff2']
 AJAX_PREFIX = 'ajax_'
 BLOG_PREFIX = 'blog_'
 
+AJAX_DELIMITER = '<<delimiter>>'
 AJAX_SEPARATOR = '<<CONTENT>>'
 TEMPLATE_PLACEHOLDER = '<<TEMPLATE>>'
 

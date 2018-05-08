@@ -25,6 +25,10 @@ def run(context, options = None):
 		with open(src_file_path, 'r') as f:
 			cnt = f.read()
 
-		for prefix in ['', AJAX_PREFIX]:
-			with open(os.path.join(context[KEY_OUT][KEY_ROOT], '%s%s' % (prefix, fn)), 'w') as f:
-				f.write(cnt.replace(TEMPLATE_PLACEHOLDER, '%s%s' % (prefix, KEY_BASE)))
+		if TEMPLATE_PLACEHOLDER in cnt:
+			for prefix in ['', AJAX_PREFIX]:
+				with open(os.path.join(context[KEY_OUT][KEY_ROOT], '%s%s' % (prefix, fn)), 'w') as f:
+					f.write(cnt.replace(TEMPLATE_PLACEHOLDER, '%s%s' % (prefix, KEY_BASE)))
+		else:
+			with open(os.path.join(context[KEY_OUT][KEY_ROOT], fn), 'w') as f:
+				f.write(cnt)
