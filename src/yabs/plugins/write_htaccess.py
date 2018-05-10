@@ -2,6 +2,7 @@
 
 
 import os
+import stat
 
 
 from yabs.const import (
@@ -12,5 +13,9 @@ from yabs.const import (
 
 def run(context, options = None):
 
-	with open(os.path.join(context[KEY_OUT][KEY_ROOT], '.htaccess'), 'w') as f:
+	out_path = os.path.join(context[KEY_OUT][KEY_ROOT], '.htaccess')
+
+	with open(out_path, 'w') as f:
 		f.write(options)
+
+	os.chmod(out_path, stat.S_IWUSR | stat.S_IRUSR)
