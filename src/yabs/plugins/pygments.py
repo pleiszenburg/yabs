@@ -8,12 +8,11 @@ from pygments.formatters import html
 
 def render_code(code, lang):
 
-	tmp = highlight(
+	return highlight(
 		code,
 		get_lexer_by_name(lang, stripall = True),
 		html.HtmlFormatter()
 		)
-	return tmp.replace('<div ', '<figure ').replace('</div>', '</figure>')
 
 
 def run(context, options = None):

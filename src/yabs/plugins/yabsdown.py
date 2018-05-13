@@ -165,7 +165,9 @@ class RendererWithMath(mistune.Renderer):
 			raise
 			# return '\n<pre><code>%s</code></pre>\n' % mistune.escape(code)
 
-		return self.options[KEY_CODE](code, lang)
+		return self.options[KEY_TEMPLATES]['figure_code'].render(
+			**{KEY_CODE: self.options[KEY_CODE](code, lang)}
+			)
 
 
 	def block_math(self, text):
