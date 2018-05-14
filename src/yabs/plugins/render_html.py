@@ -6,6 +6,7 @@ import os
 
 
 from yabs.const import (
+	KEY_DATA,
 	KEY_DOMAIN,
 	KEY_HTML,
 	KEY_JINJA,
@@ -40,7 +41,10 @@ def run(context, options = None):
 			cnt = f.read()
 
 		cnt = context[KEY_JINJA].from_string(cnt).render(
-			**{KEY_DOMAIN: context[KEY_DOMAIN]},
+			**{
+				KEY_DOMAIN: context[KEY_DOMAIN],
+				KEY_DATA: context[KEY_DATA] if KEY_DATA in context.keys() else {}
+				},
 			**context[KEY_NAVIGATION]
 			)
 
