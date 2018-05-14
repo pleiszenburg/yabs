@@ -14,7 +14,8 @@ from yabs.const import (
 	KEY_NAVIGATION,
 	KEY_OUT,
 	KEY_ROOT,
-	KEY_URL
+	KEY_URL,
+	KEY_VOCABULARY
 	)
 
 
@@ -42,8 +43,9 @@ def run(context, options = None):
 
 		cnt = context[KEY_JINJA].from_string(cnt).render(
 			**{
+				KEY_DATA: context[KEY_DATA] if KEY_DATA in context.keys() else {},
 				KEY_DOMAIN: context[KEY_DOMAIN],
-				KEY_DATA: context[KEY_DATA] if KEY_DATA in context.keys() else {}
+				KEY_VOCABULARY: context[KEY_VOCABULARY]
 				},
 			**context[KEY_NAVIGATION]
 			)
