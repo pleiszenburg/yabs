@@ -49,9 +49,6 @@ from yabs.const import (
 from yabs.log import log
 
 
-KNOWN_ENTRY_TYPES = [KEY_MARKDOWN]
-
-
 class blog_class:
 
 
@@ -60,20 +57,18 @@ class blog_class:
 		self.context = context
 		self.slug = self.context[KEY_PROJECT].run_plugin(options[KEY_SLUG])
 
-		src_file_list = []
-		for suffix in KNOWN_ENTRY_TYPES:
-			src_file_list.extend(glob.glob(
-				os.path.join(self.context[KEY_SRC][KEY_BLOG], '**', '*.%s' % suffix),
-				recursive = True
-				))
+		src_file_list = glob.glob(
+			os.path.join(self.context[KEY_SRC][KEY_BLOG], '**', '*.%s' % KEY_MARKDOWN),
+			recursive = True
+			)
 
 		self.entry_list = [blog_entry_class(context, file_path, self.slug) for file_path in src_file_list]
 		self.language_set = set([entry.language for entry in self.entry_list])
 		self.__match_language_versions__()
 
-		self.renderer_dict = {entry_type: {
+		self.renderer_dict = {
 			language: self.context[KEY_PROJECT].run_plugin(
-				options[entry_type], {
+				options[KEY_MARKDOWN], {
 					KEY_CODE: self.context[KEY_PROJECT].run_plugin(options[KEY_CODE]),
 					KEY_MATH: self.context[KEY_PROJECT].run_plugin(options[KEY_MATH]),
 					KEY_VOCABULARY: self.context[KEY_VOCABULARY][language],
@@ -81,7 +76,7 @@ class blog_class:
 					KEY_LANGUAGE: language
 					}
 				) for language in self.language_set
-			} for entry_type in KNOWN_ENTRY_TYPES}
+			}
 
 
 	def __match_language_versions__(self):
@@ -120,12 +115,12 @@ class blog_entry_class:
 
 		self.id = fn.rsplit('.', 1)[0].rsplit('_', 1)[0]
 		self.language = fn.rsplit('.', 1)[0].rsplit('_', 1)[1]
-		self.type = fn.rsplit('.', 1)[1]
+		self.type = KEY_MARKDOWN # TODO unused
 
 		with open(src_file_path, 'r') as f:
 			self.raw = f.read()
 
-		getattr(self, '__preprocess_%s__' % self.type)()
+		self.__preprocess_md__()
 
 		self.meta_dict[KEY_ID] = self.id
 		self.meta_dict[KEY_FN] = '%s%s.htm' % (BLOG_PREFIX, self.slug_func(self.meta_dict[KEY_TITLE]))
@@ -175,10 +170,10 @@ class blog_entry_class:
 
 	def render(self, renderer_dict, entry_language_list):
 
-		content = renderer_dict[self.type][self.language](self.content)
-		self.meta_dict[KEY_ABSTRACT] = renderer_dict[self.type][self.language](self.meta_dict[KEY_ABSTRACT])
+		content = renderer_dict[self.language](self.content)
+		self.meta_dict[KEY_ABSTRACT] = renderer_dict[self.language](self.meta_dict[KEY_ABSTRACT])
 
-		content = getattr(self, '__postprocess_%s__' % self.type)(content)
+		content = self.__postprocess_md__(content)
 
 		self.meta_dict[KEY_CONTENT] = content
 
