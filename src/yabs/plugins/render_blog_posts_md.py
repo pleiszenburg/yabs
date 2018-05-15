@@ -63,7 +63,7 @@ class blog_class:
 			)
 
 		self.entry_list = [blog_entry_class(context, file_path, self.slug) for file_path in src_file_list]
-		self.language_set = set([entry.language for entry in self.entry_list])
+		self.language_set = set([entry.meta_dict[KEY_LANGUAGE] for entry in self.entry_list])
 		self.__match_language_versions__()
 
 		self.renderer_dict = {
@@ -84,9 +84,9 @@ class blog_class:
 		self.entry_dict = {}
 
 		for entry in self.entry_list:
-			if entry.id not in self.entry_dict.keys():
-				self.entry_dict[entry.id] = []
-			self.entry_dict[entry.id].append((entry.language, entry.meta_dict[KEY_FN]))
+			if entry.meta_dict[KEY_ID] not in self.entry_dict.keys():
+				self.entry_dict[entry.meta_dict[KEY_ID]] = []
+			self.entry_dict[entry.meta_dict[KEY_ID]].append((entry.meta_dict[KEY_LANGUAGE], entry.meta_dict[KEY_FN]))
 
 		languages_set = set(self.context[KEY_LANGUAGES])
 		for entry_key in self.entry_dict.keys():
@@ -100,7 +100,7 @@ class blog_class:
 	def render_entries(self):
 
 		for entry in self.entry_list:
-			entry.render(self.renderer_dict, self.entry_dict[entry.id])
+			entry.render(self.renderer_dict, self.entry_dict[entry.meta_dict[KEY_ID]])
 
 
 class blog_entry_class:
@@ -108,26 +108,19 @@ class blog_entry_class:
 
 	def __init__(self, context, src_file_path, slug_func):
 
+		def get_entry_segments():
+			with open(src_file_path, 'r') as f:
+				raw = f.read()
+			return raw.split('\n\n', 1)
+
 		self.context = context
 		self.slug_func = slug_func
 
-		fn = os.path.basename(src_file_path)
-
-		self.id = fn.rsplit('.', 1)[0].rsplit('_', 1)[0]
-		self.language = fn.rsplit('.', 1)[0].rsplit('_', 1)[1]
-		self.type = KEY_MARKDOWN # TODO unused
-
-		with open(src_file_path, 'r') as f:
-			self.raw = f.read()
-
-		self.__preprocess_md__()
-
-		self.meta_dict[KEY_LANGUAGE] = self.language
-		self.meta_dict[KEY_ID] = self.id
-		self.meta_dict[KEY_FN] = '%s%s.htm' % (BLOG_PREFIX, self.slug_func(self.meta_dict[KEY_TITLE]))
+		meta, self.content = get_entry_segments()
+		self.meta_dict = self.__process_blog_post_meta__(src_file_path, meta)
 
 
-	def __preprocess_md__(self):
+	def __process_blog_post_meta__(self, src_file_path, meta):
 
 		def process_author(in_data):
 
@@ -146,16 +139,26 @@ class blog_entry_class:
 				KEY_EMAIL: email
 				}
 
-		meta, self.content = self.raw.split('\n\n', 1)
-		self.meta_dict = load(meta, Loader = Loader)
-		self.meta_dict[KEY_AUTHORS] = [
-			process_author(author) for author in self.meta_dict[KEY_AUTHORS]
+		fn = os.path.basename(src_file_path)
+
+		meta_dict = {
+			KEY_LANGUAGE: fn.rsplit('.', 1)[0].rsplit('_', 1)[1],
+			KEY_ID: fn.rsplit('.', 1)[0].rsplit('_', 1)[0],
+			**load(meta, Loader = Loader)
+			}
+
+		meta_dict[KEY_AUTHORS] = [
+			process_author(author) for author in meta_dict[KEY_AUTHORS]
 			]
 
 		for time_key in [KEY_CTIME, KEY_MTIME]:
-			if time_key not in self.meta_dict.keys():
+			if time_key not in meta_dict.keys():
 				continue
-			self.meta_dict['%s_datetime' % time_key] = self.meta_dict[time_key].replace(' ', 'T')
+			meta_dict['%s_datetime' % time_key] = meta_dict[time_key].replace(' ', 'T')
+
+		meta_dict[KEY_FN] = '%s%s.htm' % (BLOG_PREFIX, self.slug_func(meta_dict[KEY_TITLE]))
+
+		return meta_dict
 
 
 	def __postprocess_md__(self, html):
@@ -171,8 +174,8 @@ class blog_entry_class:
 
 	def render(self, renderer_dict, entry_language_list):
 
-		content = renderer_dict[self.language](self.content)
-		self.meta_dict[KEY_ABSTRACT] = renderer_dict[self.language](self.meta_dict[KEY_ABSTRACT])
+		content = renderer_dict[self.meta_dict[KEY_LANGUAGE]](self.content)
+		self.meta_dict[KEY_ABSTRACT] = renderer_dict[self.meta_dict[KEY_LANGUAGE]](self.meta_dict[KEY_ABSTRACT])
 
 		content = self.__postprocess_md__(content)
 
