@@ -122,6 +122,7 @@ class blog_entry_class:
 
 		self.__preprocess_md__()
 
+		self.meta_dict[KEY_LANGUAGE] = self.language
 		self.meta_dict[KEY_ID] = self.id
 		self.meta_dict[KEY_FN] = '%s%s.htm' % (BLOG_PREFIX, self.slug_func(self.meta_dict[KEY_TITLE]))
 
