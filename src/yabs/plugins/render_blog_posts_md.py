@@ -27,6 +27,7 @@ from yabs.const import (
 	KEY_CTIME,
 	KEY_DATA,
 	KEY_EMAIL,
+	KEY_ENTRY,
 	KEY_FIRSTNAME,
 	KEY_FN,
 	KEY_ID,
@@ -98,14 +99,15 @@ class blog_class:
 			self.entry_dict[entry_key].sort()
 
 
-	def add_entries_meta_to_context_data(self):
+	def build_data(self):
 
-		pass
+		if KEY_DATA not in self.context.keys():
+			self.context[KEY_DATA] = {}
 
-		# if KEY_DATA not in self.context.keys():
-		# 	self.context[KEY_DATA] = {}
-		#
-		# self.context[KEY_DATA][KEY_BLOG] = {}
+		self.context[KEY_DATA][KEY_BLOG] = {
+			'%s_list' % KEY_ENTRY: [entry.meta_dict for entry in self.entry_list],
+			'%s_dict' % KEY_ENTRY: self.entry_dict
+			}
 
 
 	def render_entries(self):
@@ -209,4 +211,4 @@ def run(context, options = None):
 
 	blog = blog_class(context, options)
 	blog.render_entries()
-	blog.add_entries_meta_to_context_data()
+	blog.build_data()
