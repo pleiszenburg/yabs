@@ -116,11 +116,12 @@ class blog_entry_class:
 		self.context = context
 		self.slug_func = slug_func
 
-		meta, self.content = get_entry_segments()
-		self.meta_dict = self.__process_blog_post_meta__(src_file_path, meta)
+		meta, content = get_entry_segments()
+		self.meta_dict = self.__process_meta__(src_file_path, meta)
+		self.meta_dict[KEY_CONTENT] = content
 
 
-	def __process_blog_post_meta__(self, src_file_path, meta):
+	def __process_meta__(self, src_file_path, meta):
 
 		def process_author(in_data):
 
@@ -161,25 +162,19 @@ class blog_entry_class:
 		return meta_dict
 
 
-	def __postprocess_md__(self, html):
-
-		soup = BeautifulSoup(html, 'html.parser')
-
-		for h_level in range(5, 0, -1):
-			for h_tag in soup.find_all('h%d' % h_level):
-				h_tag.name = 'h%d' % (h_level + 1)
-
-		return str(soup) # soup.prettify()
-
-
 	def render(self, renderer_dict, entry_language_list):
 
-		content = renderer_dict[self.meta_dict[KEY_LANGUAGE]](self.content)
-		self.meta_dict[KEY_ABSTRACT] = renderer_dict[self.meta_dict[KEY_LANGUAGE]](self.meta_dict[KEY_ABSTRACT])
+		def fix_headline_levels(html):
+			soup = BeautifulSoup(html, 'html.parser')
+			for h_level in range(5, 0, -1):
+				for h_tag in soup.find_all('h%d' % h_level):
+					h_tag.name = 'h%d' % (h_level + 1)
+			return str(soup) # soup.prettify()
 
-		content = self.__postprocess_md__(content)
+		renderer = renderer_dict[self.meta_dict[KEY_LANGUAGE]]
 
-		self.meta_dict[KEY_CONTENT] = content
+		self.meta_dict[KEY_ABSTRACT] = renderer(self.meta_dict[KEY_ABSTRACT])
+		self.meta_dict[KEY_CONTENT] = fix_headline_levels(renderer(self.meta_dict[KEY_CONTENT]))
 
 		for template_prefix, prefix in [
 			(KEY_BASE, ''),
