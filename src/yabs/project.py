@@ -10,13 +10,16 @@ import time
 
 from .const import (
 	KEY_CWD,
+	KEY_DEPLOY,
 	KEY_LOG,
+	KEY_MOUNTPOINT,
 	KEY_OUT,
 	KEY_PROJECT,
 	KEY_RECIPE,
 	KEY_ROOT,
 	KEY_SERVER,
 	KEY_SRC,
+	KEY_TARGET,
 	KEY_TIMER
 	)
 
@@ -38,6 +41,7 @@ class project_class:
 		for group_id in [KEY_SRC, KEY_OUT]:
 			self.__compile_paths__(group_id)
 		self.context[KEY_LOG] = os.path.abspath(os.path.join(self.context[KEY_CWD], self.context[KEY_LOG]))
+		self.context[KEY_DEPLOY][KEY_MOUNTPOINT] = os.path.abspath(os.path.join(self.context[KEY_CWD], self.context[KEY_DEPLOY][KEY_MOUNTPOINT]))
 
 
 	def __init_logger__(self, logger_name = None, logger_level = logging.INFO):
@@ -88,6 +92,14 @@ class project_class:
 				plugin_options = step[plugin_name]
 
 			self.run_plugin(plugin_name, plugin_options)
+
+
+	def deploy(self, target):
+
+		self.__init_logger__(KEY_DEPLOY)
+
+		self.context[KEY_DEPLOY][KEY_TARGET] = target
+		self.run_plugin(KEY_DEPLOY, self.context[KEY_DEPLOY])
 
 
 	def run(self, plugin_list):

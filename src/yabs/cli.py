@@ -49,6 +49,17 @@ def build():
 
 
 @yabs_cli.command()
+@click.argument('target', nargs = 1)
+def deploy(target):
+	"""YABS build
+
+	Deploy website to target
+	"""
+
+	__get_project__().deploy(target)
+
+
+@yabs_cli.command()
 @click.argument('plugins', nargs = -1)
 def run(plugins):
 	"""YABS run
