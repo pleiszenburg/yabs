@@ -18,9 +18,10 @@ def run(context, options = None):
 
 		entry_path = os.path.join(context[KEY_OUT][KEY_ROOT], entry)
 
-		if os.path.isfile(entry_path):
+		if os.path.isfile(entry_path) or os.path.islink(entry_path):
 			os.unlink(entry_path)
 		elif os.path.isdir(entry_path):
 			shutil.rmtree(entry_path)
 		else:
+			print(entry_path)
 			raise # TODO

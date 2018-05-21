@@ -3,6 +3,7 @@
 
 from distutils.dir_util import copy_tree
 import os
+import shutil
 import subprocess
 import time
 
@@ -70,7 +71,8 @@ def mount_sshfs(mountpoint, hostname, path, user, password):
 		'sshfs',
 		'%s@%s:/%s' % (user, hostname, path),
 		mountpoint,
-		'-o', 'password_stdin'
+		'-o', 'password_stdin',
+		'-o', 'compression=yes'
 		]
 
 	proc = subprocess.Popen(
@@ -97,7 +99,7 @@ def remove_old_deployment(mountpoint):
 
 		entry_path = os.path.join(mountpoint, entry)
 
-		if os.path.isfile(entry_path):
+		if os.path.isfile(entry_path) or os.path.islink(entry_path):
 			os.unlink(entry_path)
 		elif os.path.isdir(entry_path):
 			shutil.rmtree(entry_path)

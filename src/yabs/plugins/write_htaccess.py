@@ -18,4 +18,5 @@ def run(context, options = None):
 	with open(out_path, 'w') as f:
 		f.write(options)
 
-	os.chmod(out_path, stat.S_IWUSR | stat.S_IRUSR)
+	# BUG 1und1 ...
+	# os.chmod(out_path, stat.S_IWUSR | stat.S_IRUSR)
