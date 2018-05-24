@@ -13,18 +13,18 @@ YABS is based on a minimal plugin system core: Every piece of build functionalit
 YABS currently offers plugins for the following common [static] website build steps:
 
 * a cleanup routine, plowing the ground for new builds
-* a templating engine (thin wrapper around Jinja2)
-* a markdown processor (extended mistune)
-* a data loader for YAML & JSON data (exposing data to the templating engine)
-* a slugifier (turning headlines into valid IDs and filenames)
-* building & embedding interactive plots with plotly and bokeh
-* syntax highlighting (rendered at build time)
-* math & formulas (rendered at build time)
-* code minimization / compression (HTML, JavaScript, CSS)
-* code obfuscation (JavaScript)
-* code transpilers (between different versions of JavaScript; from SASS/SCSS to CSS)
-* code validation (HTML)
-* inclusion of third party libraries (JavaScript, CSS)
+* a templating engine (thin wrapper around [Jinja2](jinja.pocoo.org))
+* a markdown processor (extended [mistune](https://github.com/lepture/mistune))
+* a data loader for [YAML](https://pyyaml.org/) & JSON data (exposing data to the templating engine)
+* a [slugifier](https://github.com/un33k/python-slugify) (turning headlines into valid IDs and filenames)
+* building & embedding interactive plots with [plotly](https://plot.ly/) and [bokeh](https://bokeh.pydata.org/)
+* [syntax highlighting](http://pygments.org/) (rendered at build time)
+* [math & formulas](https://khan.github.io/KaTeX/) (rendered at build time)
+* code compression ([HTML](https://github.com/mankyd/htmlmin), [CSS](https://github.com/sprymix/csscompressor))
+* code obfuscation / minimization ([JavaScript](http://lisperator.net/uglifyjs/))
+* code transpilers ([between different versions of JavaScript](https://babeljs.io/); from [SASS/SCSS to CSS](https://sass.github.io/libsass-python/))
+* code validation ([HTML](https://validator.github.io/validator/))
+* inclusion of third party libraries ([JavaScript](http://browserify.org/), CSS)
 * processing of font files
 * processing of image files
 * a favicon generator
@@ -33,11 +33,15 @@ YABS currently offers plugins for the following common [static] website build st
 * a htaccess generator
 * a HTTP server for testing
 * a symlink creator
-* content deployment based on sshfs/sftp
+* content deployment based on [sshfs](https://github.com/libfuse/sshfs)/sftp
 
 If it is required to repeatedly run a small subset of a build pipeline e.g. for debugging, it is perfectly possible to do so.
 
 ## Installation
+
+Prepare a Python virtual environment with Python 3.5 or better and a recent release of node.js (for example through [nodeenv](https://github.com/ekalinin/nodeenv)).
+
+Finally, just run:
 
 ```bash
 pip install yabs
