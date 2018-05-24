@@ -45,10 +45,17 @@ pip install yabs
 
 ## Basic usage
 
+At a project root, first create a `site.yaml` configuration file. Once this has been done, you can use the following commands:
+
 ```bash
+# Run the entire pipeline
 yabs build
+# Run a list of space-separated plugins
 yabs run [plugins]
+# Start the HTTP server
 yabs server start
+# Stop the HTTP server
 yabs server stop
+# Deploy the latest build to a pre-configured target
 yabs deploy [target]
 ```
