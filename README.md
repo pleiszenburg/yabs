@@ -1,8 +1,14 @@
 # YABS - the surprised and appalled sound ones makes learning that there is "Yet Another Build System"
 
+## Synopsis
+
 YABS is a highly customizable system for creating build pipelines for static websites. Although it is inspired by systems like [Pelican](https://blog.getpelican.com/), [Sphinx](http://www.sphinx-doc.org) and [Lektor](https://www.getlektor.com/), it works at a somewhat lower level, providing a maximum of flexibility to end users while eliminating elements like a stiff, complex content management engine. YABS is intended to provide a thin layer - a Python wrapper - around a number of popular tools for building [static] websites, allowing to rapidly build just about anything ranging from small single page sites to large and complex blogs.
 
+## Design
+
 YABS is based on a minimal plugin system core: Every piece of build functionality is isolated into individual plugins, which can be chained up into custom pipelines and configured in project specific configuration files. If a certain functionality is not provided by an existing YABS plugin, it is trivial to write your own and add it to the system. Every plugin is a stand-alone Python module exposing one single method which must accept two things - a project context object and an options parameter. If a certain plugin happens to be too slow for a certain use case, it can easily be optimized without interfering with other functionality.
+
+## Features
 
 YABS currently offers plugins for the following common [static] website build steps:
 
@@ -30,3 +36,19 @@ YABS currently offers plugins for the following common [static] website build st
 * content deployment based on sshfs/sftp
 
 If it is required to repeatedly run a small subset of a build pipeline e.g. for debugging, it is perfectly possible to do so.
+
+## Installation
+
+```bash
+pip install yabs
+```
+
+## Basic usage
+
+```bash
+yabs build
+yabs run [plugins]
+yabs server start
+yabs server stop
+yabs deploy [target]
+```
