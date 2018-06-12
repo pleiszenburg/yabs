@@ -181,13 +181,16 @@ class blog_entry_class:
 			soup = BeautifulSoup(html, 'html.parser')
 			for h_level in range(5, 0, -1):
 				for h_tag in soup.find_all('h%d' % h_level):
+					if h_tag.has_attr('class'):
+						if 'article_headline' in h_tag['class']:
+							continue
 					h_tag.name = 'h%d' % (h_level + 1)
 			return str(soup) # soup.prettify()
 
 		renderer = renderer_dict[self.meta_dict[KEY_LANGUAGE]]
 
 		self.meta_dict[KEY_ABSTRACT] = renderer(self.meta_dict[KEY_ABSTRACT])
-		self.meta_dict[KEY_CONTENT] = fix_headline_levels(renderer(self.meta_dict[KEY_CONTENT]))
+		self.meta_dict[KEY_CONTENT] = renderer(self.meta_dict[KEY_CONTENT])
 
 		for template_prefix, prefix in [
 			(KEY_BASE, ''),
@@ -198,13 +201,13 @@ class blog_entry_class:
 				self.context[KEY_OUT][KEY_ROOT], prefix + self.meta_dict[KEY_FN]
 				), 'w+') as f:
 
-				f.write(self.context[KEY_TEMPLATES]['blog_article'].render(
+				f.write(fix_headline_levels(self.context[KEY_TEMPLATES]['blog_article'].render(
 					**{
 						KEY_LANGUAGES: str(entry_language_list),
 						KEY_TEMPLATE: template_prefix
 						},
 					**self.meta_dict
-					))
+					)))
 
 
 def run(context, options = None):
