@@ -29,7 +29,7 @@ VALIDATOR_FN = 'vnu.jar'
 VERSION_FN = '.vnu_version'
 
 
-def update_validator(context):
+def update_validator():
 
 	latest_dict = requests.get(
 		url = 'https://api.github.com/repos/validator/validator/releases/latest'
@@ -119,8 +119,12 @@ def run(context, options = None):
 	if options is None:
 		options = {}
 
-	if (KEY_UPDATE in options.keys() and options[KEY_UPDATE]) or KEY_UPDATE not in options.keys():
-		update_validator(context)
+	if any([
+		KEY_UPDATE in options.keys() and options[KEY_UPDATE],
+		KEY_UPDATE not in options.keys(),
+		not os.path.isfile(os.path.join(os.environ['VIRTUAL_ENV'], SHARE_FLD, VERSION_FN))
+		]):
+		update_validator()
 
 	file_list = glob.glob(os.path.join(context[KEY_OUT][KEY_ROOT], '**', '*.htm*'), recursive = True)
 	file_list = [fn for fn in file_list if not os.path.basename(fn).startswith(AJAX_PREFIX)]
