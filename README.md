@@ -37,7 +37,7 @@ YABS currently offers plugins for the following common [static] website build st
 
 If it is required to repeatedly run a small subset of a build pipeline e.g. for debugging, it is perfectly possible to do so.
 
-## Installation
+## Installation (HOW IT SHOULD BE)
 
 Prepare a Python virtual environment with Python 3.5 or better and a recent release of node.js (for example through [nodeenv](https://github.com/ekalinin/nodeenv)).
 
@@ -46,6 +46,19 @@ Finally, just run:
 ```bash
 pip install yabs
 ```
+
+## Installation (HOW IT REALLY WORKS AT THE MOMENT)
+
+1. Create a new empty virtual environment with Python 3.5 or better: `python3 -m venv env`
+1. Check out the latest source code of YABS from its git repository: `git checkout [...]`
+1. Activate the virtual environment: `source env/bin/activate`
+1. Change into the source folder of YABS: `cd yabs`
+1. Install YABS: `make install`
+1. Leave the YABS source folder: `cd ..`
+1. Deactivate the virtual environment: `deactivate`
+1. Re-activate the virtual environment: `source env/bin/activate`
+
+The last two steps are likely necessary due to a bug in one of YABS' dependencies.
 
 ## Basic usage
 
