@@ -44,8 +44,9 @@ LIB_DICT = {
 		KEY_SRC: [
 			'http://cdn.pydata.org/bokeh/release/bokeh-%s.min.js',
 			'http://cdn.pydata.org/bokeh/release/bokeh-widgets-%s.min.js',
-			'http://cdn.pydata.org/bokeh/release/bokeh-%s.min.css',
-			'http://cdn.pydata.org/bokeh/release/bokeh-widgets-%s.min.css'
+			'http://cdn.pydata.org/bokeh/release/bokeh-tables-%s.min.js',
+			# 'http://cdn.pydata.org/bokeh/release/bokeh-%s.min.css',
+			# 'http://cdn.pydata.org/bokeh/release/bokeh-widgets-%s.min.css',
 			]
 		},
 	'jquery': {
