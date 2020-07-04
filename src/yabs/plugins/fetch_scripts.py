@@ -5,23 +5,19 @@ import glob
 import os
 
 
-from yabs.const import (
-	KEY_OUT,
-	KEY_SCRIPTS,
-	KEY_SRC
-	)
+from yabs.const import KEY_OUT, KEY_SCRIPTS, KEY_SRC
 
 
-def run(context, options = None):
+def run(context, options=None):
 
-	os.mkdir(context[KEY_OUT][KEY_SCRIPTS])
+    os.mkdir(context[KEY_OUT][KEY_SCRIPTS])
 
-	for src_file_path in glob.glob(os.path.join(context[KEY_SRC][KEY_SCRIPTS], '*.js')):
+    for src_file_path in glob.glob(os.path.join(context[KEY_SRC][KEY_SCRIPTS], "*.js")):
 
-		fn = os.path.basename(src_file_path)
+        fn = os.path.basename(src_file_path)
 
-		with open(src_file_path, 'r') as f:
-			cnt = f.read()
+        with open(src_file_path, "r") as f:
+            cnt = f.read()
 
-		with open(os.path.join(context[KEY_OUT][KEY_SCRIPTS], fn), 'w') as f:
-			f.write(cnt)
+        with open(os.path.join(context[KEY_OUT][KEY_SCRIPTS], fn), "w") as f:
+            f.write(cnt)
