@@ -4,7 +4,6 @@
 import importlib.util
 import logging
 import os
-import sys
 import time
 
 
@@ -81,7 +80,7 @@ class project_class:
         for pattern in ["yabs.plugins.%s", "%s"]:
             try:
                 return importlib.import_module(pattern % plugin_name)
-            except ModuleNotFoundError as e:
+            except ModuleNotFoundError:
                 pass
 
         raise PluginNotFound('"%s": Plugin not found!' % plugin_name)

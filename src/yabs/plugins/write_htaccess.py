@@ -2,7 +2,7 @@
 
 
 import os
-import stat
+# import stat
 
 
 from yabs.const import (

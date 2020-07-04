@@ -7,7 +7,7 @@ import os
 import subprocess
 
 
-from yabs.const import KEY_OUT, KEY_SCRIPTS, KEY_SRC
+from yabs.const import KEY_OUT, KEY_SCRIPTS
 
 
 def run(context, options=None):

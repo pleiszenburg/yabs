@@ -5,7 +5,7 @@ import glob
 import os
 
 
-from yabs.const import KEY_FONTS, KEY_OUT, KEY_ROOT, KEY_SRC
+from yabs.const import KEY_FONTS, KEY_OUT, KEY_SRC
 
 
 def run(context, options=None):

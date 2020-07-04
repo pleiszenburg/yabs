@@ -14,7 +14,6 @@ from bs4 import BeautifulSoup
 from yabs.const import (
     KEY_HTML,
     KEY_ID,
-    KEY_JINJA,
     KEY_OUT,
     KEY_PLOT,
     KEY_PLOTS,

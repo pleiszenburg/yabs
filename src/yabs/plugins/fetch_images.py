@@ -5,7 +5,7 @@ import glob
 import os
 
 
-from yabs.const import IMAGE_SUFFIX_LIST, KEY_IMAGES, KEY_OUT, KEY_ROOT, KEY_SRC
+from yabs.const import IMAGE_SUFFIX_LIST, KEY_IMAGES, KEY_OUT, KEY_SRC
 
 
 def run(context, options=None):

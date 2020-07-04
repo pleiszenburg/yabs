@@ -3,7 +3,6 @@
 
 import glob
 import os
-from pprint import pprint as pp
 
 
 from bs4 import BeautifulSoup
@@ -43,13 +42,11 @@ from yabs.const import (
     KEY_ROOT,
     KEY_SLUG,
     KEY_SRC,
-    KEY_SUBTITLE,
     KEY_TEMPLATE,
     KEY_TEMPLATES,
     KEY_TITLE,
     KEY_VOCABULARY,
 )
-from yabs.log import log
 
 
 class blog_class:

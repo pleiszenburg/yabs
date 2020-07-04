@@ -8,7 +8,6 @@ import os
 from yabs.const import (
     KEY_DATA,
     KEY_DOMAIN,
-    KEY_HTML,
     KEY_JINJA,
     KEY_NAME,
     KEY_NAVIGATION,

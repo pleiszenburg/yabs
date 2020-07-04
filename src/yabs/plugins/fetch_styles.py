@@ -6,7 +6,7 @@ import os
 import subprocess
 
 
-from yabs.const import KEY_OUT, KEY_PYGMENTS, KEY_ROOT, KEY_SRC, KEY_STYLES, KEY_THEME
+from yabs.const import KEY_OUT, KEY_PYGMENTS, KEY_SRC, KEY_STYLES, KEY_THEME
 from yabs.log import log
 
 
@@ -38,7 +38,7 @@ def run(context, options=None):
 
     try:
         os.mkdir(context[KEY_OUT][KEY_STYLES])
-    except FileExistsError as e:
+    except FileExistsError:
         log.warning('Folder "%s" already exists.' % context[KEY_OUT][KEY_STYLES])
 
     suffix_list = ["css", "sass", "scss"]

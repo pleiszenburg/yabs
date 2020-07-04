@@ -22,14 +22,12 @@ from yabs.const import (
     KEY_OUT,
     KEY_PATH,
     KEY_PASSWORD,
-    KEY_PORT,
     KEY_ROOT,
     KEY_TARGET,
     KEY_TARGETS,
     KEY_USER,
     YABS_FN,
 )
-from yabs.log import log
 
 
 def check_mountpoint(mountpoint):
