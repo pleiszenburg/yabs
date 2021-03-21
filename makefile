@@ -2,13 +2,7 @@
 # 	web_build
 
 install:
-	pip install --upgrade pip; \
-	pip install --upgrade setuptools; \
-	pip install -r requirements_python.txt; \
-	nodeenv -p; \
-	npm i -g npm; \
-	cat requirements_node.txt | xargs npm install -g; \
-	pip install -e .
+	bash install.sh
 
 # upload:
 # 	web_build --upload
