@@ -12,6 +12,7 @@ nodeenv
 numpy
 plotly
 Pygments
+python-language-server[all]
 python-slugify
 PyYAML
 pillow
