@@ -32,7 +32,7 @@ import importlib.util
 from logging import getLogger
 import os
 from types import ModuleType
-from typing import Any, Dict, List, Union
+from typing import Any, Dict, List
 
 from typeguard import typechecked
 
