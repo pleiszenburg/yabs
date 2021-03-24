@@ -113,6 +113,9 @@ class Project(ProjectABC):
             raise PluginNotFound(f'"{plugin_name:s}": Plugin not found!') from err
 
     def build(self):
+        """
+        Runs entire recipe
+        """
 
         for step in self._context[KEY_RECIPE]:
 
@@ -126,17 +129,26 @@ class Project(ProjectABC):
             self.run_plugin(plugin_name, plugin_options)
 
     def deploy(self, target: str):
+        """
+        Deploys to pre-configured target
+        """
 
         self._context[KEY_DEPLOY][KEY_TARGET] = target
         self.run_plugin(KEY_DEPLOY, self._context[KEY_DEPLOY])
 
     def run(self, plugin_list: List[str]):
+        """
+        Runs list of plugins (by name) without options
+        """
 
         for plugin_name in plugin_list:
 
             self.run_plugin(plugin_name, None)
 
     def run_plugin(self, plugin_name: str, plugin_options: Union[Dict, None] = None):
+        """
+        Runs a single plugin (by name) with options
+        """
 
         try:
             plugin = self._get_plugin(plugin_name)
@@ -157,5 +169,8 @@ class Project(ProjectABC):
         )
 
     def serve(self):
+        """
+        Starts server (based on HTTP server plugin)
+        """
 
         self.run_plugin(KEY_SERVER, self._context[KEY_SERVER])
