@@ -70,8 +70,8 @@ def run(plugins):
 @yabs_cli.command(
     cls=DaemonCLI,
     daemon_params={
-        "workdir": os.getcwd(),
-        "pidfile": os.path.join(os.getcwd(), PID_FN),
+        "work_dir": os.getcwd(),
+        "pid_file": os.path.join(os.getcwd(), PID_FN),
     },
 )
 def server():

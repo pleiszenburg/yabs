@@ -2,8 +2,7 @@ beautifulsoup4
 bokeh
 click
 csscompressor
-# daemonocle
-meeshkan-daemonocle
+daemonocle
 htmlmin
 Jinja2
 libsass
