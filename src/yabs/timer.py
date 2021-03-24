@@ -29,6 +29,9 @@ specific language governing rights and limitations under the License.
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 from time import time
+from typing import Tuple
+
+from typeguard import typechecked
 
 from .abc import TimerABC
 
@@ -36,6 +39,7 @@ from .abc import TimerABC
 # CLASS
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+@typechecked
 class Timer(TimerABC):
     """
     Minimal timer.
@@ -48,9 +52,9 @@ class Timer(TimerABC):
         self._start = time()
         self._last = self._start
 
-    def __call__(self):
+    def __call__(self) -> Tuple[float, float]:
         """
-        Returns current time in second as well as elapsed time since last call in seconds.
+        Returns current time in second and elapsed time since last call in seconds
         """
 
         current = time() - self._start
