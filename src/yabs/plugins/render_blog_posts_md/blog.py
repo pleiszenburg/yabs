@@ -22,7 +22,6 @@ from ...const import (
     KEY_SLUG,
     KEY_SRC,
     KEY_TEMPLATES,
-    KEY_VOCABULARY,
 )
 from .entry import Entry
 
@@ -55,7 +54,6 @@ class Blog:
                 {
                     KEY_CODE: self._context[KEY_PROJECT].run_plugin(options[KEY_CODE]),
                     KEY_MATH: self._context[KEY_PROJECT].run_plugin(options[KEY_MATH]),
-                    KEY_VOCABULARY: self._context[KEY_VOCABULARY][language],
                     KEY_TEMPLATES: self._context[KEY_TEMPLATES],
                     KEY_LANGUAGE: language,
                 },

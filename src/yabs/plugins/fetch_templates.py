@@ -14,7 +14,6 @@ from yabs.const import (
     KEY_JINJA,
     KEY_SRC,
     KEY_TEMPLATES,
-    KEY_VOCABULARY,
 )
 
 
@@ -28,7 +27,6 @@ def run(context, options=None):
     )
     context[KEY_JINJA].globals.update({
         KEY_DOMAIN: context[KEY_DOMAIN],
-        KEY_VOCABULARY: context[KEY_VOCABULARY],
     })
     if KEY_DATA in context.keys():
         context[KEY_JINJA].globals.update({

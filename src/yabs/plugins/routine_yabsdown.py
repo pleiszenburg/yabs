@@ -22,7 +22,6 @@ from yabs.const import (
     KEY_ROOT,
     KEY_TEMPLATES,
     KEY_VIDEO,
-    KEY_VOCABULARY,
 )
 
 
@@ -197,11 +196,11 @@ class RendererWithMath(mistune.Renderer):
                 alt_attr=text,
                 alt_html=text,
                 number=self.counter_dict[KEY_FIGURE],
-                prefix=self.options[KEY_VOCABULARY][KEY_FIGURE],
                 src=os.path.join(self.options[KEY_IMAGES], src)
                 if not src.startswith("http")
                 else src,
                 title=title,
+                language=self.options[KEY_LANGUAGE],
             )
 
         if src.startswith("youtube:"):
@@ -209,8 +208,8 @@ class RendererWithMath(mistune.Renderer):
             return self.options[KEY_TEMPLATES]["figure_video"].render(
                 alt_html=text,
                 number=self.counter_dict[KEY_VIDEO],
-                prefix=self.options[KEY_VOCABULARY][KEY_VIDEO],
                 video_id=src.split(":")[1],
+                language=self.options[KEY_LANGUAGE],
             )
 
         if src.startswith("plot:"):
@@ -218,7 +217,6 @@ class RendererWithMath(mistune.Renderer):
             return self.options[KEY_TEMPLATES]["figure_plot"].render(
                 alt_html=text,
                 number=self.counter_dict[KEY_PLOT],
-                prefix=self.options[KEY_VOCABULARY][KEY_PLOT],
                 plot_id=src.split(":")[1],
                 language=self.options[KEY_LANGUAGE],
             )
