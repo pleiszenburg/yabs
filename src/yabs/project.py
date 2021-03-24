@@ -32,7 +32,7 @@ import importlib.util
 from logging import getLogger
 import os
 from types import ModuleType
-from typing import Dict, List, Union
+from typing import Any, Dict, List, Union
 
 from typeguard import typechecked
 
@@ -145,7 +145,7 @@ class Project(ProjectABC):
 
             self.run_plugin(plugin_name, None)
 
-    def run_plugin(self, plugin_name: str, plugin_options: Union[Dict, None] = None):
+    def run_plugin(self, plugin_name: str, plugin_options: Union[Dict, None] = None) -> Any:
         """
         Runs a single plugin (by name) with options
         """
@@ -162,11 +162,13 @@ class Project(ProjectABC):
 
         os.chdir(self._context[KEY_CWD])
 
-        plugin.run(self._context, plugin_options)
+        ret = plugin.run(self._context, plugin_options)
 
         self._log.info(
             '"%s": Done in %.2f sec.', plugin_name, self._context[KEY_TIMER]()[1]
         )
+
+        return ret
 
     def serve(self):
         """
