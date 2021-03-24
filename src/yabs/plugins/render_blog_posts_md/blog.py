@@ -37,37 +37,37 @@ class Blog:
 
     def __init__(self, context: Dict, options: Any = None):
 
-        self.context = context
-        self.slug = self.context[KEY_PROJECT].run_plugin(options[KEY_SLUG])
+        self._context = context
+        self._slug = self._context[KEY_PROJECT].run_plugin(options[KEY_SLUG])
 
-        self.entry_list = [
-            Entry(context, file_path, self.slug)
+        self._entry_list = [
+            Entry(context, file_path, self._slug)
             for file_path in glob.glob(
-                os.path.join(self.context[KEY_SRC][KEY_BLOG], "**", "*.%s" % KEY_MARKDOWN),
+                os.path.join(self._context[KEY_SRC][KEY_BLOG], "**", "*.%s" % KEY_MARKDOWN),
                 recursive=True,
             )
         ]
-        self.entry_dict = self._match_language_versions()
+        self._entry_dict = self._match_language_versions()
 
-        self.renderer_dict = {
-            language: self.context[KEY_PROJECT].run_plugin(
+        self._renderer_dict = {
+            language: self._context[KEY_PROJECT].run_plugin(
                 options[KEY_MARKDOWN],
                 {
-                    KEY_CODE: self.context[KEY_PROJECT].run_plugin(options[KEY_CODE]),
-                    KEY_MATH: self.context[KEY_PROJECT].run_plugin(options[KEY_MATH]),
-                    KEY_VOCABULARY: self.context[KEY_VOCABULARY][language],
-                    KEY_TEMPLATES: self.context[KEY_TEMPLATES],
+                    KEY_CODE: self._context[KEY_PROJECT].run_plugin(options[KEY_CODE]),
+                    KEY_MATH: self._context[KEY_PROJECT].run_plugin(options[KEY_MATH]),
+                    KEY_VOCABULARY: self._context[KEY_VOCABULARY][language],
+                    KEY_TEMPLATES: self._context[KEY_TEMPLATES],
                     KEY_LANGUAGE: language,
                 },
             )
-            for language in {entry.meta_dict[KEY_LANGUAGE] for entry in self.entry_list}
+            for language in {entry.meta_dict[KEY_LANGUAGE] for entry in self._entry_list}
         }
 
     def _match_language_versions(self):
 
         entry_dict = {}
 
-        for entry in self.entry_list:
+        for entry in self._entry_list:
 
             if entry.meta_dict[KEY_ID] not in entry_dict.keys():
                 entry_dict[entry.meta_dict[KEY_ID]] = []
@@ -75,7 +75,7 @@ class Blog:
                 (entry.meta_dict[KEY_LANGUAGE], entry.meta_dict[KEY_FN])
             )
 
-        languages_set = set(self.context[KEY_LANGUAGES])
+        languages_set = set(self._context[KEY_LANGUAGES])
 
         for entry_key in entry_dict.keys():
 
@@ -89,15 +89,15 @@ class Blog:
 
     def build_data(self):
 
-        if KEY_DATA not in self.context.keys():
-            self.context[KEY_DATA] = {}
+        if KEY_DATA not in self._context.keys():
+            self._context[KEY_DATA] = {}
 
-        self.context[KEY_DATA][KEY_BLOG] = {
-            "%s_list" % KEY_ENTRY: [entry.meta_dict for entry in self.entry_list],
-            "%s_dict" % KEY_ENTRY: self.entry_dict,
+        self._context[KEY_DATA][KEY_BLOG] = {
+            "%s_list" % KEY_ENTRY: [entry.meta_dict for entry in self._entry_list],
+            "%s_dict" % KEY_ENTRY: self._entry_dict,
         }
 
     def render_entries(self):
 
-        for entry in self.entry_list:
-            entry.render(self.renderer_dict, self.entry_dict[entry.meta_dict[KEY_ID]])
+        for entry in self._entry_list:
+            entry.render(self._renderer_dict, self._entry_dict[entry.meta_dict[KEY_ID]])

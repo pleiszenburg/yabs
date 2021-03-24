@@ -2,6 +2,7 @@
 
 
 import os
+from typing import Callable, Dict, List, Union
 
 from bs4 import BeautifulSoup
 from yaml import load
@@ -31,6 +32,7 @@ from ...const import (
     KEY_TEMPLATE,
     KEY_TEMPLATES,
     KEY_TITLE,
+    META_DELIMITER,
 )
 
 
@@ -41,38 +43,42 @@ class Entry:
     Mutable.
     """
 
-    def __init__(self, context, src_file_path, slug_func):
+    def __init__(self, context: Dict, src_file_path: str, slug_func: Callable):
 
-        def get_entry_segments():
-            with open(src_file_path, "r") as f:
-                raw = f.read()
-            return raw.split("\n\n", 1)
+        self._context = context
+        self._slug_func = slug_func
 
-        self.context = context
-        self.slug_func = slug_func
+        with open(src_file_path, "r") as f:
+            raw = f.read()
+        meta, content = raw.split(META_DELIMITER, 1)
 
-        meta, content = get_entry_segments()
-        self.meta_dict = self.__process_meta__(src_file_path, meta)
-        self.meta_dict[KEY_CONTENT] = content
+        self._meta_dict = self._process_meta(src_file_path, meta.strip())
+        self._meta_dict[KEY_CONTENT] = content.strip()
 
-    def __process_meta__(self, src_file_path, meta):
+    @property
+    def meta_dict(self) -> Dict:
 
-        def process_author(in_data):
+        return self._meta_dict
 
-            if isinstance(in_data, str):
-                lastname, firstname = in_data.split(",")
-                email = ""
-            elif isinstance(in_data, dict):
-                lastname, firstname = list(in_data.keys())[0].split(",")
-                email = list(in_data.values())[0].strip()
-            else:
-                raise TypeError('unhandled author datatype')
+    @staticmethod
+    def _process_author(in_data: Union[Dict[str, str], str]) -> Dict[str, str]:
 
-            return {
-                KEY_LASTNAME: lastname.strip(),
-                KEY_FIRSTNAME: firstname.strip(),
-                KEY_EMAIL: email,
-            }
+        if isinstance(in_data, str):
+            lastname, firstname = in_data.split(",")
+            email = ""
+        elif isinstance(in_data, dict):
+            lastname, firstname = list(in_data.keys())[0].split(",")
+            email = list(in_data.values())[0].strip()
+        else:
+            raise TypeError('unhandled author datatype')
+
+        return {
+            KEY_LASTNAME: lastname.strip(),
+            KEY_FIRSTNAME: firstname.strip(),
+            KEY_EMAIL: email,
+        }
+
+    def _process_meta(self, src_file_path: str, meta: str) -> Dict:
 
         fn = os.path.basename(src_file_path)
 
@@ -83,7 +89,8 @@ class Entry:
         }
 
         meta_dict[KEY_AUTHORS] = [
-            process_author(author) for author in meta_dict[KEY_AUTHORS]
+            self._process_author(author)
+            for author in meta_dict[KEY_AUTHORS]
         ]
 
         if KEY_MTIME not in meta_dict.keys():
@@ -93,26 +100,31 @@ class Entry:
 
         meta_dict[KEY_FN] = "%s%s.htm" % (
             BLOG_PREFIX,
-            self.slug_func(meta_dict[KEY_TITLE]),
+            self._slug_func(meta_dict[KEY_TITLE]),
         )
 
         return meta_dict
 
-    def render(self, renderer_dict, entry_language_list):
-        def fix_headline_levels(html):
-            soup = BeautifulSoup(html, "html.parser")
-            for h_level in range(5, 0, -1):
-                for h_tag in soup.find_all("h%d" % h_level):
-                    if h_tag.has_attr("class"):
-                        if "article_headline" in h_tag["class"]:
-                            continue
-                    h_tag.name = "h%d" % (h_level + 1)
-            return str(soup)  # soup.prettify()
+    @staticmethod
+    def _fix_headline_levels(html: str) -> str:
 
-        renderer = renderer_dict[self.meta_dict[KEY_LANGUAGE]]
+        soup = BeautifulSoup(html, "html.parser")
 
-        self.meta_dict[KEY_ABSTRACT] = renderer(self.meta_dict[KEY_ABSTRACT])
-        self.meta_dict[KEY_CONTENT] = renderer(self.meta_dict[KEY_CONTENT])
+        for h_level in range(5, 0, -1):
+            for h_tag in soup.find_all("h%d" % h_level):
+                if h_tag.has_attr("class"):
+                    if "article_headline" in h_tag["class"]:
+                        continue
+                h_tag.name = "h%d" % (h_level + 1)
+
+        return str(soup)  # soup.prettify()
+
+    def render(self, renderer_dict: Dict, entry_language_list: List[str]):
+
+        renderer = renderer_dict[self._meta_dict[KEY_LANGUAGE]]
+
+        self._meta_dict[KEY_ABSTRACT] = renderer(self._meta_dict[KEY_ABSTRACT])
+        self._meta_dict[KEY_CONTENT] = renderer(self._meta_dict[KEY_CONTENT])
 
         for template_prefix, prefix in [
             (KEY_BASE, ""),
@@ -121,19 +133,19 @@ class Entry:
 
             with open(
                 os.path.join(
-                    self.context[KEY_OUT][KEY_ROOT], prefix + self.meta_dict[KEY_FN]
+                    self._context[KEY_OUT][KEY_ROOT], prefix + self._meta_dict[KEY_FN]
                 ),
                 "w+",
             ) as f:
 
                 f.write(
-                    fix_headline_levels(
-                        self.context[KEY_TEMPLATES]["blog_article"].render(
+                    self._fix_headline_levels(
+                        self._context[KEY_TEMPLATES]["blog_article"].render(
                             **{
                                 KEY_LANGUAGES: str(entry_language_list),
                                 KEY_TEMPLATE: template_prefix,
                             },
-                            **self.meta_dict
+                            **self._meta_dict
                         )
                     )
                 )
