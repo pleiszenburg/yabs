@@ -74,7 +74,6 @@ def _configure_logger(level: int = INFO, path: Union[str, None] = None, shell: b
 
     logger = getLogger(LOGGER)
     logger.setLevel(DEBUG)
-    logger.setFormatter(formatter)
 
     fh = FileHandler(path)
     fh.setLevel(DEBUG)
