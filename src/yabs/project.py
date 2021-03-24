@@ -31,7 +31,8 @@ specific language governing rights and limitations under the License.
 import importlib.util
 from logging import getLogger
 import os
-from typing import Dict
+from types import ModuleType
+from typing import Dict, List, Union
 
 from typeguard import typechecked
 
@@ -86,7 +87,7 @@ class Project(ProjectABC):
             )
         )
 
-    def _compile_paths(self, group_id):
+    def _compile_paths(self, group_id: str):
 
         group_root_key = "%s_%s" % (group_id, KEY_ROOT)
 
@@ -104,7 +105,7 @@ class Project(ProjectABC):
         )
         self._context.pop(group_root_key)
 
-    def _get_plugin(self, plugin_name):
+    def _get_plugin(self, plugin_name: str) -> ModuleType:
 
         for pattern in ["yabs.plugins.%s", "%s"]:
             try:
@@ -127,18 +128,18 @@ class Project(ProjectABC):
 
             self.run_plugin(plugin_name, plugin_options)
 
-    def deploy(self, target):
+    def deploy(self, target: str):
 
         self._context[KEY_DEPLOY][KEY_TARGET] = target
         self.run_plugin(KEY_DEPLOY, self._context[KEY_DEPLOY])
 
-    def run(self, plugin_list):
+    def run(self, plugin_list: List[str]):
 
         for plugin_name in plugin_list:
 
             self.run_plugin(plugin_name, None)
 
-    def run_plugin(self, plugin_name, plugin_options=None):
+    def run_plugin(self, plugin_name: str, plugin_options: Union[Dict, None] = None):
 
         try:
             plugin = self._get_plugin(plugin_name)
