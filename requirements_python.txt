@@ -15,4 +15,5 @@ python-slugify
 PyYAML
 pillow
 requests
+typeguard
 unidecode
