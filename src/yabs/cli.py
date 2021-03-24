@@ -28,30 +28,80 @@ specific language governing rights and limitations under the License.
 # IMPORT
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+from logging import (
+    DEBUG,
+    FileHandler,
+    Formatter,
+    getLogger,
+    INFO,
+    StreamHandler,
+)
 import os
+from typing import Union
 
 import click
 from daemonocle.cli import DaemonCLI
-
 from yaml import load
-
 try:
     from yaml import CLoader as Loader
 except ImportError:
     from yaml import Loader
+from typeguard import typechecked
 
-from .const import CONFIG_FILE, KEY_CWD, PID_FN
+from .const import (
+    CONFIG_FILE,
+    KEY_CWD,
+    KEY_LOG,
+    PID_FN,
+    LOGGER,
+)
 from .project import Project
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # ROUTINES
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-def _get_project():
+@typechecked
+def _configure_logger(level: int = INFO, path: Union[str, None] = None, shell: bool = False):
+
+    if path is None:
+        path = os.path.join(os.getcwd(), LOGGER)
+
+    formatter = Formatter(
+        fmt = '[%(asctime)s %(levelname)s] %(message)s',
+        datefmt = '%H:%M:%S',
+    )
+
+    logger = getLogger(LOGGER)
+    logger.setLevel(DEBUG)
+    logger.setFormatter(formatter)
+
+    fh = FileHandler(path)
+    fh.setLevel(DEBUG)
+    fh.setFormatter(formatter)
+    logger.addHandler(fh)
+
+    if shell:
+        ch = StreamHandler()
+        ch.setLevel(level)
+        ch.setFormatter(formatter)
+        logger.addHandler(ch)
+
+
+@typechecked
+def _get_project(shell: bool = False) -> Project:
 
     with open(CONFIG_FILE, "r") as f:
         config = load(f.read(), Loader=Loader)
     config[KEY_CWD] = os.path.abspath(os.getcwd())
+
+    _configure_logger(
+        path = os.path.join(config.get(
+            KEY_LOG,
+            os.getcwd(),
+        ), LOGGER),
+        shell = shell,
+    )
 
     return Project(config)
 
@@ -62,7 +112,6 @@ def yabs_cli():
 
 	Yet Another Build System
 	"""
-    pass
 
 
 @yabs_cli.command()
@@ -72,7 +121,7 @@ def build():
 	Builds website from recipe
 	"""
 
-    _get_project().build()
+    _get_project(shell = True).build()
 
 
 @yabs_cli.command()
@@ -83,7 +132,7 @@ def deploy(target):
 	Deploy website to target
 	"""
 
-    _get_project().deploy(target)
+    _get_project(shell = True).deploy(target)
 
 
 @yabs_cli.command()
@@ -94,7 +143,7 @@ def run(plugins):
 	Runs any given plugin or list of plugins with default options
 	"""
 
-    _get_project().run(plugins)
+    _get_project(shell = True).run(plugins)
 
 
 @yabs_cli.command(
@@ -110,4 +159,4 @@ def server():
 	Serves website via HTTP (default server plugin)
 	"""
 
-    _get_project().serve()
+    _get_project(shell = False).serve()
