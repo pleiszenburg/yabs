@@ -145,7 +145,7 @@ class Project(ProjectABC):
 
             self.run_plugin(plugin_name, None)
 
-    def run_plugin(self, plugin_name: str, plugin_options: Union[Dict, None] = None) -> Any:
+    def run_plugin(self, plugin_name: str, plugin_options: Any = None) -> Any:
         """
         Runs a single plugin (by name) with options
         """
