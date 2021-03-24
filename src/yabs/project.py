@@ -104,7 +104,7 @@ class Project(ProjectABC):
         )
         self._context.pop(group_root_key)
 
-    def __get_plugin__(self, plugin_name):
+    def _get_plugin(self, plugin_name):
 
         for pattern in ["yabs.plugins.%s", "%s"]:
             try:
@@ -141,7 +141,7 @@ class Project(ProjectABC):
     def run_plugin(self, plugin_name, plugin_options=None):
 
         try:
-            plugin = self.__get_plugin__(plugin_name)
+            plugin = self._get_plugin(plugin_name)
         except PluginNotFound as e:
             self._log.error(str(e))
             return
