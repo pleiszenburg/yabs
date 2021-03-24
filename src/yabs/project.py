@@ -29,7 +29,7 @@ specific language governing rights and limitations under the License.
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 import importlib.util
-import logging
+from logging import getLogger
 import os
 from typing import Dict
 
@@ -49,6 +49,7 @@ from .const import (
     KEY_SRC,
     KEY_TARGET,
     KEY_TIMER,
+    LOGGER,
 )
 from .error import PluginNotFound
 from .timer import Timer
@@ -68,8 +69,11 @@ class Project(ProjectABC):
     def __init__(self, context: Dict):
 
         self._context = context
+
         self._context[KEY_PROJECT] = self
         self._context[KEY_TIMER] = Timer()
+
+        self._log = getLogger(LOGGER)
 
         for group_id in [KEY_SRC, KEY_OUT]:
             self.__compile_paths__(group_id)
@@ -80,17 +84,6 @@ class Project(ProjectABC):
             os.path.join(
                 self._context[KEY_CWD], self._context[KEY_DEPLOY][KEY_MOUNTPOINT]
             )
-        )
-
-    def __init_logger__(self, logger_name=None, logger_level=logging.INFO):
-
-        logging.basicConfig(
-            filename=os.path.join(self._context[KEY_LOG], logger_name)
-            if logger_name is not None
-            else None,
-            level=logger_level,
-            format="[%(asctime)s %(levelname)s] %(message)s",
-            datefmt="%H:%M:%S",
         )
 
     def __compile_paths__(self, group_id):
@@ -123,8 +116,6 @@ class Project(ProjectABC):
 
     def build(self):
 
-        self.__init_logger__()
-
         for step in self._context[KEY_RECIPE]:
 
             if isinstance(step, str):
@@ -138,14 +129,10 @@ class Project(ProjectABC):
 
     def deploy(self, target):
 
-        self.__init_logger__(KEY_DEPLOY)
-
         self._context[KEY_DEPLOY][KEY_TARGET] = target
         self.run_plugin(KEY_DEPLOY, self._context[KEY_DEPLOY])
 
     def run(self, plugin_list):
-
-        self.__init_logger__()
 
         for plugin_name in plugin_list:
 
@@ -156,25 +143,23 @@ class Project(ProjectABC):
         try:
             plugin = self.__get_plugin__(plugin_name)
         except PluginNotFound as e:
-            logging.error(str(e))
+            self._log.error(str(e))
             return
 
         self._context[KEY_TIMER]()
 
-        logging.info('"%s": Running ...' % plugin_name)
+        self._log.info('"%s": Running ...', plugin_name)
 
         os.chdir(self._context[KEY_CWD])
 
         ret = plugin.run(self._context, plugin_options)
 
-        logging.info(
-            '"%s": Done in %.2f sec.' % (plugin_name, self._context[KEY_TIMER]()[1])
+        self._log.info(
+            '"%s": Done in %.2f sec.', plugin_name, self._context[KEY_TIMER]()[1]
         )
 
         return ret
 
     def serve(self):
-
-        self.__init_logger__(KEY_SERVER)
 
         self.run_plugin(KEY_SERVER, self._context[KEY_SERVER])
