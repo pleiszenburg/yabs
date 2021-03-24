@@ -3,18 +3,14 @@
 
 import os
 
-
 from bs4 import BeautifulSoup
-
 from yaml import load
-
 try:
     from yaml import CLoader as Loader
 except ImportError:
     from yaml import Loader
 
-
-from yabs.const import (
+from ...const import (
     AJAX_PREFIX,
     BLOG_PREFIX,
     KEY_ABSTRACT,
@@ -39,6 +35,11 @@ from yabs.const import (
 
 
 class Entry:
+    """
+    One blog post / entry.
+
+    Mutable.
+    """
 
     def __init__(self, context, src_file_path, slug_func):
 

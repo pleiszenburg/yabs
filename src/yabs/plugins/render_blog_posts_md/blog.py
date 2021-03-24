@@ -3,9 +3,11 @@
 
 import glob
 import os
+from typing import Any, Dict
 
+from typeguard import typechecked
 
-from yabs.const import (
+from ...const import (
     KEY_BLOG,
     KEY_CODE,
     KEY_DATA,
@@ -22,31 +24,30 @@ from yabs.const import (
     KEY_TEMPLATES,
     KEY_VOCABULARY,
 )
-
-
 from .entry import Entry
 
 
+@typechecked
 class Blog:
+    """
+    An entire blog with multiple entries.
 
-    def __init__(self, context, options):
+    Mutable.
+    """
+
+    def __init__(self, context: Dict, options: Any = None):
 
         self.context = context
         self.slug = self.context[KEY_PROJECT].run_plugin(options[KEY_SLUG])
 
-        src_file_list = glob.glob(
-            os.path.join(self.context[KEY_SRC][KEY_BLOG], "**", "*.%s" % KEY_MARKDOWN),
-            recursive=True,
-        )
-
         self.entry_list = [
             Entry(context, file_path, self.slug)
-            for file_path in src_file_list
+            for file_path in glob.glob(
+                os.path.join(self.context[KEY_SRC][KEY_BLOG], "**", "*.%s" % KEY_MARKDOWN),
+                recursive=True,
+            )
         ]
-        self.language_set = set(
-            [entry.meta_dict[KEY_LANGUAGE] for entry in self.entry_list]
-        )
-        self.__match_language_versions__()
+        self.entry_dict = self._match_language_versions()
 
         self.renderer_dict = {
             language: self.context[KEY_PROJECT].run_plugin(
@@ -59,27 +60,32 @@ class Blog:
                     KEY_LANGUAGE: language,
                 },
             )
-            for language in self.language_set
+            for language in {entry.meta_dict[KEY_LANGUAGE] for entry in self.entry_list}
         }
 
-    def __match_language_versions__(self):
+    def _match_language_versions(self):
 
-        self.entry_dict = {}
+        entry_dict = {}
 
         for entry in self.entry_list:
-            if entry.meta_dict[KEY_ID] not in self.entry_dict.keys():
-                self.entry_dict[entry.meta_dict[KEY_ID]] = []
-            self.entry_dict[entry.meta_dict[KEY_ID]].append(
+
+            if entry.meta_dict[KEY_ID] not in entry_dict.keys():
+                entry_dict[entry.meta_dict[KEY_ID]] = []
+            entry_dict[entry.meta_dict[KEY_ID]].append(
                 (entry.meta_dict[KEY_LANGUAGE], entry.meta_dict[KEY_FN])
             )
 
         languages_set = set(self.context[KEY_LANGUAGES])
-        for entry_key in self.entry_dict.keys():
-            entry_languages = set([lang for lang, _ in self.entry_dict[entry_key]])
+
+        for entry_key in entry_dict.keys():
+
+            entry_languages = set([lang for lang, _ in entry_dict[entry_key]])
             missing_translations = languages_set - entry_languages
             for lang in missing_translations:
-                self.entry_dict[entry_key].append((lang, str(None)))
-            self.entry_dict[entry_key].sort()
+                entry_dict[entry_key].append((lang, str(None)))
+            entry_dict[entry_key].sort()
+
+        return entry_dict
 
     def build_data(self):
 
