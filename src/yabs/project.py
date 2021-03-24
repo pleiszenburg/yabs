@@ -67,25 +67,25 @@ class Project(ProjectABC):
 
     def __init__(self, context: Dict):
 
-        self.context = context
-        self.context[KEY_PROJECT] = self
-        self.context[KEY_TIMER] = Timer()
+        self._context = context
+        self._context[KEY_PROJECT] = self
+        self._context[KEY_TIMER] = Timer()
 
         for group_id in [KEY_SRC, KEY_OUT]:
             self.__compile_paths__(group_id)
-        self.context[KEY_LOG] = os.path.abspath(
-            os.path.join(self.context[KEY_CWD], self.context[KEY_LOG])
+        self._context[KEY_LOG] = os.path.abspath(
+            os.path.join(self._context[KEY_CWD], self._context[KEY_LOG])
         )
-        self.context[KEY_DEPLOY][KEY_MOUNTPOINT] = os.path.abspath(
+        self._context[KEY_DEPLOY][KEY_MOUNTPOINT] = os.path.abspath(
             os.path.join(
-                self.context[KEY_CWD], self.context[KEY_DEPLOY][KEY_MOUNTPOINT]
+                self._context[KEY_CWD], self._context[KEY_DEPLOY][KEY_MOUNTPOINT]
             )
         )
 
     def __init_logger__(self, logger_name=None, logger_level=logging.INFO):
 
         logging.basicConfig(
-            filename=os.path.join(self.context[KEY_LOG], logger_name)
+            filename=os.path.join(self._context[KEY_LOG], logger_name)
             if logger_name is not None
             else None,
             level=logger_level,
@@ -97,19 +97,19 @@ class Project(ProjectABC):
 
         group_root_key = "%s_%s" % (group_id, KEY_ROOT)
 
-        for path_id in self.context[group_id]:
-            self.context[group_id][path_id] = os.path.abspath(
+        for path_id in self._context[group_id]:
+            self._context[group_id][path_id] = os.path.abspath(
                 os.path.join(
-                    self.context[KEY_CWD],
-                    self.context[group_root_key],
-                    self.context[group_id][path_id],
+                    self._context[KEY_CWD],
+                    self._context[group_root_key],
+                    self._context[group_id][path_id],
                 )
             )
 
-        self.context[group_id][KEY_ROOT] = os.path.abspath(
-            os.path.join(self.context[KEY_CWD], self.context[group_root_key])
+        self._context[group_id][KEY_ROOT] = os.path.abspath(
+            os.path.join(self._context[KEY_CWD], self._context[group_root_key])
         )
-        self.context.pop(group_root_key)
+        self._context.pop(group_root_key)
 
     def __get_plugin__(self, plugin_name):
 
@@ -125,7 +125,7 @@ class Project(ProjectABC):
 
         self.__init_logger__()
 
-        for step in self.context[KEY_RECIPE]:
+        for step in self._context[KEY_RECIPE]:
 
             if isinstance(step, str):
                 plugin_name = step
@@ -140,8 +140,8 @@ class Project(ProjectABC):
 
         self.__init_logger__(KEY_DEPLOY)
 
-        self.context[KEY_DEPLOY][KEY_TARGET] = target
-        self.run_plugin(KEY_DEPLOY, self.context[KEY_DEPLOY])
+        self._context[KEY_DEPLOY][KEY_TARGET] = target
+        self.run_plugin(KEY_DEPLOY, self._context[KEY_DEPLOY])
 
     def run(self, plugin_list):
 
@@ -159,16 +159,16 @@ class Project(ProjectABC):
             logging.error(str(e))
             return
 
-        self.context[KEY_TIMER]()
+        self._context[KEY_TIMER]()
 
         logging.info('"%s": Running ...' % plugin_name)
 
-        os.chdir(self.context[KEY_CWD])
+        os.chdir(self._context[KEY_CWD])
 
-        ret = plugin.run(self.context, plugin_options)
+        ret = plugin.run(self._context, plugin_options)
 
         logging.info(
-            '"%s": Done in %.2f sec.' % (plugin_name, self.context[KEY_TIMER]()[1])
+            '"%s": Done in %.2f sec.' % (plugin_name, self._context[KEY_TIMER]()[1])
         )
 
         return ret
@@ -177,4 +177,4 @@ class Project(ProjectABC):
 
         self.__init_logger__(KEY_SERVER)
 
-        self.run_plugin(KEY_SERVER, self.context[KEY_SERVER])
+        self.run_plugin(KEY_SERVER, self._context[KEY_SERVER])
