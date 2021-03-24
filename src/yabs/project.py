@@ -107,13 +107,10 @@ class Project(ProjectABC):
 
     def _get_plugin(self, plugin_name: str) -> ModuleType:
 
-        for pattern in ["yabs.plugins.%s", "%s"]:
-            try:
-                return importlib.import_module(pattern % plugin_name)
-            except ModuleNotFoundError:
-                pass
-
-        raise PluginNotFound('"%s": Plugin not found!' % plugin_name)
+        try:
+            return importlib.import_module(f"yabs.plugins.{plugin_name:s}")
+        except ModuleNotFoundError as err:
+            raise PluginNotFound(f'"{plugin_name:s}": Plugin not found!') from err
 
     def build(self):
 
