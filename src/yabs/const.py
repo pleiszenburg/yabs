@@ -30,6 +30,8 @@ specific language governing rights and limitations under the License.
 
 CONFIG_FILE = "site.yaml"
 
+LOGGER = "YABS"
+
 IMAGE_SUFFIX_LIST = ["gif", "jpg", "jpeg", "png"]
 FONT_SUFFIX_LIST = ["ttf", "woff", "woff2"]
 
