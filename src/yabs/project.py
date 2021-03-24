@@ -153,13 +153,11 @@ class Project(ProjectABC):
 
         os.chdir(self._context[KEY_CWD])
 
-        ret = plugin.run(self._context, plugin_options)
+        plugin.run(self._context, plugin_options)
 
         self._log.info(
             '"%s": Done in %.2f sec.', plugin_name, self._context[KEY_TIMER]()[1]
         )
-
-        return ret
 
     def serve(self):
 
