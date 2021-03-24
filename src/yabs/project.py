@@ -76,7 +76,7 @@ class Project(ProjectABC):
         self._log = getLogger(LOGGER)
 
         for group_id in [KEY_SRC, KEY_OUT]:
-            self.__compile_paths__(group_id)
+            self._compile_paths(group_id)
         self._context[KEY_LOG] = os.path.abspath(
             os.path.join(self._context[KEY_CWD], self._context[KEY_LOG])
         )
@@ -86,7 +86,7 @@ class Project(ProjectABC):
             )
         )
 
-    def __compile_paths__(self, group_id):
+    def _compile_paths(self, group_id):
 
         group_root_key = "%s_%s" % (group_id, KEY_ROOT)
 
