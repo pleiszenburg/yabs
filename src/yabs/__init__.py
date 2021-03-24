@@ -29,7 +29,7 @@ specific language governing rights and limitations under the License.
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 from .cli import yabs_cli, build
-from .project import project_class as project
+from .project import Project
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # VERSION

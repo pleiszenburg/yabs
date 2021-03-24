@@ -14,7 +14,7 @@ except ImportError:
     from yaml import Loader
 
 from .const import CONFIG_FILE, KEY_CWD, PID_FN
-from .project import project_class
+from .project import Project
 
 
 def __get_project__():
@@ -23,7 +23,7 @@ def __get_project__():
         config = load(f.read(), Loader=Loader)
     config[KEY_CWD] = os.path.abspath(os.getcwd())
 
-    return project_class(config)
+    return Project(config)
 
 
 @click.group()
