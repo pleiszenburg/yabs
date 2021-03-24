@@ -47,7 +47,7 @@ from .project import Project
 # ROUTINES
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-def __get_project__():
+def _get_project():
 
     with open(CONFIG_FILE, "r") as f:
         config = load(f.read(), Loader=Loader)
@@ -72,7 +72,7 @@ def build():
 	Builds website from recipe
 	"""
 
-    __get_project__().build()
+    _get_project().build()
 
 
 @yabs_cli.command()
@@ -83,7 +83,7 @@ def deploy(target):
 	Deploy website to target
 	"""
 
-    __get_project__().deploy(target)
+    _get_project().deploy(target)
 
 
 @yabs_cli.command()
@@ -94,7 +94,7 @@ def run(plugins):
 	Runs any given plugin or list of plugins with default options
 	"""
 
-    __get_project__().run(plugins)
+    _get_project().run(plugins)
 
 
 @yabs_cli.command(
@@ -110,4 +110,4 @@ def server():
 	Serves website via HTTP (default server plugin)
 	"""
 
-    __get_project__().serve()
+    _get_project().serve()
