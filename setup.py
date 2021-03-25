@@ -77,7 +77,7 @@ with open(os.path.join(SRC_DIR, "yabs", "__init__.py"), "r", encoding="utf-8") a
     __version__ = get_version(f.read())
 
 # Requirements
-with open("requirements_python.txt", "r", encoding="utf-8"):
+with open("requirements_python.txt", "r", encoding="utf-8") as f:
     base_require = [line for line in f.read().split('\n') if len(line.strip()) > 0]
 extras_require = {
     "base": base_require,
@@ -126,7 +126,7 @@ setup(
         "Topic :: Text Processing :: Markup :: Markdown",
     ],
     description="Yet Another Build System",
-    entry_points={"console_scripts": ["yabs = yabs:cli",],},
+    entry_points={"console_scripts": ["yabs = yabs.cli:yabs_cli",],},
     extras_require=extras_require,
     include_package_data=True,
     install_requires=base_require,
