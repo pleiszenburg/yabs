@@ -28,12 +28,12 @@ def run(context, options=None):
             cnt = f.read()
 
         if TEMPLATE_PLACEHOLDER in cnt:
-            for prefix in ["", AJAX_PREFIX]:
+            for prefix in ("", AJAX_PREFIX):
                 with open(
-                    os.path.join(context[KEY_OUT][KEY_ROOT], "%s%s" % (prefix, fn)), "w"
+                    os.path.join(context[KEY_OUT][KEY_ROOT], f"{prefix:s}{fn:s}"), "w"
                 ) as f:
                     f.write(
-                        cnt.replace(TEMPLATE_PLACEHOLDER, "%s%s" % (prefix, KEY_BASE))
+                        cnt.replace(TEMPLATE_PLACEHOLDER, f"{prefix:s}{KEY_BASE:s}")
                     )
         else:
             with open(os.path.join(context[KEY_OUT][KEY_ROOT], fn), "w") as f:

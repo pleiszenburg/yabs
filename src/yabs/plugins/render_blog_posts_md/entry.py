@@ -126,10 +126,10 @@ class Entry:
         self._meta_dict[KEY_ABSTRACT] = renderer(self._meta_dict[KEY_ABSTRACT])
         self._meta_dict[KEY_CONTENT] = renderer(self._meta_dict[KEY_CONTENT])
 
-        for template_prefix, prefix in [
+        for template_prefix, prefix in (
             (KEY_BASE, ""),
-            ("%s%s" % (AJAX_PREFIX, KEY_BASE), AJAX_PREFIX),
-        ]:
+            (f"{AJAX_PREFIX:s}{KEY_BASE:s}", AJAX_PREFIX),
+        ):
 
             with open(
                 os.path.join(
