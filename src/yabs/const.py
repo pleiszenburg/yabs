@@ -25,6 +25,12 @@ specific language governing rights and limitations under the License.
 """
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# IMPORT
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+from unidecode import unidecode
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # VALUES
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -45,6 +51,11 @@ TEMPLATE_PLACEHOLDER = "<<TEMPLATE>>"
 
 PID_FN = ".pid"
 YABS_FN = "yabs.yaml"
+
+UMLAUT_DICT = {
+    ch: f'{unidecode(ch):s}e'
+    for ch in "äöüÄÖÜ"
+}
 
 KEY_ABSTRACT = "abstract"
 KEY_AUTHORS = "authors"
@@ -99,7 +110,6 @@ KEY_ROOT = "root"
 KEY_SCRIPT = "script"
 KEY_SCRIPTS = "scripts"
 KEY_SERVER = "server"
-KEY_SLUG = "slug"
 KEY_SRC = "src"
 KEY_STYLE = "style"
 KEY_STYLES = "styles"

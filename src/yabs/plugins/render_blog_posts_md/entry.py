@@ -2,7 +2,7 @@
 
 
 import os
-from typing import Callable, Dict, List, Union
+from typing import Dict, List, Union
 
 from bs4 import BeautifulSoup
 from yaml import load
@@ -34,6 +34,7 @@ from ...const import (
     KEY_TITLE,
     META_DELIMITER,
 )
+from ...slugify import slugify
 
 
 class Entry:
@@ -43,10 +44,9 @@ class Entry:
     Mutable.
     """
 
-    def __init__(self, context: Dict, src_file_path: str, slug_func: Callable):
+    def __init__(self, context: Dict, src_file_path: str):
 
         self._context = context
-        self._slug_func = slug_func
 
         with open(src_file_path, "r") as f:
             raw = f.read()
@@ -100,7 +100,7 @@ class Entry:
 
         meta_dict[KEY_FN] = "%s%s.htm" % (
             BLOG_PREFIX,
-            self._slug_func(meta_dict[KEY_TITLE]),
+            slugify(meta_dict[KEY_TITLE]),
         )
 
         return meta_dict

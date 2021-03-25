@@ -19,7 +19,6 @@ from ...const import (
     KEY_MARKDOWN,
     KEY_MATH,
     KEY_PROJECT,
-    KEY_SLUG,
     KEY_SRC,
     KEY_TEMPLATES,
 )
@@ -37,10 +36,9 @@ class Blog:
     def __init__(self, context: Dict, options: Any = None):
 
         self._context = context
-        self._slug = self._context[KEY_PROJECT].run_plugin(options[KEY_SLUG])
 
         self._entry_list = [
-            Entry(context, file_path, self._slug)
+            Entry(context, file_path)
             for file_path in glob.glob(
                 os.path.join(self._context[KEY_SRC][KEY_BLOG], "**", "*.%s" % KEY_MARKDOWN),
                 recursive=True,
