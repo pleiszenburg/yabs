@@ -2,12 +2,15 @@
 
 
 import glob
+from logging import getLogger
 import os
 import subprocess
 
 
-from yabs.const import KEY_OUT, KEY_PYGMENTS, KEY_SRC, KEY_STYLES, KEY_THEME
-from yabs.log import log
+from yabs.const import KEY_OUT, KEY_PYGMENTS, KEY_SRC, KEY_STYLES, KEY_THEME, LOGGER
+
+
+_log = getLogger(LOGGER)
 
 
 def __pygmentize__(context):
@@ -26,7 +29,7 @@ def __pygmentize__(context):
     outs, errs = proc.communicate()
 
     if errs.decode("utf-8").strip() != "":
-        log.error(errs.decode("utf-8").strip())
+        _log.error(errs.decode("utf-8").strip())
 
     with open(
         os.path.join(context[KEY_OUT][KEY_STYLES], "%s.css" % KEY_PYGMENTS), "w+"
@@ -39,7 +42,7 @@ def run(context, options=None):
     try:
         os.mkdir(context[KEY_OUT][KEY_STYLES])
     except FileExistsError:
-        log.warning('Folder "%s" already exists.' % context[KEY_OUT][KEY_STYLES])
+        _log.warning('Folder "%s" already exists.', context[KEY_OUT][KEY_STYLES])
 
     suffix_list = ["css", "sass", "scss"]
 

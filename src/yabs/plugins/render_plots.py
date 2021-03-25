@@ -3,9 +3,9 @@
 
 import glob
 import importlib
+from logging import getLogger
 import os
 import sys
-import traceback
 
 
 from bs4 import BeautifulSoup
@@ -24,8 +24,11 @@ from yabs.const import (
     KEY_STYLES,
     KEY_TEMPLATES,
     KEY_TYPE,
+    LOGGER,
 )
-from yabs.log import log
+
+
+_log = getLogger(LOGGER)
 
 
 def get_plotly_id(in_str):
@@ -90,14 +93,13 @@ def run(context, options=None):
         try:
             plot_module = importlib.import_module(plot_name)
         except ModuleNotFoundError:
-            log.warning('File "%s" can not be imported for rendering a plot.' % plot_fn)
+            _log.warning('File "%s" can not be imported for rendering a plot.', plot_fn)
             continue
 
         try:
             plot_dict = plot_module.run(context, options)
         except:
-            log.error('File "%s" caused an error while trying to plot.' % plot_fn)
-            log.error(traceback.format_exc())
+            _log.exception('File "%s" caused an error while trying to plot.', plot_fn)
             continue
 
         render(context, options, plot_name, plot_dict)

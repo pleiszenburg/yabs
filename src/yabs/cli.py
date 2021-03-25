@@ -68,7 +68,7 @@ def _configure_logger(level: int = INFO, path: Union[str, None] = None, shell: b
         path = os.path.join(os.getcwd(), LOGGER)
 
     formatter = Formatter(
-        fmt = '[%(asctime)s %(levelname)s] %(message)s',
+        fmt = '[%(asctime)s %(module)s %(levelname)s] %(message)s',
         datefmt = '%H:%M:%S',
     )
 

@@ -4,6 +4,7 @@
 import glob
 import io
 import json
+from logging import getLogger
 import os
 import subprocess
 import zipfile
@@ -12,8 +13,7 @@ import zipfile
 import requests
 
 
-from yabs.const import AJAX_PREFIX, KEY_IGNORE, KEY_OUT, KEY_ROOT, KEY_UPDATE
-from yabs.log import log
+from yabs.const import AJAX_PREFIX, KEY_IGNORE, KEY_OUT, KEY_ROOT, KEY_UPDATE, LOGGER
 
 
 BIN_FLD = "bin"
@@ -21,6 +21,9 @@ DIST_FLD = "dist"
 SHARE_FLD = "share"
 VALIDATOR_FN = "vnu.jar"
 VERSION_FN = ".vnu_version"
+
+
+_log = getLogger(LOGGER)
 
 
 def update_validator():
@@ -36,10 +39,10 @@ def update_validator():
         with open(version_file_path, "r") as f:
             current_version = f.read().strip()
         if current_version == latest_version:
-            log.debug("Validator up to date ... ")
+            _log.debug("Validator up to date ... ")
             return
 
-    log.info("Updating validator ... ")
+    _log.info("Updating validator ... ")
 
     latest_url = None
     for item in latest_dict["assets"]:
@@ -76,7 +79,7 @@ def validate_files(file_list, ignore_list):
     out, err = vnu_proc.communicate()
 
     if out.decode("utf-8").strip() != "":
-        log.error(out.decode("utf-8"))
+        _log.error(out.decode("utf-8"))
 
     vnu_out = json.loads(err.decode("utf-8"))
     vnu_by_file = {}
@@ -84,7 +87,7 @@ def validate_files(file_list, ignore_list):
     for key in vnu_out.keys():
 
         if key != "messages":
-            log.error("Unknown VNU JSON key: " + key)
+            _log.error("Unknown VNU JSON key: %s", key)
             continue
 
         for vnu_problem in vnu_out[key]:
@@ -109,9 +112,9 @@ def validate_files(file_list, ignore_list):
     vnu_files = list(vnu_by_file.keys())
     vnu_files.sort()
     for vnu_file in vnu_files:
-        log.warning("In file: %s" % vnu_file.split("/")[-1])
+        _log.warning("In file: %s", vnu_file.split("/")[-1])
         for line in vnu_by_file[vnu_file]:
-            log.warning(" %s" % line)
+            _log.warning(" %s", line)
 
 
 def run(context, options=None):

@@ -5,6 +5,7 @@ from distutils.version import StrictVersion
 import fnmatch
 import glob
 import io
+from logging import getLogger
 import os
 from pprint import pformat as pf
 import urllib.request
@@ -28,8 +29,8 @@ from yabs.const import (
     KEY_TAGS,
     KEY_UPDATE,
     KEY_VERSION,
+    LOGGER,
 )
-from yabs.log import log
 
 
 VERSION_FN = ".version"
@@ -80,6 +81,9 @@ LIB_DICT = {
 
 
 LIBRARY_LIST = list(LIB_DICT.keys())
+
+
+_log = getLogger(LOGGER)
 
 
 def fetch_library(context, library):
@@ -134,8 +138,8 @@ def get_relevant_version(library):
             versions = [tag["name"] for tag in tags if "-" not in tag["name"]]
             versions = [tag.lstrip("v") for tag in versions]
         except:
-            log.error("Failed to parse version from Github response.")
-            log.error(pf(tags))
+            _log.error("Failed to parse version from Github response.")
+            _log.error(pf(tags))
             raise  # TODO
         versions.sort(key=StrictVersion)
         return versions[-1]
@@ -170,10 +174,10 @@ def update_library(context, library):
         with open(version_file_path, "r") as f:
             old_library_version = f.read().strip()
         if old_library_version == new_library_version:
-            log.debug("%s up to date ..." % library)
+            _log.debug("%s up to date ...", library)
             return
 
-    log.info("Updating %s ..." % library)
+    _log.info("Updating %s ...", library)
 
     # Remove library files of previous versions
     for src_file_path in glob.glob(os.path.join(library_path, "*.*")):
