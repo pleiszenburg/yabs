@@ -9,19 +9,20 @@ from typeguard import typechecked
 
 from ...const import (
     KEY_BLOG,
-    KEY_CODE,
     KEY_DATA,
     KEY_ENTRY,
     KEY_FN,
     KEY_ID,
+    KEY_IMAGES,
     KEY_LANGUAGE,
     KEY_LANGUAGES,
     KEY_MARKDOWN,
-    KEY_MATH,
-    KEY_PROJECT,
+    KEY_OUT,
+    KEY_ROOT,
     KEY_SRC,
     KEY_TEMPLATES,
 )
+from ...markdown import YabsMarkdown
 from .entry import Entry
 
 
@@ -33,7 +34,7 @@ class Blog:
     Mutable.
     """
 
-    def __init__(self, context: Dict, options: Any = None):
+    def __init__(self, context: Dict, options: Any):
 
         self._context = context
 
@@ -47,15 +48,14 @@ class Blog:
         self._entry_dict = self._match_language_versions()
 
         self._renderer_dict = {
-            language: self._context[KEY_PROJECT].run_plugin(
-                options[KEY_MARKDOWN],
-                {
-                    KEY_CODE: self._context[KEY_PROJECT].run_plugin(options[KEY_CODE]),
-                    KEY_MATH: self._context[KEY_PROJECT].run_plugin(options[KEY_MATH]),
-                    KEY_TEMPLATES: self._context[KEY_TEMPLATES],
-                    KEY_LANGUAGE: language,
-                },
-            )
+            language: YabsMarkdown.with_renderer(**{
+                KEY_TEMPLATES: self._context[KEY_TEMPLATES],
+                KEY_LANGUAGE: language,
+                KEY_IMAGES: os.path.relpath(
+                    context[KEY_OUT][KEY_IMAGES],
+                    context[KEY_OUT][KEY_ROOT],
+                ),
+            })
             for language in {entry.meta_dict[KEY_LANGUAGE] for entry in self._entry_list}
         }
 
