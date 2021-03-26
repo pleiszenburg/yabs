@@ -8,14 +8,15 @@ from typing import Any, Dict
 from typeguard import typechecked
 
 from ...const import (
-    KEY_DATA,
     KEY_ENTRY,
     KEY_FN,
     KEY_ID,
     KEY_LANGUAGE,
     KEY_LANGUAGES,
     KEY_MARKDOWN,
+    KEY_NAME,
     KEY_RENDERER,
+    KEY_SEQUENCES,
     KEY_SRC,
 )
 from .entry import Entry
@@ -32,6 +33,7 @@ class Blog:
     def __init__(self, context: Dict, options: Any):
 
         self._context = context
+        self._name = options[KEY_NAME]
 
         self._entry_list = [
             Entry(context, file_path)
@@ -73,12 +75,14 @@ class Blog:
 
     def build_data(self):
 
-        if KEY_DATA not in self._context.keys():
-            self._context[KEY_DATA] = {}
+        if KEY_SEQUENCES not in self._context.keys():
+            self._context[KEY_SEQUENCES] = {}
 
-        self._context[KEY_DATA][KEY_BLOG] = {
-            "%s_list" % KEY_ENTRY: [entry.meta_dict for entry in self._entry_list],
-            "%s_dict" % KEY_ENTRY: self._entry_dict,
+        assert self._name not in self._context[KEY_SEQUENCES].keys()
+
+        self._context[KEY_SEQUENCES][self._name] = {
+            f"{KEY_ENTRY:s}_list": [entry.meta_dict for entry in self._entry_list],
+            f"{KEY_ENTRY:s}_dict": self._entry_dict,
         }
 
     def render_entries(self):
