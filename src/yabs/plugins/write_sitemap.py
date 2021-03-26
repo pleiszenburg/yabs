@@ -8,11 +8,12 @@ from typing import Dict
 
 from typeguard import typechecked
 
-from yabs.const import (
+from .render_sequence.translation import Translation
+from ..const import (
     AJAX_PREFIX,
     KEY_CTIME,
     KEY_DOMAIN,
-    KEY_ENTRY,
+    KEY_ENTRIES,
     KEY_FN,
     KEY_MTIME,
     KEY_OUT,
@@ -55,6 +56,16 @@ class Sitemap:
             f.write(cnt)
 
 
+    def _find_translation(self, fn: str) -> Translation:
+
+        for entry in self._context[KEY_SEQUENCES][self._get_sequence_name(fn)][KEY_ENTRIES]:
+            for translation in entry.translations:
+                if translation[KEY_FN] == fn:
+                    return translation
+
+        raise ValueError('sequence entry is None')
+
+
     def _generate_entry(self, fn: str) -> str:
 
         return """<url>
@@ -79,19 +90,7 @@ class Sitemap:
 
     def _get_lastmod(self, fn: str) -> str:
 
-        sequence_entry = None
-        for entry in self._context[KEY_SEQUENCES][self._get_sequence_name(fn)][f"{KEY_ENTRY:s}_list"]:
-            if entry[KEY_FN] == fn:
-                sequence_entry = entry
-                break
-        if sequence_entry is None:
-            raise ValueError('sequence entry is None')
-
-        blog_date_str = sequence_entry[
-            KEY_MTIME if KEY_MTIME in sequence_entry.keys() else KEY_CTIME
-        ]
-
-        return blog_date_str.split(" ")[0]
+        return self._find_translation(fn)[KEY_MTIME].split(" ")[0]
 
 
     def _get_priority(self, fn: str) -> float:
