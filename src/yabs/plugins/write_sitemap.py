@@ -128,4 +128,4 @@ class Sitemap:
 @typechecked
 def run(context: Dict, options: None = None):
 
-    Sitemap(context = context, options = options)
+    _ = Sitemap(context = context, options = options)
