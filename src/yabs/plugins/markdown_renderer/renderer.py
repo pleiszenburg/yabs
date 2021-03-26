@@ -34,19 +34,20 @@ from bs4 import BeautifulSoup
 from mistune import Renderer
 from typeguard import typechecked
 
-from .katex import render_formula
-from .pygments import render_code
-from ..const import (
+from ...const import (
     IMAGE_SUFFIX_LIST,
     KEY_CODE,
     KEY_FIGURE,
+    KEY_FOOTNOTES,
     KEY_FORMULA,
+    KEY_IMAGE,
     KEY_IMAGES,
     KEY_LANGUAGE,
     KEY_PLOT,
-    KEY_TEMPLATES,
     KEY_VIDEO,
 )
+from .katex import render_formula
+from .pygments import render_code
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # CLASS
@@ -73,9 +74,9 @@ class YabsRenderer(Renderer):
             # return '\n<pre><code>%s</code></pre>\n' % mistune.escape(code)
             raise ValueError('no language specified')
 
-        return self.options[KEY_TEMPLATES]["figure_code"].render(
+        return self.options[KEY_CODE].render(
             **{KEY_CODE: render_code(code, lang)}
-        ) # TODO template hard code
+        )
 
     def block_math(self, text: str) -> str:
         """
@@ -84,17 +85,17 @@ class YabsRenderer(Renderer):
 
         self._counters[KEY_FORMULA] += 1
 
-        return self.options[KEY_TEMPLATES][KEY_FORMULA].render(
+        return self.options[KEY_FORMULA].render(
             formula = render_formula(text),
             number = self._counters[KEY_FORMULA],
-        ) # TODO template hard code
+        )
 
     def footnotes(self, text: str) -> str:
         """
         Renders footnotes below text
         """
 
-        return self.options[KEY_TEMPLATES]["footnotes"].render(footnotes=text) # TODO template hard code
+        return self.options[KEY_FOOTNOTES].render(footnotes=text)
 
     def latex_environment(self, name: str, text: str) -> str:
         """
@@ -138,7 +139,7 @@ class YabsRenderer(Renderer):
         if any(src.endswith(item) for item in IMAGE_SUFFIX_LIST):
 
             self._counters[KEY_FIGURE] += 1
-            return self.options[KEY_TEMPLATES]["figure_image"].render(
+            return self.options[KEY_IMAGE].render(
                 alt_attr=text,
                 alt_html=text,
                 number=self._counters[KEY_FIGURE],
@@ -147,26 +148,26 @@ class YabsRenderer(Renderer):
                 else src,
                 title=title,
                 language=self.options[KEY_LANGUAGE],
-            ) # TODO template hard code
+            )
 
         if src.startswith("youtube:"):
 
             self._counters[KEY_VIDEO] += 1
-            return self.options[KEY_TEMPLATES]["figure_video"].render(
+            return self.options[KEY_VIDEO].render(
                 alt_html=text,
                 number=self._counters[KEY_VIDEO],
                 video_id=src.split(":")[1],
                 language=self.options[KEY_LANGUAGE],
-            ) # TODO template hard code
+            )
 
         if src.startswith("plot:"):
 
             self._counters[KEY_PLOT] += 1
-            return self.options[KEY_TEMPLATES]["figure_plot"].render(
+            return self.options[KEY_PLOT].render(
                 alt_html=text,
                 number=self._counters[KEY_PLOT],
                 plot_id=src.split(":")[1],
                 language=self.options[KEY_LANGUAGE],
-            ) # TODO template hard code
+            )
 
-        raise  # handle youtube, plots, etc HERE!
+        raise ValueError('unknown type of figure', src)

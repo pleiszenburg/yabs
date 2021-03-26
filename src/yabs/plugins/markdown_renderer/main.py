@@ -29,11 +29,16 @@ specific language governing rights and limitations under the License.
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 import os
-from typing import Any, Dict
+from typing import Dict
 
 from typeguard import typechecked
 
 from ...const import (
+    KEY_BASE,
+    KEY_CODE,
+    KEY_FOOTNOTES,
+    KEY_FORMULA,
+    KEY_IMAGE,
     KEY_IMAGES,
     KEY_LANGUAGE,
     KEY_LANGUAGES,
@@ -41,7 +46,9 @@ from ...const import (
     KEY_NAME,
     KEY_TEMPLATES,
     KEY_OUT,
+    KEY_PLOT,
     KEY_ROOT,
+    KEY_VIDEO,
 )
 from .markdown import YabsMarkdown
 
@@ -50,7 +57,7 @@ from .markdown import YabsMarkdown
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 @typechecked
-def run(context: Dict, options: Any = None):
+def run(context: Dict, options: Dict):
 
     if KEY_MARKDOWN not in context.keys():
         context[KEY_MARKDOWN] = {}
@@ -58,11 +65,17 @@ def run(context: Dict, options: Any = None):
     assert isinstance(context[KEY_MARKDOWN], dict)
     assert options[KEY_NAME] not in context[KEY_MARKDOWN].keys()
 
-    context[KEY_MARKDOWN][KEY_NAME] = {}
-
-    for language in context[KEY_LANGUAGES]:
-        context[KEY_MARKDOWN][KEY_NAME][language] = YabsMarkdown.with_renderer(**{
-            KEY_TEMPLATES: context[KEY_TEMPLATES],
+    context[KEY_MARKDOWN][options[KEY_NAME]] = { # name of renderer
+        YabsMarkdown.with_renderer(**{
             KEY_LANGUAGE: language,
+            KEY_BASE: context[KEY_TEMPLATES][options[KEY_BASE]],
+            KEY_IMAGE: context[KEY_TEMPLATES][options[KEY_IMAGE]],
             KEY_IMAGES: os.path.relpath(context[KEY_OUT][KEY_IMAGES], context[KEY_OUT][KEY_ROOT]),
+            KEY_VIDEO: context[KEY_TEMPLATES][options[KEY_VIDEO]],
+            KEY_PLOT: context[KEY_TEMPLATES][options[KEY_PLOT]],
+            KEY_CODE: context[KEY_TEMPLATES][options[KEY_CODE]],
+            KEY_FORMULA: context[KEY_TEMPLATES][options[KEY_FORMULA]],
+            KEY_FOOTNOTES: context[KEY_TEMPLATES][options[KEY_FOOTNOTES]],
         })
+        for language in context[KEY_LANGUAGES]
+    }
