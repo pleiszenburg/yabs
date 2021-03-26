@@ -28,9 +28,6 @@ specific language governing rights and limitations under the License.
 # IMPORT
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-import os
-from typing import Dict
-
 from mistune import Markdown
 from typeguard import typechecked
 
