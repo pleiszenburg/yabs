@@ -6,7 +6,7 @@ YABS
 Yet Another Build System
 https://github.com/pleiszenburg/yabs
 
-    src/yabs/markdown/katex.py: Katex wrapper
+    src/yabs/plugins/markdown_renderer/katex.py: Katex wrapper
 
     Copyright (C) 2018-2021 Sebastian M. Ernst <ernst@pleiszenburg.de>
 

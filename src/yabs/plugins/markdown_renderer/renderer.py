@@ -6,7 +6,7 @@ YABS
 Yet Another Build System
 https://github.com/pleiszenburg/yabs
 
-    src/yabs/markdown/renderer.py: Markdown renderer
+    src/yabs/plugins/markdown_renderer/renderer.py: Markdown renderer
 
     Copyright (C) 2018-2021 Sebastian M. Ernst <ernst@pleiszenburg.de>
 

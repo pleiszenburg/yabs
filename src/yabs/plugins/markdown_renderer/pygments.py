@@ -6,7 +6,7 @@ YABS
 Yet Another Build System
 https://github.com/pleiszenburg/yabs
 
-    src/yabs/markdown/pygments.py: Pygments wrapper
+    src/yabs/plugins/markdown_renderer/pygments.py: Pygments wrapper
 
     Copyright (C) 2018-2021 Sebastian M. Ernst <ernst@pleiszenburg.de>
 

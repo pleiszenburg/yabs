@@ -6,7 +6,7 @@ YABS
 Yet Another Build System
 https://github.com/pleiszenburg/yabs
 
-    src/yabs/markdown/markdown.py: Core markdown class
+    src/yabs/plugins/markdown_renderer/markdown.py: Core markdown class
 
     Copyright (C) 2018-2021 Sebastian M. Ernst <ernst@pleiszenburg.de>
 

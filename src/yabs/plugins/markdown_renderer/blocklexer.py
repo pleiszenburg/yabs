@@ -6,7 +6,7 @@ YABS
 Yet Another Build System
 https://github.com/pleiszenburg/yabs
 
-    src/yabs/markdown/blocklexer.py: Block lexer
+    src/yabs/plugins/markdown_renderer/blocklexer.py: Block lexer
 
     Copyright (C) 2018-2021 Sebastian M. Ernst <ernst@pleiszenburg.de>
 

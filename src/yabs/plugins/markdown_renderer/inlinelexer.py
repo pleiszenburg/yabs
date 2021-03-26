@@ -6,7 +6,7 @@ YABS
 Yet Another Build System
 https://github.com/pleiszenburg/yabs
 
-    src/yabs/markdown/inlinelexer.py: Inline lexer
+    src/yabs/plugins/markdown_renderer/inlinelexer.py: Inline lexer
 
     Copyright (C) 2018-2021 Sebastian M. Ernst <ernst@pleiszenburg.de>
 

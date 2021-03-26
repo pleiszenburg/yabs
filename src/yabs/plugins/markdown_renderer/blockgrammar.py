@@ -6,7 +6,7 @@ YABS
 Yet Another Build System
 https://github.com/pleiszenburg/yabs
 
-    src/yabs/markdown/blockgrammar.py: Block grammar
+    src/yabs/plugins/markdown_renderer/blockgrammar.py: Block grammar
 
     Copyright (C) 2018-2021 Sebastian M. Ernst <ernst@pleiszenburg.de>
 

@@ -6,7 +6,7 @@ YABS
 Yet Another Build System
 https://github.com/pleiszenburg/yabs
 
-    src/yabs/markdown/inlinegrammar.py: Inline grammar
+    src/yabs/plugins/markdown_renderer/inlinegrammar.py: Inline grammar
 
     Copyright (C) 2018-2021 Sebastian M. Ernst <ernst@pleiszenburg.de>
 
