@@ -101,9 +101,9 @@ class Translation:
         return self.id == other.id
 
 
-    def __getitem__(self, key: str) -> str:
+    def __getitem__(self, key: str) -> Any:
 
-        return self._meta
+        return self._meta[key]
 
 
     @property
