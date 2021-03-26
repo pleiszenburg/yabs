@@ -49,6 +49,7 @@ from ...const import (
     KEY_FN,
     KEY_ID,
     KEY_MARKDOWN,
+    KEY_LANGUAGE,
     KEY_LANGUAGES,
     KEY_LASTNAME,
     KEY_MTIME,
@@ -183,6 +184,7 @@ class Translation:
 
             f.write(template(**{
                 KEY_ID: self._id,
+                KEY_LANGUAGE: self._language,
                 KEY_LANGUAGES: str(languages),
                 KEY_ABSTRACT: renderer(self._abstract),
                 KEY_CONTENT: self._fix_h_levels(renderer(self._content)),
