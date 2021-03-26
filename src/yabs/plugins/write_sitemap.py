@@ -4,85 +4,128 @@
 import datetime
 import glob
 import os
+from typing import Dict
 
+from typeguard import typechecked
 
 from yabs.const import (
     AJAX_PREFIX,
-    BLOG_PREFIX,
-    KEY_BLOG,
     KEY_CTIME,
-    KEY_DATA,
     KEY_DOMAIN,
     KEY_ENTRY,
     KEY_FN,
     KEY_MTIME,
     KEY_OUT,
     KEY_ROOT,
+    KEY_SEQUENCES,
 )
 
 
-def run(context, options=None):
-    def get_datestring_now():
-        cur_date = datetime.datetime.now()
-        return "%04d-%02d-%02d" % (cur_date.year, cur_date.month, cur_date.day)
+@typechecked
+class Sitemap:
+    """
+    Generates an XML sitemap file.
 
-    def get_lastmod(fn):
-        if not fn.startswith(BLOG_PREFIX):
-            return current_date_str
-        blog_entry_meta_dict = None
-        for entry in context[KEY_DATA][KEY_BLOG]["%s_list" % KEY_ENTRY]:
+    Mutable, single use.
+    """
+
+    def __init__(self, context: Dict, options: None = None):
+
+        self._context = context
+        self._today = self._get_datestring_now()
+        self._sequence_names = list(context[KEY_SEQUENCES].keys())
+
+        files = []
+        for file_path in glob.glob(os.path.join(self._context[KEY_OUT][KEY_ROOT], "*.htm*")):
+            fn = os.path.basename(file_path)
+            if not fn.startswith(AJAX_PREFIX): # TODO handle custom prefixes!
+                files.append(fn)
+
+        cnt = """<?xml version="1.0" encoding="UTF-8"?>
+        <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+        {entries}
+        </urlset>
+        """.format(
+            entries = "\n".join([self._generate_entry(fn) for fn in files])
+        )
+
+        cnt = "\n".join([line.strip() for line in cnt.split("\n")])
+
+        with open(os.path.join(context[KEY_OUT][KEY_ROOT], "sitemap.xml"), "w") as f:
+            f.write(cnt)
+
+
+    def _generate_entry(self, fn: str) -> str:
+
+        return """<url>
+    	<loc>http://www.{domain:s}/{filename:s}</loc>
+    	<lastmod>{lastmod:s}</lastmod>
+    	<changefreq>weekly</changefreq>
+    	<priority>{priority:0.2f}</priority>
+    	</url>""".format(
+            domain = self._context[KEY_DOMAIN],
+            filename = fn,
+            lastmod = self._get_lastmod(fn) if self._is_in_sequence(fn) else self._today,
+            priority = self._get_priority(fn),
+        )
+
+
+    @staticmethod
+    def _get_datestring_now() -> str:
+
+        today = datetime.datetime.now()
+        return f"{today.year:04d}-{today.month:02d}-{today.day:02d}"
+
+
+    def _get_lastmod(self, fn: str) -> str:
+
+        sequence_entry = None
+        for entry in self._context[KEY_SEQUENCES][self._get_sequence_name(fn)][f"{KEY_ENTRY:s}_list"]:
             if entry[KEY_FN] == fn:
-                blog_entry_meta_dict = entry
+                sequence_entry = entry
                 break
-        if blog_entry_meta_dict is None:
-            raise  # TODO
-        if KEY_MTIME in blog_entry_meta_dict.keys():
-            blog_date_str = blog_entry_meta_dict[KEY_MTIME]
-        else:
-            blog_date_str = blog_entry_meta_dict[KEY_CTIME]
+        if sequence_entry is None:
+            raise ValueError('sequence entry is None')
+
+        blog_date_str = sequence_entry[
+            KEY_MTIME if KEY_MTIME in sequence_entry.keys() else KEY_CTIME
+        ]
+
         return blog_date_str.split(" ")[0]
 
-    def get_priority(fn):
+
+    def _get_priority(self, fn: str) -> float:
+
         if fn.startswith("index"):
             return 1.0
-        elif fn.startswith(BLOG_PREFIX):
-            return 0.5
+        elif self._is_in_sequence(fn):
+            return 0.75
         elif fn.startswith("plot_"):
             return 0.25
         else:
-            return 0.75
+            return 0.5
 
-    def generate_entry(fn):
-        return """<url>
-		<loc>http://www.{domain}/{filename}</loc>
-		<lastmod>{lastmod}</lastmod>
-		<changefreq>weekly</changefreq>
-		<priority>{priority}</priority>
-		</url>""".format(
-            domain=context[KEY_DOMAIN],
-            filename=fn,
-            lastmod=get_lastmod(fn),
-            priority="%0.2f" % get_priority(fn),
+
+    def _get_sequence_name(self, fn: str) -> str:
+
+        assert self._is_in_sequence(fn)
+
+        return next(
+            sequence_name
+            for sequence_name in self._sequence_names
+            if fn.startswith(f"{sequence_name:s}_")
         )
 
-    file_list = []
 
-    for file_path in glob.glob(os.path.join(context[KEY_OUT][KEY_ROOT], "*.htm*")):
-        fn = os.path.basename(file_path)
-        if not fn.startswith(AJAX_PREFIX):
-            file_list.append(fn)
+    def _is_in_sequence(self, fn: str) -> bool:
 
-    current_date_str = get_datestring_now()
+        return any((
+            fn.startswith(f"{sequence_name:s}_")
+            for sequence_name in self._sequence_names
+        ))
 
-    cnt = """<?xml version="1.0" encoding="UTF-8"?>
-	<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-	{entries}
-	</urlset>
-	""".format(
-        entries="\n".join([generate_entry(fn) for fn in file_list])
-    )
 
-    cnt = "\n".join([line.strip() for line in cnt.split("\n")])
+@typechecked
+def run(context: Dict, options: None = None):
 
-    with open(os.path.join(context[KEY_OUT][KEY_ROOT], "sitemap.xml"), "w") as f:
-        f.write(cnt)
+    Sitemap(context = context, options = options)
