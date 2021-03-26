@@ -13,16 +13,12 @@ from ...const import (
     KEY_ENTRY,
     KEY_FN,
     KEY_ID,
-    KEY_IMAGES,
     KEY_LANGUAGE,
     KEY_LANGUAGES,
     KEY_MARKDOWN,
-    KEY_OUT,
-    KEY_ROOT,
+    KEY_RENDERER,
     KEY_SRC,
-    KEY_TEMPLATES,
 )
-from ...markdown import YabsMarkdown
 from .entry import Entry
 
 
@@ -48,15 +44,8 @@ class Blog:
         self._entry_dict = self._match_language_versions()
 
         self._renderer_dict = {
-            language: YabsMarkdown.with_renderer(**{
-                KEY_TEMPLATES: self._context[KEY_TEMPLATES],
-                KEY_LANGUAGE: language,
-                KEY_IMAGES: os.path.relpath(
-                    context[KEY_OUT][KEY_IMAGES],
-                    context[KEY_OUT][KEY_ROOT],
-                ),
-            })
-            for language in {entry.meta_dict[KEY_LANGUAGE] for entry in self._entry_list}
+            language: context[KEY_MARKDOWN][options[KEY_RENDERER]]
+            for language in context[KEY_LANGUAGES]
         }
 
     def _match_language_versions(self):
