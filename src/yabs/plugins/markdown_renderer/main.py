@@ -66,7 +66,7 @@ def run(context: Dict, options: Dict):
     assert options[KEY_NAME] not in context[KEY_MARKDOWN].keys()
 
     context[KEY_MARKDOWN][options[KEY_NAME]] = { # name of renderer
-        YabsMarkdown.with_renderer(**{
+        language: YabsMarkdown.with_renderer(**{
             KEY_LANGUAGE: language,
             KEY_BASE: context[KEY_TEMPLATES][options[KEY_BASE]],
             KEY_IMAGE: context[KEY_TEMPLATES][options[KEY_IMAGE]],

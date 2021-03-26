@@ -8,7 +8,6 @@ from typing import Any, Dict
 from typeguard import typechecked
 
 from ...const import (
-    KEY_BLOG,
     KEY_DATA,
     KEY_ENTRY,
     KEY_FN,
@@ -37,14 +36,14 @@ class Blog:
         self._entry_list = [
             Entry(context, file_path)
             for file_path in glob.glob(
-                os.path.join(self._context[KEY_SRC][KEY_BLOG], "**", "*.%s" % KEY_MARKDOWN),
+                os.path.join(options[KEY_SRC], "**", "*.%s" % KEY_MARKDOWN),
                 recursive=True,
             )
         ]
         self._entry_dict = self._match_language_versions()
 
         self._renderer_dict = {
-            language: context[KEY_MARKDOWN][options[KEY_RENDERER]]
+            language: context[KEY_MARKDOWN][options[KEY_RENDERER]][language]
             for language in context[KEY_LANGUAGES]
         }
 
