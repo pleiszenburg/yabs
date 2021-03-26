@@ -23,9 +23,9 @@ from .entry import Entry
 
 
 @typechecked
-class Blog:
+class Sequence:
     """
-    An entire blog with multiple entries.
+    A sequence with multiple entries.
 
     Mutable.
     """
