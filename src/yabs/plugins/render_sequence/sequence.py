@@ -36,6 +36,7 @@ from typeguard import typechecked
 
 from ...const import (
     KEY_ENTRIES,
+    KEY_FN,
     KEY_LANGUAGES,
     KEY_MARKDOWN,
     KEY_NAME,
@@ -128,7 +129,10 @@ class Sequence:
 
                 translation.render(
                     renderers = self._renderers,
-                    languages = list(sorted(entry.languages)),
+                    languages = [
+                        (language, entry[language][KEY_FN])
+                        for language in entry.languages
+                    ],
                     path = self._context[KEY_SRC][KEY_STAGING],
                     template = self._template.render,
                 )

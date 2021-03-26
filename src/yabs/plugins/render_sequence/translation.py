@@ -29,7 +29,7 @@ specific language governing rights and limitations under the License.
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 import os
-from typing import Any, Callable, Dict, List
+from typing import Any, Callable, Dict, List, Tuple
 
 from bs4 import BeautifulSoup
 from yaml import load
@@ -173,7 +173,7 @@ class Translation:
     def render(
         self,
         renderers: Dict, # markdown
-        languages: List[str], # available translations
+        languages: List[Tuple[str, str]], # available translations and URLs
         path: str,
         template: Callable, # jinja
     ):
