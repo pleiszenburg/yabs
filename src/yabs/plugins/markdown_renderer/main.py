@@ -6,7 +6,7 @@ YABS
 Yet Another Build System
 https://github.com/pleiszenburg/yabs
 
-    src/yabs/plugins/markdown_renderer/__init__.py: Markdown root
+    src/yabs/plugins/markdown_renderer/main.py: Entry point
 
     Copyright (C) 2018-2021 Sebastian M. Ernst <ernst@pleiszenburg.de>
 
