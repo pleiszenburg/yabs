@@ -77,7 +77,7 @@ def _compress_scripts_file(path: str):
 
 
 @typechecked
-def _compress_scripts_in_html_file(path):
+def _compress_scripts_in_html_file(path: str):
 
     with open(path, "r", encoding = "utf-8") as f:
         cnt = f.read()
