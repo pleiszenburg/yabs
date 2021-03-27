@@ -28,6 +28,7 @@ specific language governing rights and limitations under the License.
 # IMPORT
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+from logging import getLogger
 import glob
 import os
 from typing import Dict
@@ -36,12 +37,14 @@ import htmlmin
 from typeguard import typechecked
 
 from ..const import (
-    AJAX_DELIMITER,
     AJAX_PREFIX,
     AJAX_SEPARATOR,
     KEY_OUT,
     KEY_ROOT,
+    LOGGER,
 )
+
+_log = getLogger(LOGGER)
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # ROUTINES
@@ -67,25 +70,24 @@ def _compress_html(content: str) -> str:
 @typechecked
 def _compress_html_file(path: str):
 
+    _log.debug("Compressing %s", path)
+
     with open(path, "r", encoding = "utf-8") as f:
         cnt = f.read()
 
     fn = os.path.basename(path)
 
     if fn.startswith(AJAX_PREFIX) and AJAX_SEPARATOR in cnt:
+
         self_info_json, html_cnt = cnt.split(AJAX_SEPARATOR)
         cnt = "%s\n%s\n%s" % (
             self_info_json.strip(),
             AJAX_SEPARATOR,
             _compress_html(html_cnt),
         )
-    elif fn.startswith(AJAX_PREFIX) and AJAX_DELIMITER in cnt:
-        in_cnt_list = cnt.split(AJAX_DELIMITER)
-        out_cnt_list = []
-        for cnt_item in in_cnt_list:
-            out_cnt_list.append(_compress_html(cnt_item))
-        cnt = ("\n%s\n" % AJAX_DELIMITER).join(out_cnt_list)
+
     else:
+
         cnt = _compress_html(cnt)
 
     with open(path, "w", encoding = "utf-8") as f:
