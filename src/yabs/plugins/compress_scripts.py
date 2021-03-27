@@ -29,6 +29,7 @@ specific language governing rights and limitations under the License.
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 import glob
+from logging import getLogger
 import os
 from subprocess import Popen, PIPE
 from typing import Dict
@@ -36,7 +37,9 @@ from typing import Dict
 from bs4 import BeautifulSoup
 from typeguard import typechecked
 
-from yabs.const import KEY_OUT, KEY_ROOT, KEY_SCRIPTS
+from yabs.const import KEY_OUT, KEY_ROOT, KEY_SCRIPTS, LOGGER
+
+_log = getLogger(LOGGER)
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # IMPORT
@@ -53,7 +56,9 @@ def _compress_scripts(cnt: str) -> str:
     )
     out, err = proc.communicate(input = cnt.encode(encoding="UTF-8"))
 
-    if err.decode(encoding="UTF-8").strip() != "" or proc.returncode != 0:
+    if err.decode(encoding="UTF-8").strip():
+        _log.error(err.decode(encoding="UTF-8"))
+    if proc.returncode != 0:
         raise SystemError("uglifyjs failed", err.decode(encoding="UTF-8"))
 
     return out.decode(encoding="UTF-8")
