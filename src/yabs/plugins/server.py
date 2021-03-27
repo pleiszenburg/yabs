@@ -2,17 +2,21 @@
 
 
 from http.server import HTTPServer, SimpleHTTPRequestHandler
-import logging
+from logging import getLogger
 import os
 
 
-from yabs.const import KEY_HOSTNAME, KEY_OUT, KEY_PORT, KEY_ROOT
+from yabs.const import KEY_HOSTNAME, KEY_OUT, KEY_PORT, KEY_ROOT, LOGGER
+
+
+_log = getLogger(LOGGER)
 
 
 class rq_handler_class(SimpleHTTPRequestHandler):
+
     def log_message(self, format, *args):
 
-        logging.info(format % args)
+        _log.info(format, *args)
 
 
 def run(context, options=None):

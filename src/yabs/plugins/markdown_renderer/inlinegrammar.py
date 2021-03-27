@@ -6,7 +6,7 @@ YABS
 Yet Another Build System
 https://github.com/pleiszenburg/yabs
 
-    src/yabs/plugins/fetch_images.py: Fetches images
+    src/yabs/plugins/markdown_renderer/inlinegrammar.py: Inline grammar
 
     Copyright (C) 2018-2021 Sebastian M. Ernst <ernst@pleiszenburg.de>
 
@@ -28,38 +28,28 @@ specific language governing rights and limitations under the License.
 # IMPORT
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-import glob
-import os
-from typing import Dict
+import re
 
+from mistune import InlineGrammar
 from typeguard import typechecked
 
-from ..const import IMAGE_SUFFIX_LIST, KEY_IMAGES, KEY_OUT, KEY_SRC
-
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# ROUTINE
+# CLASS
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 @typechecked
-def run(context: Dict, options: None = None):
+class YabsInlineGrammar(InlineGrammar):
+    """
+    This defines different ways of declaring math objects that should be
+	passed through to mathjax unaffected. These are used by the YabsInlineLexer.
+	"""
 
-    os.mkdir(context[KEY_OUT][KEY_IMAGES])
+    inline_math = re.compile(r"^\$(.+?)\$|^\\\\\((.+?)\\\\\)", re.DOTALL)
 
-    file_list = []
-    for suffix in IMAGE_SUFFIX_LIST:
-        file_list.extend(
-            glob.glob(
-                os.path.join(context[KEY_SRC][KEY_IMAGES], "**", f"*.{suffix:s}"),
-                recursive=True,
-            )
-        )
+    block_math = re.compile(r"^\$\$(.*?)\$\$|^\\\\\[(.*?)\\\\\]", re.DOTALL)
 
-    for src_file_path in file_list:
+    latex_environment = re.compile(
+        r"^\\begin\{([a-z]*\*?)\}(.*?)\\end\{\1\}", re.DOTALL
+    )
 
-        fn = os.path.basename(src_file_path)
-
-        with open(src_file_path, "rb") as f:
-            cnt_bin = f.read()
-
-        with open(os.path.join(context[KEY_OUT][KEY_IMAGES], fn), "wb") as f:
-            f.write(cnt_bin)
+    text = re.compile(r"^[\s\S]+?(?=[\\<!\[_*`~$]|https?://| {2,}\n|$)")

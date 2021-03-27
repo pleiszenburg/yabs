@@ -6,7 +6,7 @@ YABS
 Yet Another Build System
 https://github.com/pleiszenburg/yabs
 
-    src/yabs/plugins/fetch_images.py: Fetches images
+    src/yabs/plugins/markdown_renderer/markdown.py: Core markdown class
 
     Copyright (C) 2018-2021 Sebastian M. Ernst <ernst@pleiszenburg.de>
 
@@ -28,38 +28,37 @@ specific language governing rights and limitations under the License.
 # IMPORT
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-import glob
-import os
-from typing import Dict
-
+from mistune import Markdown
 from typeguard import typechecked
 
-from ..const import IMAGE_SUFFIX_LIST, KEY_IMAGES, KEY_OUT, KEY_SRC
+from .blocklexer import YabsBlockLexer
+from .inlinelexer import YabsInlineLexer
+from .renderer import YabsRenderer
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# ROUTINE
+# CLASS
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 @typechecked
-def run(context: Dict, options: None = None):
+class YabsMarkdown(Markdown):
+    """
+    Injects custom lexers
+    """
 
-    os.mkdir(context[KEY_OUT][KEY_IMAGES])
+    def __init__(self, renderer, **kwargs):
 
-    file_list = []
-    for suffix in IMAGE_SUFFIX_LIST:
-        file_list.extend(
-            glob.glob(
-                os.path.join(context[KEY_SRC][KEY_IMAGES], "**", f"*.{suffix:s}"),
-                recursive=True,
-            )
-        )
+        if "inline" not in kwargs:
+            kwargs["inline"] = YabsInlineLexer
+        if "block" not in kwargs:
+            kwargs["block"] = YabsBlockLexer
 
-    for src_file_path in file_list:
+        super().__init__(renderer, **kwargs)
 
-        fn = os.path.basename(src_file_path)
+    def output_multiline_math(self):
 
-        with open(src_file_path, "rb") as f:
-            cnt_bin = f.read()
+        return self.inline(self.token["text"])
 
-        with open(os.path.join(context[KEY_OUT][KEY_IMAGES], fn), "wb") as f:
-            f.write(cnt_bin)
+    @classmethod
+    def with_renderer(cls, **options) -> Markdown:
+
+        return cls(renderer = YabsRenderer(**options))

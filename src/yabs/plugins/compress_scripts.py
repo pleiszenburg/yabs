@@ -1,47 +1,85 @@
 # -*- coding: utf-8 -*-
 
+"""
+
+YABS
+Yet Another Build System
+https://github.com/pleiszenburg/yabs
+
+    src/yabs/plugins/compress_scripts.py: Compresses JavaScript
+
+    Copyright (C) 2018-2021 Sebastian M. Ernst <ernst@pleiszenburg.de>
+
+<LICENSE_BLOCK>
+The contents of this file are subject to the GNU Lesser General Public License
+Version 2.1 ("LGPL" or "License"). You may not use this file except in
+compliance with the License. You may obtain a copy of the License at
+https://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt
+https://github.com/pleiszenburg/yabs/blob/master/LICENSE
+
+Software distributed under the License is distributed on an "AS IS" basis,
+WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for the
+specific language governing rights and limitations under the License.
+</LICENSE_BLOCK>
+
+"""
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# IMPORT
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 import glob
+from logging import getLogger
 import os
-import subprocess
-
+from subprocess import Popen, PIPE
+from typing import Dict
 
 from bs4 import BeautifulSoup
+from typeguard import typechecked
 
+from yabs.const import KEY_OUT, KEY_ROOT, KEY_SCRIPTS, LOGGER
 
-from yabs.const import KEY_OUT, KEY_ROOT, KEY_SCRIPTS
+_log = getLogger(LOGGER)
 
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# IMPORT
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-def compress_scripts(cnt):
+@typechecked
+def _compress_scripts(cnt: str) -> str:
 
-    proc = subprocess.Popen(
+    proc = Popen(
         ["uglifyjs", "--compress", "--mangle"],
-        stdin=subprocess.PIPE,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
+        stdin = PIPE,
+        stdout = PIPE,
+        stderr = PIPE,
     )
-    out, err = proc.communicate(input=cnt.encode(encoding="UTF-8"))
+    out, err = proc.communicate(input = cnt.encode(encoding="UTF-8"))
 
-    if err.decode(encoding="UTF-8").strip() != "":
-        print(err.decode(encoding="UTF-8"))
+    if err.decode(encoding="UTF-8").strip():
+        _log.error(err.decode(encoding="UTF-8"))
+    if proc.returncode != 0:
+        raise SystemError("uglifyjs failed", err.decode(encoding="UTF-8"))
 
     return out.decode(encoding="UTF-8")
 
 
-def compress_scripts_file(file_path):
+@typechecked
+def _compress_scripts_file(path: str):
 
-    with open(file_path, "r") as f:
+    with open(path, "r", encoding = "utf-8") as f:
         cnt = f.read()
 
-    cnt = compress_scripts(cnt)
+    cnt = _compress_scripts(cnt)
 
-    with open(file_path, "w") as f:
+    with open(path, "w", encoding = "utf-8") as f:
         f.write(cnt)
 
 
-def compress_scripts_in_html_file(file_path):
+@typechecked
+def _compress_scripts_in_html_file(path: str):
 
-    with open(file_path, "r") as f:
+    with open(path, "r", encoding = "utf-8") as f:
         cnt = f.read()
 
     soup = BeautifulSoup(cnt, "html.parser")
@@ -49,19 +87,20 @@ def compress_scripts_in_html_file(file_path):
         if uncompressed_tag.has_attr("src"):
             continue
         uncompressed_str = uncompressed_tag.decode_contents()
-        compressed_str = compress_scripts(uncompressed_str)
+        compressed_str = _compress_scripts(uncompressed_str)
         cnt = cnt.replace(uncompressed_str, compressed_str)
 
-    with open(file_path, "w") as f:
+    with open(path, "w", encoding = "utf-8") as f:
         f.write(cnt)
 
 
-def run(context, options=None):
+@typechecked
+def run(context: Dict, options: None = None):
 
     for file_path in glob.glob(os.path.join(context[KEY_OUT][KEY_SCRIPTS], "*.js")):
-        compress_scripts_file(file_path)
+        _compress_scripts_file(file_path)
 
     for file_path in glob.iglob(
         os.path.join(context[KEY_OUT][KEY_ROOT], "**/*.htm*"), recursive=True
     ):
-        compress_scripts_in_html_file(file_path)
+        _compress_scripts_in_html_file(file_path)

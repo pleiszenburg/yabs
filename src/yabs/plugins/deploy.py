@@ -1,20 +1,47 @@
 # -*- coding: utf-8 -*-
 
+"""
+
+YABS
+Yet Another Build System
+https://github.com/pleiszenburg/yabs
+
+    src/yabs/plugins/deploy.py: Deploys via sshfs to remote
+
+    Copyright (C) 2018-2021 Sebastian M. Ernst <ernst@pleiszenburg.de>
+
+<LICENSE_BLOCK>
+The contents of this file are subject to the GNU Lesser General Public License
+Version 2.1 ("LGPL" or "License"). You may not use this file except in
+compliance with the License. You may obtain a copy of the License at
+https://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt
+https://github.com/pleiszenburg/yabs/blob/master/LICENSE
+
+Software distributed under the License is distributed on an "AS IS" basis,
+WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for the
+specific language governing rights and limitations under the License.
+</LICENSE_BLOCK>
+
+"""
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# IMPORT
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 from distutils.dir_util import copy_tree
+from logging import getLogger
 import os
 import shutil
-import subprocess
+from subprocess import Popen, PIPE
 import time
-
+from typing import Dict
 
 from yaml import load
-
 try:
     from yaml import CLoader as Loader
 except ImportError:
     from yaml import Loader
-
+from typeguard import typechecked
 
 from yabs.const import (
     KEY_HOSTNAME,
@@ -26,45 +53,55 @@ from yabs.const import (
     KEY_TARGET,
     KEY_TARGETS,
     KEY_USER,
+    LOGGER,
     YABS_FN,
 )
 
+_log = getLogger(LOGGER)
 
-def check_mountpoint(mountpoint):
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# ROUTINES
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-    proc = subprocess.Popen(
+@typechecked
+def _check_mountpoint(mountpoint: str) -> bool:
+
+    proc = Popen(
         ["mountpoint", "-q", mountpoint],
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
+        stdout = PIPE,
+        stderr = PIPE,
     )
     out, err = proc.communicate()
 
     if out.decode(encoding="UTF-8").strip() != "":
-        print(out.decode(encoding="UTF-8"))
+        _log.info("mountpoint: %s", out.decode(encoding="UTF-8"))
     if err.decode(encoding="UTF-8").strip() != "":
-        print(err.decode(encoding="UTF-8"))
+        _log.error("mountpoint: %s", err.decode(encoding="UTF-8"))
 
     return not bool(proc.returncode)
 
 
-def copy_current_build(buildroot, mountpoint):
+@typechecked
+def _copy_current_build(buildroot: str, mountpoint: str):
 
-    copy_tree(buildroot, mountpoint, preserve_symlinks=0)
-
-
-def load_passwords(cfp_path):
-
-    with open(cfp_path, "r") as f:
-        cfg_dict = load(f.read(), Loader=Loader)
-
-    return cfg_dict[KEY_PASSWORD]
+    copy_tree(buildroot, mountpoint, preserve_symlinks = 0)
 
 
-def mount_sshfs(mountpoint, hostname, path, user, password):
+@typechecked
+def _load_passwords(path: str) -> Dict[str, str]:
+
+    with open(path, "r", encoding = "utf-8") as f:
+        config = load(f.read(), Loader = Loader) # dict
+
+    return config[KEY_PASSWORD]
+
+
+@typechecked
+def _mount_sshfs(mountpoint: str, hostname: str, path: str, user: str, password: str) -> bool:
 
     cmd = [
         "sshfs",
-        "%s@%s:/%s" % (user, hostname, path),
+        f"{user:s}@{hostname:s}:/{path:s}",
         mountpoint,
         "-o",
         "password_stdin",
@@ -72,20 +109,21 @@ def mount_sshfs(mountpoint, hostname, path, user, password):
         "compression=yes",
     ]
 
-    proc = subprocess.Popen(
-        cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+    proc = Popen(
+        cmd, stdin = PIPE, stdout = PIPE, stderr = PIPE,
     )
-    out, err = proc.communicate(input=password.encode(encoding="UTF-8"))
+    out, err = proc.communicate(input = password.encode(encoding="UTF-8"))
 
     if out.decode(encoding="UTF-8").strip() != "":
-        print(out.decode(encoding="UTF-8"))
+        _log.info("sshfs: %s", out.decode(encoding="UTF-8"))
     if err.decode(encoding="UTF-8").strip() != "":
-        print(err.decode(encoding="UTF-8"))
+        _log.error("sshfs: %s", err.decode(encoding="UTF-8"))
 
     return not bool(proc.returncode)
 
 
-def remove_old_deployment(mountpoint):
+@typechecked
+def _remove_old_deployment(mountpoint: str):
 
     for entry in os.listdir(mountpoint):
 
@@ -96,51 +134,68 @@ def remove_old_deployment(mountpoint):
         elif os.path.isdir(entry_path):
             shutil.rmtree(entry_path)
         else:
-            raise  # TODO
+            raise ValueError(f"remote path {mountpoint:s} is not file, link or directory")
 
 
-def umount_sshfs(mountpoint):
+@typechecked
+def _umount_sshfs(mountpoint: str) -> bool:
 
-    proc = subprocess.Popen(
+    proc = Popen(
         ["fusermount", "-u", mountpoint],
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
+        stdout = PIPE,
+        stderr = PIPE,
     )
     out, err = proc.communicate()
 
+    if out.decode(encoding="UTF-8").strip() != "":
+        _log.info("fusermount: %s", out.decode(encoding="UTF-8"))
     if err.decode(encoding="UTF-8").strip() != "":
-        print(err.decode(encoding="UTF-8"))
+        _log.error("fusermount: %s", err.decode(encoding="UTF-8"))
 
     return not bool(proc.returncode)
 
 
-def run(context, options=None):
+@typechecked
+def run(context: Dict, options: Dict):
 
-    passwords_dict = load_passwords(os.path.join(os.environ.get("HOME"), YABS_FN))
+    _log.info("Loading credentials ...")
+    passwords_dict = _load_passwords(os.path.join(os.environ.get("HOME"), YABS_FN))
 
-    status = mount_sshfs(
+    _log.info("Mounting remote ...")
+    status = _mount_sshfs(
         options[KEY_MOUNTPOINT],
         options[KEY_TARGETS][options[KEY_TARGET]][KEY_HOSTNAME],
         options[KEY_TARGETS][options[KEY_TARGET]][KEY_PATH],
         options[KEY_TARGETS][options[KEY_TARGET]][KEY_USER],
         passwords_dict[options[KEY_TARGETS][options[KEY_TARGET]][KEY_USER]],
     )
+
+    _log.info("Checking mount result ...")
     assert status
-    assert check_mountpoint(options[KEY_MOUNTPOINT])
+    assert _check_mountpoint(options[KEY_MOUNTPOINT])
 
-    remove_old_deployment(options[KEY_MOUNTPOINT])
-    copy_current_build(context[KEY_OUT][KEY_ROOT], options[KEY_MOUNTPOINT])
+    _log.info("Removing old content ...")
+    _remove_old_deployment(options[KEY_MOUNTPOINT])
 
+    _log.info("Uploading new content ...")
+    _copy_current_build(context[KEY_OUT][KEY_ROOT], options[KEY_MOUNTPOINT])
+
+    _log.info("Unmounting ...")
     umount_count = 0
     while True:
-        if umount_count == 10:
-            raise  #
+        if umount_count == 20:
+            raise SystemError("failed to unmount")
         try:
-            status = umount_sshfs(options[KEY_MOUNTPOINT])
+            status = _umount_sshfs(options[KEY_MOUNTPOINT])
             assert status
+            _log.info("... succeeded ...")
             break
         except AssertionError:
+            _log.info("... failed, waiting for re-try ...")
             umount_count += 1
             time.sleep(0.25)
-    assert not check_mountpoint(options[KEY_MOUNTPOINT])
-    print("Good umount.")
+
+    _log.info("Checking umount result ...")
+    assert not _check_mountpoint(options[KEY_MOUNTPOINT])
+
+    _log.info("Deployed.")

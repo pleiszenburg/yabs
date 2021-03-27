@@ -6,7 +6,7 @@ YABS
 Yet Another Build System
 https://github.com/pleiszenburg/yabs
 
-    src/yabs/plugins/fetch_images.py: Fetches images
+    src/yabs/plugins/markdown_renderer/pygments.py: Pygments wrapper
 
     Copyright (C) 2018-2021 Sebastian M. Ernst <ernst@pleiszenburg.de>
 
@@ -28,38 +28,20 @@ specific language governing rights and limitations under the License.
 # IMPORT
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-import glob
-import os
-from typing import Dict
-
+from pygments import highlight
+from pygments.lexers import get_lexer_by_name
+from pygments.formatters import html
 from typeguard import typechecked
 
-from ..const import IMAGE_SUFFIX_LIST, KEY_IMAGES, KEY_OUT, KEY_SRC
-
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# ROUTINE
+# ROUTINES
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 @typechecked
-def run(context: Dict, options: None = None):
+def render_code(code: str, lang: str) -> str:
 
-    os.mkdir(context[KEY_OUT][KEY_IMAGES])
-
-    file_list = []
-    for suffix in IMAGE_SUFFIX_LIST:
-        file_list.extend(
-            glob.glob(
-                os.path.join(context[KEY_SRC][KEY_IMAGES], "**", f"*.{suffix:s}"),
-                recursive=True,
-            )
-        )
-
-    for src_file_path in file_list:
-
-        fn = os.path.basename(src_file_path)
-
-        with open(src_file_path, "rb") as f:
-            cnt_bin = f.read()
-
-        with open(os.path.join(context[KEY_OUT][KEY_IMAGES], fn), "wb") as f:
-            f.write(cnt_bin)
+    return highlight(
+        code = code,
+        lexer = get_lexer_by_name(lang, stripall = True),
+        formatter = html.HtmlFormatter(),
+    )

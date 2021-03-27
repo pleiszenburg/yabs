@@ -4,15 +4,25 @@
 import glob
 import os
 import random
+from typing import Dict
 
+from typeguard import typechecked
 
-from yabs.const import AJAX_PREFIX, KEY_DOMAIN, KEY_OUT, KEY_ROOT
+from ..const import (
+    KEY_DOMAIN,
+    KEY_OUT,
+    KEY_PREFIX,
+    KEY_ROOT,
+)
 
 
 HASH_DIGITS = 8
 
 
-def run(context, options=None):
+@typechecked
+def run(context: Dict, options: Dict):
+
+    disallow_prefix = options[f"disallow_{KEY_PREFIX:s}"] # list
 
     allow_files = []
     disallow_files = []
@@ -21,7 +31,7 @@ def run(context, options=None):
 
         fn = os.path.basename(file_path)
 
-        if fn.startswith(AJAX_PREFIX):
+        if any(fn.startswith(prefix) for prefix in disallow_prefix):
             disallow_files.append(fn)
         else:
             allow_files.append(fn)

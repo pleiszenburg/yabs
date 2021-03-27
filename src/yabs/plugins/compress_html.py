@@ -1,17 +1,55 @@
 # -*- coding: utf-8 -*-
 
+"""
 
+YABS
+Yet Another Build System
+https://github.com/pleiszenburg/yabs
+
+    src/yabs/plugins/compress_html.py: Compresses HTML
+
+    Copyright (C) 2018-2021 Sebastian M. Ernst <ernst@pleiszenburg.de>
+
+<LICENSE_BLOCK>
+The contents of this file are subject to the GNU Lesser General Public License
+Version 2.1 ("LGPL" or "License"). You may not use this file except in
+compliance with the License. You may obtain a copy of the License at
+https://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt
+https://github.com/pleiszenburg/yabs/blob/master/LICENSE
+
+Software distributed under the License is distributed on an "AS IS" basis,
+WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for the
+specific language governing rights and limitations under the License.
+</LICENSE_BLOCK>
+
+"""
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# IMPORT
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+from logging import getLogger
 import glob
 import os
-
+from typing import Dict
 
 import htmlmin
+from typeguard import typechecked
 
+from ..const import (
+    KEY_OUT,
+    KEY_ROOT,
+    LOGGER,
+)
 
-from yabs.const import AJAX_DELIMITER, AJAX_PREFIX, AJAX_SEPARATOR, KEY_OUT, KEY_ROOT
+_log = getLogger(LOGGER)
 
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# ROUTINES
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-def compress_html(content):
+@typechecked
+def _compress_html(content: str) -> str:
 
     return htmlmin.minify(
         content,
@@ -27,36 +65,44 @@ def compress_html(content):
     )
 
 
-def compress_html_file(file_path):
+@typechecked
+def _compress_html_file(path: str, sections: Dict[str, str]):
 
-    with open(file_path, "r") as f:
+    _log.debug("Compressing %s", path)
+
+    with open(path, "r", encoding = "utf-8") as f:
         cnt = f.read()
 
-    fn = os.path.basename(file_path)
+    fn = os.path.basename(path)
 
-    if fn.startswith(AJAX_PREFIX) and AJAX_SEPARATOR in cnt:
-        self_info_json, html_cnt = cnt.split(AJAX_SEPARATOR)
-        cnt = "%s\n%s\n%s" % (
-            self_info_json.strip(),
-            AJAX_SEPARATOR,
-            compress_html(html_cnt),
-        )
-    elif fn.startswith(AJAX_PREFIX) and AJAX_DELIMITER in cnt:
-        in_cnt_list = cnt.split(AJAX_DELIMITER)
-        out_cnt_list = []
-        for cnt_item in in_cnt_list:
-            out_cnt_list.append(compress_html(cnt_item))
-        cnt = ("\n%s\n" % AJAX_DELIMITER).join(out_cnt_list)
+    if any(
+        fn.startswith(prefix) and (separator in cnt)
+        for prefix, separator in sections.items()
+    ):
+
+        separator = None
+        for prefix, v in sections.items():
+            if fn.startswith(prefix):
+                separator = v
+        assert separator is not None
+
+        header, html = cnt.split(separator)
+        cnt = f"{header.strip():s}\n{separator:s}\n{_compress_html(html):s}"
+
     else:
-        cnt = compress_html(cnt)
 
-    with open(file_path, "w") as f:
+        cnt = _compress_html(cnt)
+
+    with open(path, "w", encoding = "utf-8") as f:
         f.write(cnt)
 
 
-def run(context, options=None):
+@typechecked
+def run(context: Dict, options: Dict[str, str]):
+
+    sections = options # dict: {prefix: separator}
 
     for file_path in glob.iglob(
         os.path.join(context[KEY_OUT][KEY_ROOT], "**/*.htm*"), recursive=True
     ):
-        compress_html_file(file_path)
+        _compress_html_file(file_path, sections)

@@ -6,7 +6,7 @@ YABS
 Yet Another Build System
 https://github.com/pleiszenburg/yabs
 
-    src/yabs/plugins/fetch_images.py: Fetches images
+    src/yabs/plugins/render_sequence/entry.py: A sequence entry
 
     Copyright (C) 2018-2021 Sebastian M. Ernst <ernst@pleiszenburg.de>
 
@@ -28,38 +28,53 @@ specific language governing rights and limitations under the License.
 # IMPORT
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-import glob
-import os
-from typing import Dict
+from typing import List, Set, Union
 
 from typeguard import typechecked
 
-from ..const import IMAGE_SUFFIX_LIST, KEY_IMAGES, KEY_OUT, KEY_SRC
+from .translation import Translation
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# ROUTINE
+# CLASS
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 @typechecked
-def run(context: Dict, options: None = None):
+class Entry:
+    """
+    All translations of a post / entry.
 
-    os.mkdir(context[KEY_OUT][KEY_IMAGES])
+    Mutable.
+    """
 
-    file_list = []
-    for suffix in IMAGE_SUFFIX_LIST:
-        file_list.extend(
-            glob.glob(
-                os.path.join(context[KEY_SRC][KEY_IMAGES], "**", f"*.{suffix:s}"),
-                recursive=True,
-            )
-        )
+    def __init__(self, id: str):
 
-    for src_file_path in file_list:
+        self._id = id
+        self._translations = {}
 
-        fn = os.path.basename(src_file_path)
 
-        with open(src_file_path, "rb") as f:
-            cnt_bin = f.read()
+    def __getitem__(self, language: str) -> Union[Translation, None]:
 
-        with open(os.path.join(context[KEY_OUT][KEY_IMAGES], fn), "wb") as f:
-            f.write(cnt_bin)
+        try:
+            return self._translations[language]
+        except KeyError:
+            return None
+
+
+    def add(self, translation: Translation):
+
+        assert translation.id == self._id
+        assert translation.language not in self._translations.keys()
+
+        self._translations[translation.language] = translation
+
+
+    @property
+    def languages(self) -> Set[str]:
+
+        return set(self._translations.keys())
+
+
+    @property
+    def translations(self) -> List[Translation]:
+
+        return list(self._translations.values())

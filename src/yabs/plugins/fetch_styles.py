@@ -1,62 +1,73 @@
-# -*- coding: utf-8 -*-
+## -*- coding: utf-8 -*-
 
+"""
+
+YABS
+Yet Another Build System
+https://github.com/pleiszenburg/yabs
+
+    src/yabs/plugins/fetch_styles.py: Fetches CSS, SCSS and SASS
+
+    Copyright (C) 2018-2021 Sebastian M. Ernst <ernst@pleiszenburg.de>
+
+<LICENSE_BLOCK>
+The contents of this file are subject to the GNU Lesser General Public License
+Version 2.1 ("LGPL" or "License"). You may not use this file except in
+compliance with the License. You may obtain a copy of the License at
+https://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt
+https://github.com/pleiszenburg/yabs/blob/master/LICENSE
+
+Software distributed under the License is distributed on an "AS IS" basis,
+WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for the
+specific language governing rights and limitations under the License.
+</LICENSE_BLOCK>
+
+"""
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# IMPORT
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 import glob
+from logging import getLogger
 import os
-import subprocess
+from typing import Dict
 
+from typeguard import typechecked
 
-from yabs.const import KEY_OUT, KEY_PYGMENTS, KEY_SRC, KEY_STYLES, KEY_THEME
-from yabs.log import log
+from ..const import (
+    KEY_OUT,
+    KEY_SRC,
+    KEY_STYLES,
+    LOGGER,
+)
 
+_log = getLogger(LOGGER)
 
-def __pygmentize__(context):
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# IMPORT
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-    cmd_list = [
-        "pygmentize",
-        "-S",
-        context[KEY_PYGMENTS][KEY_THEME],
-        "-f",
-        "html",
-        "-a",
-        ".highlight",
-    ]
-
-    proc = subprocess.Popen(cmd_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    outs, errs = proc.communicate()
-
-    if errs.decode("utf-8").strip() != "":
-        log.error(errs.decode("utf-8").strip())
-
-    with open(
-        os.path.join(context[KEY_OUT][KEY_STYLES], "%s.css" % KEY_PYGMENTS), "w+"
-    ) as f:
-        f.write(outs.decode("utf-8"))
-
-
-def run(context, options=None):
+@typechecked
+def run(context: Dict, options: None = None):
 
     try:
         os.mkdir(context[KEY_OUT][KEY_STYLES])
     except FileExistsError:
-        log.warning('Folder "%s" already exists.' % context[KEY_OUT][KEY_STYLES])
+        _log.warning('Folder "%s" already exists.', context[KEY_OUT][KEY_STYLES])
 
-    suffix_list = ["css", "sass", "scss"]
-
-    file_list = []
-    for suffix in suffix_list:
-        file_list.extend(
-            glob.glob(os.path.join(context[KEY_SRC][KEY_STYLES], "*.%s" % suffix))
+    files = []
+    for suffix in ("css", "sass", "scss"):
+        files.extend(
+            glob.glob(os.path.join(context[KEY_SRC][KEY_STYLES], f"*.{suffix:s}"))
         )
 
-    for src_file_path in file_list:
+    for path in files:
 
-        fn = os.path.basename(src_file_path)
+        fn = os.path.basename(path)
 
-        with open(src_file_path, "r") as f:
+        with open(path, "r", encoding = "utf-8") as f:
             cnt = f.read()
 
-        with open(os.path.join(context[KEY_OUT][KEY_STYLES], fn), "w") as f:
+        with open(os.path.join(context[KEY_OUT][KEY_STYLES], fn), "w", encoding = "utf-8") as f:
             f.write(cnt)
-
-    __pygmentize__(context)

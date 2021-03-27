@@ -6,7 +6,7 @@ YABS
 Yet Another Build System
 https://github.com/pleiszenburg/yabs
 
-    src/yabs/plugins/fetch_images.py: Fetches images
+    src/yabs/timer.py: Minimal timer
 
     Copyright (C) 2018-2021 Sebastian M. Ernst <ernst@pleiszenburg.de>
 
@@ -28,38 +28,37 @@ specific language governing rights and limitations under the License.
 # IMPORT
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-import glob
-import os
-from typing import Dict
+from time import time
+from typing import Tuple
 
 from typeguard import typechecked
 
-from ..const import IMAGE_SUFFIX_LIST, KEY_IMAGES, KEY_OUT, KEY_SRC
+from .abc import TimerABC
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# ROUTINE
+# CLASS
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 @typechecked
-def run(context: Dict, options: None = None):
+class Timer(TimerABC):
+    """
+    Minimal timer.
 
-    os.mkdir(context[KEY_OUT][KEY_IMAGES])
+    Mutable.
+    """
 
-    file_list = []
-    for suffix in IMAGE_SUFFIX_LIST:
-        file_list.extend(
-            glob.glob(
-                os.path.join(context[KEY_SRC][KEY_IMAGES], "**", f"*.{suffix:s}"),
-                recursive=True,
-            )
-        )
+    def __init__(self):
 
-    for src_file_path in file_list:
+        self._start = time()
+        self._last = self._start
 
-        fn = os.path.basename(src_file_path)
+    def __call__(self) -> Tuple[float, float]:
+        """
+        Returns current time in second and elapsed time since last call in seconds
+        """
 
-        with open(src_file_path, "rb") as f:
-            cnt_bin = f.read()
+        current = time() - self._start
+        diff = current - self._last
+        self._last = current
 
-        with open(os.path.join(context[KEY_OUT][KEY_IMAGES], fn), "wb") as f:
-            f.write(cnt_bin)
+        return current, diff

@@ -6,7 +6,7 @@ YABS
 Yet Another Build System
 https://github.com/pleiszenburg/yabs
 
-    src/yabs/plugins/fetch_images.py: Fetches images
+    src/yabs/plugins/fetch_pygments.py: Fetches / generates pygments CSS
 
     Copyright (C) 2018-2021 Sebastian M. Ernst <ernst@pleiszenburg.de>
 
@@ -28,38 +28,51 @@ specific language governing rights and limitations under the License.
 # IMPORT
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-import glob
+from logging import getLogger
 import os
+from subprocess import Popen, PIPE
 from typing import Dict
 
 from typeguard import typechecked
 
-from ..const import IMAGE_SUFFIX_LIST, KEY_IMAGES, KEY_OUT, KEY_SRC
+from ..const import (
+    KEY_NAME,
+    KEY_OUT,
+    KEY_STYLES,
+    KEY_THEME,
+    LOGGER,
+)
+
+_log = getLogger(LOGGER)
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # ROUTINE
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 @typechecked
-def run(context: Dict, options: None = None):
+def run(context: Dict, options: Dict):
 
-    os.mkdir(context[KEY_OUT][KEY_IMAGES])
+    theme = options[KEY_THEME]
+    name = options[KEY_NAME]
+    path = context[KEY_OUT][KEY_STYLES]
 
-    file_list = []
-    for suffix in IMAGE_SUFFIX_LIST:
-        file_list.extend(
-            glob.glob(
-                os.path.join(context[KEY_SRC][KEY_IMAGES], "**", f"*.{suffix:s}"),
-                recursive=True,
-            )
-        )
+    proc = Popen([
+        "pygmentize",
+        "-S",
+        theme,
+        "-f",
+        "html",
+        "-a",
+        f".{name:s}",
+    ], stdout = PIPE, stderr = PIPE,)
+    outs, errs = proc.communicate()
 
-    for src_file_path in file_list:
+    if errs.decode("utf-8").strip() != "" or proc.returncode != 0:
+        _log.error("pygmentize failed: %s", errs.decode("utf-8").strip())
 
-        fn = os.path.basename(src_file_path)
-
-        with open(src_file_path, "rb") as f:
-            cnt_bin = f.read()
-
-        with open(os.path.join(context[KEY_OUT][KEY_IMAGES], fn), "wb") as f:
-            f.write(cnt_bin)
+    with open(
+        os.path.join(path, f"{name:s}.css"),
+        "w+",
+        encoding = "utf-8",
+    ) as f:
+        f.write(outs.decode("utf-8"))
