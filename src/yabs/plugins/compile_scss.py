@@ -3,9 +3,11 @@
 
 import glob
 import os
+from typing import Dict
 
 
 import sass
+from typeguard import typechecked
 
 
 STYLE_SASS = "sass"
@@ -16,38 +18,38 @@ STYLE_SUFFIX_LIST = [STYLE_SASS, STYLE_SCSS]
 from yabs.const import KEY_COLORS, KEY_OUT, KEY_STYLES
 
 
-def run(context, options=None):
+@typechecked
+def run(context: Dict, options: None = None):
 
-    suffix_list = ["sass", "scss"]
+    colors = "\n".join([
+        f"${name:s}: rgb({r:d}, {g:d}, {b:d})"
+        for name, (r, g, b) in context[KEY_COLORS].items()
+    ])
 
-    file_list = []
-    for suffix in suffix_list:
-        file_list.extend(
-            glob.glob(os.path.join(context[KEY_OUT][KEY_STYLES], "*.%s" % suffix))
+    suffixes = ("sass", "scss")
+
+    files = []
+    for suffix in suffixes:
+        files.extend(
+            glob.glob(os.path.join(context[KEY_OUT][KEY_STYLES], f"*.{suffix}"))
         )
 
-    for file_path in file_list:
+    for path in files:
 
-        with open(file_path, "r") as f:
+        with open(path, "r", encoding = "utf-8") as f:
             cnt = f.read()
-
-        cnt_color_list = []
-        for color_index, color in enumerate(context[KEY_COLORS]):
-            cnt_color_list.append(
-                "$color%d: rgb%s" % (color_index + 1, str(tuple(color)))
-            )
-        cnt = "\n".join(cnt_color_list) + "\n" + cnt
-
-        os.unlink(file_path)
+        os.unlink(path)
 
         cnt = sass.compile(
-            string=cnt, output_style="compact", indented=file_path.endswith(STYLE_SASS)
+            string = f"{colors:s}\n{cnt:s}",
+            output_style = "compact",
+            indented = path.endswith(STYLE_SASS),
         )
 
-        for suffix in suffix_list:
-            if file_path.endswith(suffix):
-                file_path = file_path[: -1 * len(suffix)] + "css"
+        for suffix in suffixes:
+            if path.endswith(suffix):
+                path = path[: -1 * len(suffix)] + "css"
                 break
 
-        with open(file_path, "w") as f:
+        with open(path, "w", encoding = "utf-8") as f:
             f.write(cnt)
