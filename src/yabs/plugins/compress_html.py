@@ -37,8 +37,6 @@ import htmlmin
 from typeguard import typechecked
 
 from ..const import (
-    AJAX_PREFIX,
-    AJAX_SEPARATOR,
     KEY_OUT,
     KEY_ROOT,
     LOGGER,
@@ -68,7 +66,7 @@ def _compress_html(content: str) -> str:
 
 
 @typechecked
-def _compress_html_file(path: str):
+def _compress_html_file(path: str, sections: Dict[str, str]):
 
     _log.debug("Compressing %s", path)
 
@@ -77,14 +75,19 @@ def _compress_html_file(path: str):
 
     fn = os.path.basename(path)
 
-    if fn.startswith(AJAX_PREFIX) and AJAX_SEPARATOR in cnt:
+    if any(
+        fn.startswith(prefix) and (separator in cnt)
+        for prefix, separator in sections.items()
+    ):
 
-        self_info_json, html_cnt = cnt.split(AJAX_SEPARATOR)
-        cnt = "%s\n%s\n%s" % (
-            self_info_json.strip(),
-            AJAX_SEPARATOR,
-            _compress_html(html_cnt),
-        )
+        separator = None
+        for prefix, v in sections.items():
+            if fn.startswith(prefix):
+                separator = v
+        assert separator is not None
+
+        header, html = cnt.split(separator)
+        cnt = f"{header.strip():s}\n{separator:s}\n{_compress_html(html):s}"
 
     else:
 
@@ -95,9 +98,11 @@ def _compress_html_file(path: str):
 
 
 @typechecked
-def run(context: Dict, options: None = None):
+def run(context: Dict, options: Dict[str, str]):
+
+    sections = options # dict: {prefix: separator}
 
     for file_path in glob.iglob(
         os.path.join(context[KEY_OUT][KEY_ROOT], "**/*.htm*"), recursive=True
     ):
-        _compress_html_file(file_path)
+        _compress_html_file(file_path, sections)
