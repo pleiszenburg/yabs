@@ -11,7 +11,6 @@ from typeguard import typechecked
 from yabs.const import (
     KEY_NAME,
     KEY_OUT,
-    # KEY_PYGMENTS,
     KEY_STYLES,
     KEY_THEME,
     LOGGER,
@@ -35,7 +34,7 @@ def run(context: Dict, options: Dict):
         "-f",
         "html",
         "-a",
-        ".highlight",
+        f".{name:s}",
     ], stdout = PIPE, stderr = PIPE,)
     outs, errs = proc.communicate()
 
