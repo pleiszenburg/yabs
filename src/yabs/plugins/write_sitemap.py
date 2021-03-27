@@ -10,13 +10,13 @@ from typeguard import typechecked
 
 from .render_sequence.translation import Translation
 from ..const import (
-    AJAX_PREFIX,
-    KEY_CTIME,
     KEY_DOMAIN,
     KEY_ENTRIES,
     KEY_FN,
+    KEY_IGNORE,
     KEY_MTIME,
     KEY_OUT,
+    KEY_PREFIX,
     KEY_ROOT,
     KEY_SEQUENCES,
 )
@@ -30,7 +30,9 @@ class Sitemap:
     Mutable, single use.
     """
 
-    def __init__(self, context: Dict, options: None = None):
+    def __init__(self, context: Dict, options: Dict):
+
+        ignore_prefix = options[f"{KEY_IGNORE:s}_{KEY_PREFIX:s}"] # list
 
         self._context = context
         self._today = self._get_datestring_now()
@@ -39,7 +41,7 @@ class Sitemap:
         files = []
         for file_path in glob.glob(os.path.join(self._context[KEY_OUT][KEY_ROOT], "*.htm*")):
             fn = os.path.basename(file_path)
-            if not fn.startswith(AJAX_PREFIX): # TODO handle custom prefixes!
+            if not any(fn.startswith(prefix) for prefix in ignore_prefix):
                 files.append(fn)
 
         cnt = """<?xml version="1.0" encoding="UTF-8"?>
@@ -125,6 +127,6 @@ class Sitemap:
 
 
 @typechecked
-def run(context: Dict, options: None = None):
+def run(context: Dict, options: Dict):
 
     _ = Sitemap(context = context, options = options)

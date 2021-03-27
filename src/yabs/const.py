@@ -41,11 +41,7 @@ LOGGER = "YABS"
 IMAGE_SUFFIX_LIST = ["gif", "jpg", "jpeg", "png"]
 FONT_SUFFIX_LIST = ["ttf", "woff", "woff2"]
 
-AJAX_PREFIX = "ajax_"
-
-AJAX_DELIMITER = "<<DELIMITER>>"
-AJAX_SEPARATOR = "<<CONTENT>>"
-META_DELIMITER = "<<DELIMITER>>"
+META_DELIMITER = "<<DELIMITER>>" # sequences
 
 PID_FN = ".pid"
 YABS_FN = "yabs.yaml"
