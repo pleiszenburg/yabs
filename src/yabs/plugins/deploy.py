@@ -88,7 +88,7 @@ def _copy_current_build(buildroot: str, mountpoint: str):
 
 
 @typechecked
-def _load_passwords(path: str) -> str:
+def _load_passwords(path: str) -> Dict[str, str]:
 
     with open(path, "r", encoding = "utf-8") as f:
         config = load(f.read(), Loader = Loader) # dict
@@ -158,8 +158,10 @@ def _umount_sshfs(mountpoint: str) -> bool:
 @typechecked
 def run(context: Dict, options: Dict):
 
+    _log.info("Loading credentials ...")
     passwords_dict = _load_passwords(os.path.join(os.environ.get("HOME"), YABS_FN))
 
+    _log.info("Mounting remote ...")
     status = _mount_sshfs(
         options[KEY_MOUNTPOINT],
         options[KEY_TARGETS][options[KEY_TARGET]][KEY_HOSTNAME],
@@ -167,12 +169,18 @@ def run(context: Dict, options: Dict):
         options[KEY_TARGETS][options[KEY_TARGET]][KEY_USER],
         passwords_dict[options[KEY_TARGETS][options[KEY_TARGET]][KEY_USER]],
     )
+
+    _log.info("Checking mount result ...")
     assert status
     assert _check_mountpoint(options[KEY_MOUNTPOINT])
 
+    _log.info("Removing old content ...")
     _remove_old_deployment(options[KEY_MOUNTPOINT])
+
+    _log.info("Uploading new content ...")
     _copy_current_build(context[KEY_OUT][KEY_ROOT], options[KEY_MOUNTPOINT])
 
+    _log.info("Unmounting ...")
     umount_count = 0
     while True:
         if umount_count == 20:
@@ -180,10 +188,14 @@ def run(context: Dict, options: Dict):
         try:
             status = _umount_sshfs(options[KEY_MOUNTPOINT])
             assert status
+            _log.info("... succeeded ...")
             break
         except AssertionError:
+            _log.info("... failed, waiting for re-try ...")
             umount_count += 1
             time.sleep(0.25)
 
+    _log.info("Checking umount result ...")
     assert not _check_mountpoint(options[KEY_MOUNTPOINT])
-    _log.info("Good umount.")
+
+    _log.info("Deployed.")
