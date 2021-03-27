@@ -6,7 +6,7 @@ import io
 import json
 from logging import getLogger
 import os
-import subprocess
+from subprocess import Popen, PIPE
 from typing import Dict, List
 import zipfile
 
@@ -28,6 +28,7 @@ from yabs.const import (
 
 BIN_FLD = "bin"
 DIST_FLD = "dist"
+GITHUB = "https://api.github.com/repos/validator/validator/releases/latest"
 SHARE_FLD = "share"
 VALIDATOR_FN = "vnu.jar"
 VERSION_FN = ".vnu_version"
@@ -38,28 +39,28 @@ _log = getLogger(LOGGER)
 
 def _update_validator():
 
-    latest_dict = requests.get(
-        url="https://api.github.com/repos/validator/validator/releases/latest"
-    ).json()
+    latest_dict = requests.get(url = GITHUB).json()
     latest_version = latest_dict["tag_name"]
 
-    version_file_path = os.path.join(os.environ["VIRTUAL_ENV"], SHARE_FLD, VERSION_FN)
+    latest_path = os.path.join(os.environ["VIRTUAL_ENV"], SHARE_FLD, VERSION_FN)
 
-    if os.path.isfile(version_file_path):
-        with open(version_file_path, "r") as f:
+    if os.path.isfile(latest_path):
+        _log.info("Validator installed ... ")
+        with open(latest_path, "r", encoding = "utf-8") as f:
             current_version = f.read().strip()
+        _log.info("Installed validator version: %s", current_version)
         if current_version == latest_version:
             _log.info("Validator up to date ... ")
             return
 
-    _log.info("Updating validator ... ")
+    _log.info("Updating validator to version: %s", latest_version)
 
     latest_url = None
     for item in latest_dict["assets"]:
         if item["name"].startswith(VALIDATOR_FN) and item["name"].endswith(".zip"):
             latest_url = item["browser_download_url"]
     if latest_url is None:
-        raise  # TODO
+        raise ValueError("no url found")
 
     latest_zip_bin = requests.get(latest_url, stream=True)
 
@@ -68,10 +69,10 @@ def _update_validator():
         os.unlink(validator_path)
 
     with zipfile.ZipFile(io.BytesIO(latest_zip_bin.content)) as z:
-        with open(validator_path, "wb") as f:
+        with open(validator_path, "wb", encoding = "utf-8") as f:
             f.write(z.read(os.path.join(DIST_FLD, VALIDATOR_FN)))
 
-    with open(version_file_path, "w+") as f:
+    with open(latest_path, "w+", encoding = "utf-8") as f:
         f.write(latest_version)
 
 
@@ -86,22 +87,21 @@ def _validate_files(files: List[str], ignore: List[str]):
         "json",
     ] + files
 
-    vnu_proc = subprocess.Popen(vnu_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    out, err = vnu_proc.communicate()
-
+    proc = Popen(vnu_cmd, stdout = PIPE, stderr = PIPE)
+    out, err = proc.communicate()
     if out.decode("utf-8").strip() != "":
         _log.error(out.decode("utf-8"))
-
     vnu_out = json.loads(err.decode("utf-8"))
+
     vnu_by_file = {}
 
-    for key in vnu_out.keys():
+    for key, value in vnu_out.items():
 
         if key != "messages":
             _log.error("Unknown VNU JSON key: %s", key)
             continue
 
-        for vnu_problem in vnu_out[key]:
+        for vnu_problem in value:
 
             if any(
                 ignore_item in vnu_problem["message"] for ignore_item in ignore
@@ -112,10 +112,10 @@ def _validate_files(files: List[str], ignore: List[str]):
             if vnu_file not in vnu_by_file.keys():
                 vnu_by_file.update({vnu_file: []})
             vnu_by_file[vnu_file].append(
-                '"%s": %s' % (vnu_problem["type"], vnu_problem["message"])
+                f"\"{vnu_problem['type']:s}\": {vnu_problem['message']:s}"
             )
             vnu_by_file[vnu_file].append(
-                "[...]%s[...]" % vnu_problem["extract"]
+                f"[...]{vnu_problem['extract']:s}[...]"
                 if "extract" in vnu_problem.keys()
                 else "???"
             )
@@ -123,7 +123,7 @@ def _validate_files(files: List[str], ignore: List[str]):
     vnu_files = list(vnu_by_file.keys())
     vnu_files.sort()
     for vnu_file in vnu_files:
-        _log.warning("In file: %s", vnu_file.split("/")[-1])
+        _log.warning("In file: %s", vnu_file.split('/')[-1])
         for line in vnu_by_file[vnu_file]:
             _log.warning(" %s", line)
 
