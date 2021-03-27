@@ -7,13 +7,23 @@ import json
 from logging import getLogger
 import os
 import subprocess
+from typing import Dict, List
 import zipfile
 
 
 import requests
+from typeguard import typechecked
 
 
-from yabs.const import AJAX_PREFIX, KEY_IGNORE, KEY_OUT, KEY_ROOT, KEY_UPDATE, LOGGER
+from yabs.const import (
+    KEY_IGNORE,
+    KEY_OUT,
+    KEY_PREFIX,
+    KEY_ROOT,
+    KEY_UPDATE,
+    KEY_WARNING,
+    LOGGER,
+)
 
 
 BIN_FLD = "bin"
@@ -26,7 +36,7 @@ VERSION_FN = ".vnu_version"
 _log = getLogger(LOGGER)
 
 
-def update_validator():
+def _update_validator():
 
     latest_dict = requests.get(
         url="https://api.github.com/repos/validator/validator/releases/latest"
@@ -39,7 +49,7 @@ def update_validator():
         with open(version_file_path, "r") as f:
             current_version = f.read().strip()
         if current_version == latest_version:
-            _log.debug("Validator up to date ... ")
+            _log.info("Validator up to date ... ")
             return
 
     _log.info("Updating validator ... ")
@@ -65,7 +75,8 @@ def update_validator():
         f.write(latest_version)
 
 
-def validate_files(file_list, ignore_list):
+@typechecked
+def _validate_files(files: List[str], ignore: List[str]):
 
     vnu_cmd = [
         "java",
@@ -73,7 +84,7 @@ def validate_files(file_list, ignore_list):
         os.path.join(os.environ["VIRTUAL_ENV"], BIN_FLD, VALIDATOR_FN),
         "--format",
         "json",
-    ] + file_list
+    ] + files
 
     vnu_proc = subprocess.Popen(vnu_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     out, err = vnu_proc.communicate()
@@ -93,7 +104,7 @@ def validate_files(file_list, ignore_list):
         for vnu_problem in vnu_out[key]:
 
             if any(
-                ignore_item in vnu_problem["message"] for ignore_item in ignore_list
+                ignore_item in vnu_problem["message"] for ignore_item in ignore
             ):
                 continue
 
@@ -117,29 +128,31 @@ def validate_files(file_list, ignore_list):
             _log.warning(" %s", line)
 
 
-def run(context, options=None):
-
-    if options is None:
-        options = {}
+@typechecked
+def run(context: Dict, options: Dict):
 
     if any(
         [
-            KEY_UPDATE in options.keys() and options[KEY_UPDATE],
-            KEY_UPDATE not in options.keys(),
+            options.get(KEY_UPDATE, True),
             not os.path.isfile(
                 os.path.join(os.environ["VIRTUAL_ENV"], SHARE_FLD, VERSION_FN)
             ),
         ]
     ):
-        update_validator()
+        _update_validator()
 
-    file_list = glob.glob(
-        os.path.join(context[KEY_OUT][KEY_ROOT], "**", "*.htm*"), recursive=True
-    )
-    file_list = [
-        fn for fn in file_list if not os.path.basename(fn).startswith(AJAX_PREFIX)
+    files = [
+        fn
+        for fn in glob.glob(
+            os.path.join(context[KEY_OUT][KEY_ROOT], "**", "*.htm*"),
+            recursive = True,
+        )
+        if not any(
+            os.path.basename(fn).startswith(prefix)
+            for prefix in options.get(f"{KEY_IGNORE:s}_{KEY_PREFIX:s}", [])
+        )
     ]
 
-    validate_files(
-        file_list, options[KEY_IGNORE] if KEY_IGNORE in options.keys() else []
+    _validate_files(
+        files, options.get(f"{KEY_IGNORE:s}_{KEY_WARNING:s}", [])
     )
