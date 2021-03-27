@@ -6,7 +6,7 @@ YABS
 Yet Another Build System
 https://github.com/pleiszenburg/yabs
 
-    src/yabs/plugins/compress_scripts.py: Compresses JavaScript
+    src/yabs/plugins/deploy.py: Deploys via sshfs to remote
 
     Copyright (C) 2018-2021 Sebastian M. Ernst <ernst@pleiszenburg.de>
 
