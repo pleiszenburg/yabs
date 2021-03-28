@@ -1,6 +1,6 @@
 #!/bin/bash
 
-ENVP=/home/ernst/Desktop/PROJEKTE/prj.PLEISZENBURG.page/env387
+ENVP=env
 
 source $ENVP/bin/activate
 
