@@ -1,15 +1,42 @@
 # -*- coding: utf-8 -*-
 
+"""
+
+YABS
+Yet Another Build System
+https://github.com/pleiszenburg/yabs
+
+    src/yabs/plugins/render_plots.py: Renders plotly and bokeh plots
+
+    Copyright (C) 2018-2021 Sebastian M. Ernst <ernst@pleiszenburg.de>
+
+<LICENSE_BLOCK>
+The contents of this file are subject to the GNU Lesser General Public License
+Version 2.1 ("LGPL" or "License"). You may not use this file except in
+compliance with the License. You may obtain a copy of the License at
+https://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt
+https://github.com/pleiszenburg/yabs/blob/master/LICENSE
+
+Software distributed under the License is distributed on an "AS IS" basis,
+WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for the
+specific language governing rights and limitations under the License.
+</LICENSE_BLOCK>
+
+"""
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# IMPORT
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 import glob
 import importlib
 from logging import getLogger
 import os
 import sys
-
+from typing import Any, Dict
 
 from bs4 import BeautifulSoup
-
+from typeguard import typechecked
 
 from yabs.const import (
     KEY_HTML,
@@ -27,21 +54,25 @@ from yabs.const import (
     LOGGER,
 )
 
-
 _log = getLogger(LOGGER)
 
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# IMPORT
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-def get_plotly_id(in_str):
+@typechecked
+def _get_plotly_id(html: str) -> str:
 
-    soup_list = list(BeautifulSoup(in_str, "html.parser"))
+    soup_list = list(BeautifulSoup(html, "html.parser"))
 
     if soup_list[0].name != "div":
-        raise  # TODO
+        raise ValueError("no div-tag found")
 
     return soup_list[0].attrs["id"]
 
 
-def render(context, options, plot_name, plot_dict):
+@typechecked
+def _render(context: Dict, plot_name: str, plot_dict: Dict):
 
     plot_languages = plot_dict.pop(KEY_OUT)
     plot_type = plot_dict.pop(KEY_TYPE)
@@ -60,12 +91,12 @@ def render(context, options, plot_name, plot_dict):
     for language_id in plot_languages.keys():
 
         plot_id = (
-            get_plotly_id(plot_languages[language_id][KEY_HTML])
+            _get_plotly_id(plot_languages[language_id][KEY_HTML])
             if plot_type == KEY_PLOTLY
             else ""
         )
 
-        plot_out = context[KEY_TEMPLATES]["%s_%s" % (KEY_PLOT, plot_type)].render(
+        plot_out = context[KEY_TEMPLATES][f"{KEY_PLOT:s}_{plot_type:s}"].render(
             **{KEY_SCRIPTS: scripts_path, KEY_STYLES: styles_path, KEY_ID: plot_id},
             **plot_languages[language_id],
             **plot_dict
@@ -74,14 +105,16 @@ def render(context, options, plot_name, plot_dict):
         with open(
             os.path.join(
                 context[KEY_OUT][KEY_ROOT],
-                "%s_%s_%s.htm" % (KEY_PLOT, plot_name, language_id),
+                f"{KEY_PLOT:s}_{plot_name:s}_{language_id:s}.htm",
             ),
             "w",
+            encoding = "utf-8",
         ) as f:
             f.write(plot_out)
 
 
-def run(context, options=None):
+@typechecked
+def run(context: Dict, options: Any = None):
 
     sys.path.insert(0, context[KEY_SRC][KEY_PLOTS])
 
@@ -102,6 +135,6 @@ def run(context, options=None):
             _log.exception('File "%s" caused an error while trying to plot.', plot_fn)
             continue
 
-        render(context, options, plot_name, plot_dict)
+        _render(context, plot_name, plot_dict)
 
     sys.path.pop(0)
