@@ -1,12 +1,14 @@
-# YABS - the surprised and appalled sound ones makes learning that there is "Yet Another Build System"
+# YABS
+
+The surprised and appalled sound ones makes learning that there is "Yet Another Build System".
 
 ## Synopsis
 
-YABS is a highly customizable system for creating build pipelines for static websites. Although it is inspired by systems like [Pelican](https://blog.getpelican.com/), [Sphinx](http://www.sphinx-doc.org) and [Lektor](https://www.getlektor.com/), it works at a somewhat lower level, providing a maximum of flexibility to end users while eliminating elements like a stiff, complex content management engine. YABS is intended to provide a thin layer - a Python wrapper - around a number of popular tools for building [static] websites, allowing to rapidly build just about anything ranging from small single page sites to large and complex blogs.
+YABS is a highly customizable system for creating build pipelines for static websites. Although it is inspired by systems like [Pelican](https://blog.getpelican.com/), [Sphinx](http://www.sphinx-doc.org) and [Lektor](https://www.getlektor.com/), it works at a somewhat lower level, providing a maximum of flexibility to end users while eliminating elements like a stiff, complex content management engine. YABS is intended to provide a thin layer - a Python wrapper - around a number of popular tools for building static websites, allowing to rapidly build just about anything ranging from small single page sites to large and complex blogs.
 
 ## Design
 
-YABS is based on a minimal plugin system core: Every piece of build functionality is isolated into individual plugins, which can be chained up into custom pipelines and configured in project specific configuration files. If a certain functionality is not provided by an existing YABS plugin, it is trivial to write your own and add it to the system. Every plugin is a stand-alone Python module exposing one single method which must accept two things - a project context object and an options parameter. If a certain plugin happens to be too slow for a certain use case, it can easily be optimized without interfering with other functionality.
+YABS is based on a minimal plugin system core: Every piece of build functionality is isolated into individual plugins, which can be chained up into custom pipelines and configured in project-specific configuration files. If a certain functionality is not provided by an existing YABS plugin, it is trivial to write your own and add it to the system. Every plugin is a stand-alone Python module exposing one single method which must accept two things - a project context object and an options parameter. If a certain plugin happens to be too slow for a certain use case, it can easily be optimized without interfering with other functionality.
 
 ## Features
 
@@ -37,28 +39,13 @@ YABS currently offers plugins for the following common [static] website build st
 
 If it is required to repeatedly run a small subset of a build pipeline e.g. for debugging, it is perfectly possible to do so.
 
-## Installation (HOW IT SHOULD BE)
+## Installation
 
-Prepare a Python virtual environment with Python 3.5 or better and a recent release of node.js (for example through [nodeenv](https://github.com/ekalinin/nodeenv)).
-
-Finally, just run:
-
-```bash
-pip install yabs
-```
-
-## Installation (HOW IT REALLY WORKS AT THE MOMENT)
-
-1. Create a new empty virtual environment with Python 3.5 or better: `python3 -m venv env`
 1. Check out the latest source code of YABS from its git repository: `git checkout [...]`
-1. Activate the virtual environment: `source env/bin/activate`
 1. Change into the source folder of YABS: `cd yabs`
+1. Create a new empty virtual environment named `env` with Python 3.8 or better: `python3 -m venv env`
 1. Install YABS: `make install`
-1. Leave the YABS source folder: `cd ..`
-1. Deactivate the virtual environment: `deactivate`
-1. Re-activate the virtual environment: `source env/bin/activate`
-
-The last two steps are likely necessary due to a bug in one of YABS' dependencies.
+1. Activate the virtual environment: `source env/bin/activate`
 
 ## Basic usage
 
