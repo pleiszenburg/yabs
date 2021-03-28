@@ -44,7 +44,7 @@ from ..const import (
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 @typechecked
-def run(context: Dict, options: None = None):
+def run(context: Dict, options: str):
 
     out_path = os.path.join(context[KEY_OUT][KEY_ROOT], ".htaccess")
 
