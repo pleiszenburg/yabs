@@ -36,7 +36,7 @@ from typing import Dict
 
 from typeguard import typechecked
 
-from ..const import KEY_OUT, KEY_SCRIPTS, LOGGER
+from ..const import KEY_OUT, KEY_SCRIPTS, KEY_SRC, LOGGER
 
 _log = getLogger(LOGGER)
 
@@ -49,10 +49,19 @@ def run(context: Dict, options: None = None):
 
     for file_path in glob.glob(os.path.join(context[KEY_OUT][KEY_SCRIPTS], "*.js")):
 
+        env = os.environ.copy()
+        scripts = os.path.abspath(context[KEY_SRC][KEY_SCRIPTS])
+        env['NODE_PATH'] = (
+            scripts
+            if 'NODE_PATH' in env.keys() else
+            f"{scripts:s}:{env['NODE_PATH']:s}"
+        )
+
         proc = Popen(
             ["browserify", file_path, "-o", file_path],
             stdout = PIPE,
             stderr = PIPE,
+            env = env,
         )
         out, err = proc.communicate()
 
