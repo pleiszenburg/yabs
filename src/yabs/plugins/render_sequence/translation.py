@@ -142,22 +142,6 @@ class Translation:
         }
 
 
-    def _process_meta(self, raw: str) -> Dict:
-
-        meta = load(raw, Loader = Loader)
-
-        meta[KEY_AUTHORS] = [self._process_author(author) for author in meta[KEY_AUTHORS]]
-
-        if KEY_MTIME not in meta.keys():
-            meta[KEY_MTIME] = meta[KEY_CTIME]
-        for key in (KEY_CTIME, KEY_MTIME):
-            meta[f"{key:s}_datetime"] = meta[key].replace(" ", "T")
-
-        meta[KEY_FN] = f"{self._sequence:s}_{slugify(meta[KEY_TITLE]):s}.htm"
-
-        return meta
-
-
     @staticmethod
     def _fix_h_levels(html: str) -> str:
 
