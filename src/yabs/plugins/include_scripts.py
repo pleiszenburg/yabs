@@ -53,7 +53,7 @@ def run(context: Dict, options: None = None):
         scripts = os.path.abspath(context[KEY_SRC][KEY_SCRIPTS])
         env['NODE_PATH'] = (
             scripts
-            if 'NODE_PATH' in env.keys() else
+            if 'NODE_PATH' not in env.keys() else
             f"{scripts:s}:{env['NODE_PATH']:s}"
         )
 
