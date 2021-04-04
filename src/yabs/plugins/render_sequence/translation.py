@@ -67,7 +67,7 @@ class Translation:
     """
     The translation of a post / entry.
 
-    Immutable.
+    Mutable.
     """
 
     def __init__(self, context: Dict, path: str, sequence: str):
