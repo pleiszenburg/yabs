@@ -39,6 +39,7 @@ from ..const import (
     KEY_DATA,
     KEY_DOMAIN,
     KEY_JINJA,
+    KEY_LANGUAGES,
     KEY_SRC,
     KEY_TEMPLATES,
 )
@@ -58,6 +59,7 @@ def run(context: Dict, options: None = None):
     )
     context[KEY_JINJA].globals.update({
         KEY_DOMAIN: context[KEY_DOMAIN],
+        f"all_{KEY_LANGUAGES:s}": context[KEY_LANGUAGES],
     })
     if KEY_DATA in context.keys():
         context[KEY_JINJA].globals.update({
