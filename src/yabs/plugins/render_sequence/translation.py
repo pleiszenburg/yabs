@@ -87,7 +87,9 @@ class Translation:
         self._meta[KEY_FN] = f"{self._sequence:s}_{slugify(self._meta[KEY_TITLE]):s}.htm"
 
         self._abstract = abstract.strip()
+        self._abstract_rendered = None
         self._content = content.strip()
+        self._content_rendered = None
 
         fn = os.path.basename(path)
         self._id, self._language, ext = fn.rsplit(".")
@@ -113,6 +115,15 @@ class Translation:
 
 
     @property
+    def abstract_rendered(self) -> str:
+
+        if self._abstract_rendered is None:
+            raise ValueError('abstract has not been rendered')
+
+        return self._abstract_rendered
+
+
+    @property
     def id(self) -> str:
 
         return self._id
@@ -128,6 +139,15 @@ class Translation:
     def content(self) -> str:
 
         return self._content
+
+
+    @property
+    def content_rendered(self) -> str:
+
+        if self._content_rendered is None:
+            raise ValueError('content has not been rendered')
+
+        return self._content_rendered
 
 
     @staticmethod
@@ -164,12 +184,15 @@ class Translation:
 
         renderer = renderers[self._language]
 
+        self._abstract_rendered = renderer(self._abstract)
+        self._content_rendered = self._fix_h_levels(renderer(self._content))
+
         with open(os.path.join(path, self._meta[KEY_FN]), "w+", encoding = "utf-8") as f:
 
             f.write(template(**{
                 KEY_ID: self._id,
                 KEY_LANGUAGE: self._language,
                 KEY_LANGUAGES: str(languages),
-                KEY_ABSTRACT: renderer(self._abstract),
-                KEY_CONTENT: self._fix_h_levels(renderer(self._content)),
+                KEY_ABSTRACT: self._abstract_rendered,
+                KEY_CONTENT: self._content_rendered,
             }, **self._meta))
