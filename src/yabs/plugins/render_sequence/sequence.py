@@ -28,6 +28,7 @@ specific language governing rights and limitations under the License.
 # IMPORT
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+from datetime import datetime
 import glob
 import os
 from typing import Any, Dict, List
@@ -39,6 +40,7 @@ from ...const import (
     KEY_FN,
     KEY_LANGUAGES,
     KEY_MARKDOWN,
+    KEY_MTIME,
     KEY_NAME,
     KEY_RENDERER,
     KEY_SEQUENCES,
@@ -73,7 +75,7 @@ class Sequence:
             for language in context[KEY_LANGUAGES]
         }
 
-        self._entries = self._match_translations([
+        self._entries = sorted(self._match_translations([
             Translation(
                 context = context,
                 path = path,
@@ -83,13 +85,14 @@ class Sequence:
                 os.path.join(options[KEY_SRC], "**", f"*.{KEY_MARKDOWN:s}"),
                 recursive = True,
             )
-        ])
+        ]), key = self._sort_entry_by)
 
         self._render_entries()
         self._build_data()
 
 
-    def _match_translations(self, translations: List[Translation]) -> List[Entry]:
+    @staticmethod
+    def _match_translations(translations: List[Translation]) -> List[Entry]:
 
         entries = {
             translation.id: Entry(id = translation.id)
@@ -100,6 +103,15 @@ class Sequence:
             entries[translation.id].add(translation)
 
         return list(entries.values())
+
+
+    @staticmethod
+    def _sort_entry_by(entry: Entry) -> datetime:
+
+        return max([
+            datetime.fromisoformat(translation[f"{KEY_MTIME:s}_datetime"])
+            for translation in entry.translations
+        ])
 
 
     def _build_data(self):
