@@ -105,13 +105,19 @@ class Sequence:
         return list(entries.values())
 
 
-    @staticmethod
-    def _sort_entry_by(entry: Entry) -> datetime:
+    @classmethod
+    def _sort_entry_by(cls, entry: Entry) -> datetime:
 
         return max([
-            datetime.fromisoformat(translation[f"{KEY_MTIME:s}_datetime"])
+            cls._sort_translation_by(translation)
             for translation in entry.translations
         ])
+
+
+    @staticmethod
+    def _sort_translation_by(translation: Translation) -> datetime:
+
+        return datetime.fromisoformat(translation[f"{KEY_MTIME:s}_datetime"])
 
 
     def _build_data(self):
@@ -123,11 +129,11 @@ class Sequence:
         self._context[KEY_SEQUENCES][self._name] = {
             KEY_ENTRIES: self._entries,
             **{
-                language: [
+                language: sorted([
                     entry[language]
                     for entry in self._entries
                     if entry[language] is not None
-                ]
+                ], key = self._sort_translation_by)
                 for language in self._context[KEY_LANGUAGES]
             }
         }
