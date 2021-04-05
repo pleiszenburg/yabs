@@ -28,7 +28,9 @@ specific language governing rights and limitations under the License.
 # IMPORT
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+from datetime import datetime
 import os
+from random import randint
 from typing import Any, Callable, Dict, List, Tuple
 
 from bs4 import BeautifulSoup
@@ -53,6 +55,7 @@ from ...const import (
     KEY_LANGUAGES,
     KEY_LASTNAME,
     KEY_MTIME,
+    KEY_TAGS,
     KEY_TITLE,
     META_DELIMITER,
 )
@@ -80,11 +83,21 @@ class Translation:
         meta, abstract, content = raw.split(META_DELIMITER)
 
         self._meta = load(meta, Loader = Loader)
-        self._meta[KEY_AUTHORS] = [self._process_author(author) for author in self._meta[KEY_AUTHORS]]
+
+        self._meta[KEY_AUTHORS] = [self._process_author(author) for author in self._meta.get(KEY_AUTHORS, [])]
+
+        self._meta[KEY_CTIME] = self._meta.get(KEY_CTIME, datetime.now().strftime('%Y-%m-%d %H:%M'))
         self._meta[KEY_MTIME] = self._meta.get(KEY_MTIME, self._meta[KEY_CTIME])
         for key in (KEY_CTIME, KEY_MTIME):
             self._meta[f"{key:s}_datetime"] = self._meta[KEY_MTIME].replace(" ", "T")
+
+        self._meta[KEY_TITLE] = self._meta.get(KEY_TITLE, f'{randint(2**0, (2**64)-1):016x}')
+
         self._meta[KEY_FN] = f"{self._sequence:s}_{slugify(self._meta[KEY_TITLE]):s}.htm"
+
+        tags = self._meta.get(KEY_TAGS, [])
+        self._meta[KEY_TAGS] = sorted({tag for tag in tags if not tag.startswith('_')})
+        self._meta[f'special_{KEY_TAGS:s}'] = sorted({tag for tag in tags if tag.startswith('_')})
 
         self._abstract = abstract.strip()
         self._abstract_rendered = None
