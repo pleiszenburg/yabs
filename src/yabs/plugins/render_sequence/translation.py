@@ -111,6 +111,9 @@ class Translation:
 
     def __eq__(self, other: Any) -> bool:
 
+        if other is None:
+            return False
+
         assert isinstance(other, type(self))
 
         return self.id == other.id
