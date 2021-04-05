@@ -28,7 +28,9 @@ specific language governing rights and limitations under the License.
 # IMPORT
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+from datetime import datetime
 import os
+from random import randint
 from typing import Any, Callable, Dict, List, Tuple
 
 from bs4 import BeautifulSoup
@@ -53,6 +55,7 @@ from ...const import (
     KEY_LANGUAGES,
     KEY_LASTNAME,
     KEY_MTIME,
+    KEY_TAGS,
     KEY_TITLE,
     META_DELIMITER,
 )
@@ -67,7 +70,7 @@ class Translation:
     """
     The translation of a post / entry.
 
-    Immutable.
+    Mutable.
     """
 
     def __init__(self, context: Dict, path: str, sequence: str):
@@ -80,14 +83,26 @@ class Translation:
         meta, abstract, content = raw.split(META_DELIMITER)
 
         self._meta = load(meta, Loader = Loader)
-        self._meta[KEY_AUTHORS] = [self._process_author(author) for author in self._meta[KEY_AUTHORS]]
+
+        self._meta[KEY_AUTHORS] = [self._process_author(author) for author in self._meta.get(KEY_AUTHORS, [])]
+
+        self._meta[KEY_CTIME] = self._meta.get(KEY_CTIME, datetime.now().strftime('%Y-%m-%d %H:%M'))
         self._meta[KEY_MTIME] = self._meta.get(KEY_MTIME, self._meta[KEY_CTIME])
         for key in (KEY_CTIME, KEY_MTIME):
             self._meta[f"{key:s}_datetime"] = self._meta[KEY_MTIME].replace(" ", "T")
+
+        self._meta[KEY_TITLE] = self._meta.get(KEY_TITLE, f'{randint(2**0, (2**64)-1):016x}')
+
         self._meta[KEY_FN] = f"{self._sequence:s}_{slugify(self._meta[KEY_TITLE]):s}.htm"
 
+        tags = self._meta.get(KEY_TAGS, [])
+        self._meta[KEY_TAGS] = sorted({tag for tag in tags if not tag.startswith('_')})
+        self._meta[f'special_{KEY_TAGS:s}'] = sorted({tag for tag in tags if tag.startswith('_')})
+
         self._abstract = abstract.strip()
+        self._abstract_rendered = None
         self._content = content.strip()
+        self._content_rendered = None
 
         fn = os.path.basename(path)
         self._id, self._language, ext = fn.rsplit(".")
@@ -95,6 +110,9 @@ class Translation:
 
 
     def __eq__(self, other: Any) -> bool:
+
+        if other is None:
+            return False
 
         assert isinstance(other, type(self))
 
@@ -110,6 +128,15 @@ class Translation:
     def abstract(self) -> str:
 
         return self._abstract
+
+
+    @property
+    def abstract_rendered(self) -> str:
+
+        if self._abstract_rendered is None:
+            raise ValueError('abstract has not been rendered')
+
+        return self._abstract_rendered
 
 
     @property
@@ -130,6 +157,15 @@ class Translation:
         return self._content
 
 
+    @property
+    def content_rendered(self) -> str:
+
+        if self._content_rendered is None:
+            raise ValueError('content has not been rendered')
+
+        return self._content_rendered
+
+
     @staticmethod
     def _process_author(raw: str) -> Dict[str, str]:
 
@@ -140,22 +176,6 @@ class Translation:
             KEY_FIRSTNAME: firstname.strip(),
             KEY_EMAIL: email.strip(),
         }
-
-
-    def _process_meta(self, raw: str) -> Dict:
-
-        meta = load(raw, Loader = Loader)
-
-        meta[KEY_AUTHORS] = [self._process_author(author) for author in meta[KEY_AUTHORS]]
-
-        if KEY_MTIME not in meta.keys():
-            meta[KEY_MTIME] = meta[KEY_CTIME]
-        for key in (KEY_CTIME, KEY_MTIME):
-            meta[f"{key:s}_datetime"] = meta[key].replace(" ", "T")
-
-        meta[KEY_FN] = f"{self._sequence:s}_{slugify(meta[KEY_TITLE]):s}.htm"
-
-        return meta
 
 
     @staticmethod
@@ -180,12 +200,15 @@ class Translation:
 
         renderer = renderers[self._language]
 
+        self._abstract_rendered = renderer(self._abstract)
+        self._content_rendered = self._fix_h_levels(renderer(self._content))
+
         with open(os.path.join(path, self._meta[KEY_FN]), "w+", encoding = "utf-8") as f:
 
             f.write(template(**{
                 KEY_ID: self._id,
                 KEY_LANGUAGE: self._language,
                 KEY_LANGUAGES: str(languages),
-                KEY_ABSTRACT: renderer(self._abstract),
-                KEY_CONTENT: self._fix_h_levels(renderer(self._content)),
+                KEY_ABSTRACT: self._abstract_rendered,
+                KEY_CONTENT: self._content_rendered,
             }, **self._meta))

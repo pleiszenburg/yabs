@@ -56,7 +56,7 @@ def run(context: Dict, options: None = None):
             cnt = f.read()
 
         cnt = context[KEY_JINJA].from_string(cnt).render(
-            sequences = context[KEY_SEQUENCES],
+            sequences = context.get(KEY_SEQUENCES, {}),
         )
 
         with open(os.path.join(file_path), "w+", encoding = "utf-8") as f:

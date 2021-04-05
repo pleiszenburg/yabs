@@ -66,7 +66,7 @@ class _Sitemap:
 
         self._context = context
         self._today = self._get_datestring_now()
-        self._sequence_names = list(context[KEY_SEQUENCES].keys())
+        self._sequence_names = list(context.get(KEY_SEQUENCES, {}).keys())
 
         files = []
         for file_path in glob.glob(os.path.join(self._context[KEY_OUT][KEY_ROOT], "*.htm*")):
