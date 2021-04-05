@@ -32,6 +32,7 @@ from typing import List, Set, Union
 
 from typeguard import typechecked
 
+from ...const import KEY_TAGS
 from .translation import Translation
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -72,6 +73,16 @@ class Entry:
     def languages(self) -> Set[str]:
 
         return set(self._translations.keys())
+
+
+    @property
+    def special_tags(self) -> Set[str]:
+
+        return {
+            tag
+            for translation in self._translations.values()
+            for tag in translation[f'special_{KEY_TAGS:s}']
+        }
 
 
     @property
