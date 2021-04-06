@@ -29,13 +29,16 @@ specific language governing rights and limitations under the License.
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 import glob
+from logging import getLogger
 import os
 from typing import Dict
 
 import sass
 from typeguard import typechecked
 
-from ..const import KEY_COLORS, KEY_OUT, KEY_STYLES
+from ..const import KEY_COLORS, KEY_OUT, KEY_SRC, KEY_STYLES, LOGGER
+
+_log = getLogger(LOGGER)
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # CONST
@@ -65,6 +68,8 @@ def run(context: Dict, options: None = None):
             glob.glob(os.path.join(context[KEY_OUT][KEY_STYLES], f"*.{suffix}"))
         )
 
+    _log.debug('Inlcuding from %s', context[KEY_SRC][KEY_STYLES])
+
     for path in files:
 
         with open(path, "r", encoding = "utf-8") as f:
@@ -75,6 +80,7 @@ def run(context: Dict, options: None = None):
             string = f"{colors:s}\n{cnt:s}",
             output_style = "compact",
             indented = path.endswith(STYLE_SASS),
+            include_paths = [context[KEY_SRC][KEY_STYLES]],
         )
 
         for suffix in suffixes:

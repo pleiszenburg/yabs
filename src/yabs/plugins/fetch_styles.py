@@ -66,6 +66,9 @@ def run(context: Dict, options: None = None):
 
         fn = os.path.basename(path)
 
+        if fn.startswith('_'):
+            continue
+
         with open(path, "r", encoding = "utf-8") as f:
             cnt = f.read()
 
