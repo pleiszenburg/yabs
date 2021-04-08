@@ -73,10 +73,10 @@ class Translation:
     Mutable.
     """
 
-    def __init__(self, context: Dict, path: str, sequence: str):
+    def __init__(self, context: Dict, path: str, prefix: str):
 
         self._context = context
-        self._sequence = sequence
+        self._prefix = prefix
 
         with open(path, "r", encoding = "utf-8") as f:
             raw = f.read()
@@ -93,7 +93,7 @@ class Translation:
 
         self._meta[KEY_TITLE] = self._meta.get(KEY_TITLE, f'{randint(2**0, (2**64)-1):016x}')
 
-        self._meta[KEY_FN] = f"{self._sequence:s}_{slugify(self._meta[KEY_TITLE]):s}.htm"
+        self._meta[KEY_FN] = f"{self._prefix:s}{slugify(self._meta[KEY_TITLE]):s}.htm"
 
         tags = self._meta.get(KEY_TAGS, [])
         self._meta[KEY_TAGS] = sorted({tag for tag in tags if not tag.startswith('_')})
@@ -193,9 +193,6 @@ class Translation:
     def render(
         self,
         renderers: Dict, # markdown
-        languages: List[Tuple[str, str]], # available translations and URLs
-        path: str,
-        template: Callable, # jinja
     ):
 
         renderer = renderers[self._language]
@@ -203,7 +200,16 @@ class Translation:
         self._abstract_rendered = renderer(self._abstract)
         self._content_rendered = self._fix_h_levels(renderer(self._content))
 
-        with open(os.path.join(path, self._meta[KEY_FN]), "w+", encoding = "utf-8") as f:
+
+    def write(
+        self,
+        languages: List[Tuple[str, str]], # available translations and URLs
+        path: str,
+        template: Callable, # jinja
+        prefix: str, # custom for template, ignoring the one in FN for JavaScript
+    ):
+
+        with open(os.path.join(path, prefix + self._meta[KEY_FN][len(self._prefix):]), "w+", encoding = "utf-8") as f:
 
             f.write(template(**{
                 KEY_ID: self._id,

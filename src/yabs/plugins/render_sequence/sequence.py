@@ -42,6 +42,7 @@ from ...const import (
     KEY_MARKDOWN,
     KEY_MTIME,
     KEY_NAME,
+    KEY_PREFIX,
     KEY_RENDERER,
     KEY_SEQUENCES,
     KEY_SRC,
@@ -67,8 +68,18 @@ class Sequence:
     def __init__(self, context: Dict, options: Any):
 
         self._context = context
+
         self._name = options[KEY_NAME]
-        self._template = context[KEY_TEMPLATES][options[KEY_TEMPLATE]]
+        self._prefix = options[KEY_PREFIX]
+
+        self._prefixes = [
+            template[KEY_PREFIX]
+            for template in options[KEY_TEMPLATES]
+        ]
+        self._templates = [
+            context[KEY_TEMPLATES][template[KEY_NAME]]
+            for template in options[KEY_TEMPLATES]
+        ]
 
         self._renderers = {
             language: context[KEY_MARKDOWN][options[KEY_RENDERER]][language]
@@ -79,7 +90,7 @@ class Sequence:
             Translation(
                 context = context,
                 path = path,
-                sequence = self._name,
+                prefix = self._prefix,
             )
             for path in glob.glob(
                 os.path.join(options[KEY_SRC], "**", f"*.{KEY_MARKDOWN:s}"),
@@ -147,10 +158,16 @@ class Sequence:
 
                 translation.render(
                     renderers = self._renderers,
-                    languages = [
-                        (language, entry[language][KEY_FN])
-                        for language in entry.languages
-                    ],
-                    path = self._context[KEY_SRC][KEY_STAGING],
-                    template = self._template.render,
                 )
+
+                for template, prefix in zip(self._templates, self._prefixes):
+
+                    translation.write(
+                        languages = [
+                            (language, entry[language][KEY_FN])
+                            for language in entry.languages
+                        ],
+                        path = self._context[KEY_SRC][KEY_STAGING],
+                        template = template.render,
+                        prefix = prefix,
+                    )
