@@ -70,6 +70,12 @@ class Entry:
 
 
     @property
+    def id(self) -> str:
+
+        return self._id
+
+
+    @property
     def languages(self) -> Set[str]:
 
         return set(self._translations.keys())
