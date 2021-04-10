@@ -99,7 +99,7 @@ def _update_validator():
         os.unlink(validator_path)
 
     with zipfile.ZipFile(io.BytesIO(latest_zip_bin.content)) as z:
-        with open(validator_path, "wb", encoding = "utf-8") as f:
+        with open(validator_path, "wb") as f:
             f.write(z.read(os.path.join(DIST_FLD, VALIDATOR_FN)))
 
     with open(latest_path, "w+", encoding = "utf-8") as f:
