@@ -15,4 +15,4 @@ source $ENVP/bin/activate
 npm i -g npm
 cat requirements_node.txt | xargs npm install -g
 
-pip instal -e .
+pip install -e .
