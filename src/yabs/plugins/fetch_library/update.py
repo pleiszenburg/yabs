@@ -35,7 +35,7 @@ import io
 from logging import getLogger
 import os
 from pprint import pformat as pf
-from typing import List
+from typing import List, Union
 import zipfile
 
 import requests
@@ -94,6 +94,7 @@ def update_library(
     version: str,
     font_path: str,
     style_path: str,
+    post: Union[str, None],
 ):
 
     library_path = os.path.join(library_path, name)
@@ -128,6 +129,8 @@ def update_library(
     )
 
     for src_file_path in glob.glob(os.path.join(library_path, "*.*")):
+        if post is not None and src_file_path.endswith(f'{post:s}.py'):
+            continue
         os.unlink(src_file_path) # Remove library files of previous versions
 
     with open(version_file_path, "w+", encoding = "utf-8") as f:

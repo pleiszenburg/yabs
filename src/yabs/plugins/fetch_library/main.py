@@ -29,8 +29,10 @@ specific language governing rights and limitations under the License.
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 import glob
+import importlib.util
 from logging import getLogger
 import os
+import sys
 from typing import Dict
 
 from typeguard import typechecked
@@ -42,6 +44,7 @@ from ...const import (
     KEY_NAME,
     KEY_LIBRARIES,
     KEY_OUT,
+    KEY_POST,
     KEY_SCRIPTS,
     KEY_SRC,
     KEY_STYLES,
@@ -65,6 +68,7 @@ def run(context: Dict, options: Dict):
     version = options[KEY_VERSION]
     update = options[KEY_UPDATE]
     src = options[KEY_SRC]
+    post = options.get(KEY_POST, None)
 
     if update:
         update_library(
@@ -75,6 +79,7 @@ def run(context: Dict, options: Dict):
             version = version,
             font_path = context[KEY_OUT][KEY_FONTS],
             style_path = context[KEY_OUT][KEY_STYLES],
+            post = post,
         )
 
     with open(
@@ -110,3 +115,10 @@ def run(context: Dict, options: Dict):
 
         with open(os.path.join(deployment_path, fn), "wb") as f:
             f.write(cnt)
+
+    if post is not None:
+        path = os.path.join(context[KEY_SRC][KEY_LIBRARIES], name)
+        if path not in sys.path:
+            sys.path.append(path)
+        post = importlib.import_module(post)
+        post.run(context = context)
