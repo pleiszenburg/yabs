@@ -39,7 +39,7 @@ CONFIG_FILE = "site.yaml"
 LOGGER = "YABS"
 
 IMAGE_SUFFIX_LIST = ["gif", "jpg", "jpeg", "png", "webp"]
-FONT_SUFFIX_LIST = ["ttf", "woff", "woff2"]
+FONT_SUFFIX_LIST = ["ttf", "woff", "woff2", "otf"]
 
 META_DELIMITER = "<<DELIMITER>>" # sequences
 
@@ -100,6 +100,7 @@ KEY_PLOT = "plot"
 KEY_PLOTS = "plots"
 KEY_PLOTLY = "plotly"
 KEY_PORT = "port"
+KEY_POST = "post"
 KEY_PREFIX = "prefix"
 KEY_PROJECT = "project"
 KEY_RECIPE = "recipe"

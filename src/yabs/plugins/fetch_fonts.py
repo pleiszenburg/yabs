@@ -34,7 +34,7 @@ from typing import Dict
 
 from typeguard import typechecked
 
-from ..const import KEY_FONTS, KEY_OUT, KEY_SRC
+from ..const import KEY_FONTS, KEY_OUT, KEY_SRC, FONT_SUFFIX_LIST
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # IMPORT
@@ -45,12 +45,10 @@ def run(context: Dict, options: None = None):
 
     os.mkdir(context[KEY_OUT][KEY_FONTS])
 
-    suffix_list = ["woff"]
-
     file_list = []
-    for suffix in suffix_list:
+    for suffix in FONT_SUFFIX_LIST:
         file_list.extend(
-            glob.iglob(os.path.join(context[KEY_SRC][KEY_FONTS], "**", f"*.{suffix:s}"))
+            glob.glob(os.path.join(context[KEY_SRC][KEY_FONTS], f"*.{suffix:s}"))
         )
 
     for src_file_path in file_list:
