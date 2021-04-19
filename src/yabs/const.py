@@ -39,7 +39,7 @@ CONFIG_FILE = "site.yaml"
 LOGGER = "YABS"
 
 IMAGE_SUFFIX_LIST = ["gif", "jpg", "jpeg", "png", "webp"]
-FONT_SUFFIX_LIST = ["ttf", "woff", "woff2"]
+FONT_SUFFIX_LIST = ["ttf", "woff", "woff2", "otf"]
 
 META_DELIMITER = "<<DELIMITER>>" # sequences
 
