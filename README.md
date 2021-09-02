@@ -29,6 +29,7 @@ YABS currently offers plugins for the following common [static] website build st
 * inclusion of third party libraries ([JavaScript](http://browserify.org/), CSS)
 * processing of font files
 * processing of image files
+* static file repository
 * a favicon generator
 * a robots.txt generator
 * a sitemap.xml generator
