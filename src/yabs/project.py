@@ -91,7 +91,7 @@ class Project(ProjectABC):
 
     def _compile_paths(self, group_id: str):
 
-        group_root_key = "%s_%s" % (group_id, KEY_ROOT)
+        group_root_key = f"{group_id:s}_{KEY_ROOT:s}"
 
         for path_id in self._context[group_id]:
             self._context[group_id][path_id] = os.path.abspath(
@@ -105,7 +105,6 @@ class Project(ProjectABC):
         self._context[group_id][KEY_ROOT] = os.path.abspath(
             os.path.join(self._context[KEY_CWD], self._context[group_root_key])
         )
-        self._context.pop(group_root_key)
 
     def _get_plugin(self, plugin_name: str) -> ModuleType:
 
