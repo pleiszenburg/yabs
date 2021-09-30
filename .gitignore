@@ -2,3 +2,5 @@ env
 __*__
 *.egg-info
 TODO.md
+*.ipynb
+.ipynb_checkpoints/

@@ -28,29 +28,37 @@ specific language governing rights and limitations under the License.
 # IMPORT
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-import glob
 import os
-from typing import Dict
+from shutil import copytree
+from typing import Dict, Union
 
 from typeguard import typechecked
 
-from ..const import KEY_STATIC, KEY_OUT, KEY_SRC
+from ..const import KEY_STATIC, KEY_OUT, KEY_SRC, KEY_ROOT
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # IMPORT
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 @typechecked
-def run(context: Dict, options: None = None):
+def run(context: Dict, options: Union[Dict, None] = None):
 
-    os.mkdir(context[KEY_OUT][KEY_STATIC])
+    if options is None:
+        options = {}
 
-    for src_file_path in glob.glob(os.path.join(context[KEY_SRC][KEY_STATIC], "*")):
+    src_path = options.get(
+        KEY_SRC,
+        context[KEY_SRC][KEY_STATIC],
+    )
+    out_root = context[f'{KEY_OUT:s}_{KEY_ROOT:s}']
 
-        fn = os.path.basename(src_file_path)
+    try:
+        out_path = os.path.join(out_root, options[KEY_OUT])
+    except KeyError:
+        out_path = context[KEY_OUT][KEY_STATIC]
 
-        with open(src_file_path, "rb") as f:
-            cnt_bin = f.read()
-
-        with open(os.path.join(context[KEY_OUT][KEY_STATIC], fn), "wb") as f:
-            f.write(cnt_bin)
+    copytree(
+        src = src_path,
+        dst = out_path,
+        dirs_exist_ok = True,
+    )
