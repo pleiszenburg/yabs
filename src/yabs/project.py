@@ -81,11 +81,13 @@ class Project(ProjectABC):
         self._context[KEY_LOG] = os.path.abspath(
             os.path.join(self._context[KEY_CWD], self._context[KEY_LOG])
         )
-        self._context[KEY_DEPLOY][KEY_MOUNTPOINT] = os.path.abspath(
-            os.path.join(
-                self._context[KEY_CWD], self._context[KEY_DEPLOY][KEY_MOUNTPOINT]
+
+        if KEY_DEPLOY in self._context.keys():
+            self._context[KEY_DEPLOY][KEY_MOUNTPOINT] = os.path.abspath(
+                os.path.join(
+                    self._context[KEY_CWD], self._context[KEY_DEPLOY][KEY_MOUNTPOINT]
+                )
             )
-        )
 
     def _compile_paths(self, group_id: str):
 
@@ -132,6 +134,9 @@ class Project(ProjectABC):
         """
         Deploys to pre-configured target
         """
+
+        if KEY_DEPLOY not in self._context.keys():
+            raise ValueError('no deployment configuration provided')
 
         self._context[KEY_DEPLOY][KEY_TARGET] = target
         self.run_plugin(KEY_DEPLOY, self._context[KEY_DEPLOY])
