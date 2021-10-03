@@ -31,7 +31,7 @@ specific language governing rights and limitations under the License.
 import json
 import glob
 import os
-from typing import Any, Dict, Tuple
+from typing import Any, Dict, List, Tuple
 
 from typeguard import typechecked
 from yaml import load
@@ -47,6 +47,31 @@ from yabs.const import KEY_DATA, KEY_SRC
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 @typechecked
+def _load_csv(raw: str, sep: str = ';') -> List[Dict[str, str]]:
+
+    lines = [
+        line.strip()
+        for line in raw.split()
+        if len(line.split()) > 0
+    ]
+
+    header = [name.strip() for name in lines.pop(0).split(sep)]
+
+    rec = [
+        {
+            name: value
+            for name, value in zip(
+                header,
+                (value_.strip() for value_ in line.split(sep)),
+            )
+        }
+        for line in lines
+    ]
+
+    return rec
+
+
+@typechecked
 def _load_data_file(file_path: str) -> Tuple[str, Any]:
 
     fn = os.path.basename(file_path)
@@ -59,6 +84,8 @@ def _load_data_file(file_path: str) -> Tuple[str, Any]:
         return data_key, load(data, Loader=Loader)
     elif file_type == "json":
         return data_key, json.loads(data)
+    elif file_type == 'csv':
+        return data_key, _load_csv(data)
     else:
         raise ValueError(f"unknown file type: {file_type:s}")
 
