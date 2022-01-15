@@ -142,7 +142,7 @@ def _validate_files(files: List[str], ignore: List[str]):
             if vnu_file not in vnu_by_file.keys():
                 vnu_by_file.update({vnu_file: []})
             vnu_by_file[vnu_file].append(
-                f"\"{vnu_problem['type']:s}\": {vnu_problem['message']:s}"
+                f"\"{vnu_problem['type']:s}\" line {vnu_problem['lastLine']:d}: {vnu_problem['message']:s}"
             )
             vnu_by_file[vnu_file].append(
                 f"[...]{vnu_problem['extract']:s}[...]"
