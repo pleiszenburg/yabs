@@ -54,6 +54,7 @@ from ...const import (
     KEY_LANGUAGE,
     KEY_LANGUAGES,
     KEY_LASTNAME,
+    KEY_SLUG,
     KEY_MTIME,
     KEY_TAGS,
     KEY_TITLE,
@@ -93,7 +94,8 @@ class Translation:
 
         self._meta[KEY_TITLE] = self._meta.get(KEY_TITLE, f'{randint(2**0, (2**64)-1):016x}')
 
-        self._meta[KEY_FN] = f"{self._prefix:s}{slugify(self._meta[KEY_TITLE]):s}.htm"
+        self._meta[KEY_SLUG] = slugify(self._meta[KEY_TITLE])
+        self._meta[KEY_FN] = f"{self._prefix:s}{self._meta[KEY_SLUG]:s}.htm"
 
         tags = self._meta.get(KEY_TAGS, [])
         self._meta[KEY_TAGS] = sorted({tag for tag in tags if not tag.startswith('_')})
