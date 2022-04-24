@@ -28,15 +28,18 @@ specific language governing rights and limitations under the License.
 # IMPORTS
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+from logging import getLogger
 import os
 
 from bs4 import BeautifulSoup
 from mistune import Renderer, Markdown
+import requests
 from typeguard import typechecked
 
 from ...const import (
     IMAGE_SUFFIX_LIST,
     KEY_CODE,
+    KEY_CONTEXT,
     KEY_FIGURE,
     KEY_FOOTNOTES,
     KEY_FORMULA,
@@ -44,10 +47,14 @@ from ...const import (
     KEY_IMAGES,
     KEY_LANGUAGE,
     KEY_PLOT,
+    KEY_SRC,
     KEY_VIDEO,
+    LOGGER,
 )
 from .katex import render_formula
 from .pygments import render_code
+
+_log = getLogger(LOGGER)
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # CLASS
@@ -179,11 +186,25 @@ class YabsRenderer(Renderer):
 
         if src.startswith("youtube:"):
 
+            video_id = src.split(":")[1]
+
+            img_fn = os.path.join(
+                self.options[KEY_CONTEXT][KEY_SRC][KEY_IMAGES],
+                f'youtube_{video_id:s}.jpg'
+            )
+            if not os.path.exists(img_fn):
+                _log.info('youtube thumbnail missing, loading "%s"', video_id)
+                rq = requests.get(f'https://img.youtube.com/vi/{video_id:s}/hqdefault.jpg')
+                if rq.status_code != 200:
+                    raise ValueError(f'loading youtube thumbnail for "{video_id:s}" failed, code', rq.status_code)
+                with open(img_fn, mode = 'wb') as f:
+                    f.write(rq.content)
+
             self._counters[KEY_VIDEO] += 1
             return self.options[KEY_VIDEO].render(
                 alt_html=text,
                 number=self._counters[KEY_VIDEO],
-                video_id=src.split(":")[1],
+                video_id=video_id,
                 language=self.options[KEY_LANGUAGE],
             )
 
