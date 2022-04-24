@@ -54,6 +54,10 @@ class YabsMarkdown(Markdown):
 
         super().__init__(renderer, **kwargs)
 
+    def reset_counters(self):
+
+        self.renderer.reset_counters()
+
     def output_multiline_math(self):
 
         return self.inline(self.token["text"])

@@ -198,6 +198,7 @@ class Translation:
     ):
 
         renderer = renderers[self._language]
+        renderer.reset_counters()
 
         self._abstract_rendered = renderer(self._abstract)
         self._content_rendered = self._fix_h_levels(renderer(self._content))

@@ -74,6 +74,10 @@ class YabsRenderer(Renderer):
             )
         }
 
+    def reset_counters(self):
+
+        self._counters = {key: 0 for key in self._counters.keys()}
+
     def block_code(self, code: str, lang: str) -> str:
         """
         Renders a block of code as a figure
