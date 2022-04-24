@@ -31,7 +31,7 @@ specific language governing rights and limitations under the License.
 import os
 
 from bs4 import BeautifulSoup
-from mistune import Renderer
+from mistune import Renderer, Markdown
 from typeguard import typechecked
 
 from ...const import (
@@ -63,7 +63,16 @@ class YabsRenderer(Renderer):
 
         super().__init__(*args, **kwargs)
 
-        self._counters = {KEY_FIGURE: 0, KEY_PLOT: 0, KEY_VIDEO: 0, KEY_FORMULA: 0}
+        self._counters = {
+            key: 0
+            for key in (
+                KEY_FIGURE,
+                KEY_PLOT,
+                KEY_VIDEO,
+                KEY_FORMULA,
+                KEY_CODE,
+            )
+        }
 
     def block_code(self, code: str, lang: str) -> str:
         """
@@ -74,8 +83,22 @@ class YabsRenderer(Renderer):
             # return '\n<pre><code>%s</code></pre>\n' % mistune.escape(code)
             raise ValueError('no language specified')
 
+        self._counters[KEY_CODE] += 1
+
+        text = ''
+        lines = code.rstrip().rsplit('\n', 1)
+        if lines[-1].startswith('"""') and lines[-1].endswith('"""'):
+            text = lines.pop(-1)[3:-3]
+            if '\n' in text:
+                raise ValueError('new lines in code caption not supported')
+            text = Markdown()(text).strip()[3:-4] # HACK
+            code = '\n'.join(lines)
+
         return self.options[KEY_CODE].render(
-            **{KEY_CODE: render_code(code, lang)}
+            **{KEY_CODE: render_code(code, lang)},
+            alt_html=text,
+            number=self._counters[KEY_CODE],
+            language=self.options[KEY_LANGUAGE],
         )
 
     def block_math(self, text: str) -> str:
