@@ -6,7 +6,7 @@ daemonocle
 htmlmin
 Jinja2
 libsass
-mistune
+mistune<2.0
 nodeenv
 numpy
 plotly

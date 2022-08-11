@@ -35,6 +35,7 @@ from typeguard import typechecked
 
 from ...const import (
     KEY_CODE,
+    KEY_CONTEXT,
     KEY_FOOTNOTES,
     KEY_FORMULA,
     KEY_IMAGE,
@@ -66,6 +67,7 @@ def run(context: Dict, options: Dict):
 
     context[KEY_MARKDOWN][options[KEY_NAME]] = { # name of renderer
         language: YabsMarkdown.with_renderer(**{
+            KEY_CONTEXT: context,
             KEY_LANGUAGE: language,
             KEY_IMAGE: context[KEY_TEMPLATES][options[KEY_IMAGE]],
             KEY_IMAGES: os.path.relpath(context[KEY_OUT][KEY_IMAGES], context[KEY_OUT][KEY_ROOT]),
