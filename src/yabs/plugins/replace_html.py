@@ -30,6 +30,8 @@ specific language governing rights and limitations under the License.
 
 import glob
 import os
+from subprocess import Popen
+from tempfile import mkstemp
 from typing import Dict
 
 from typeguard import typechecked
@@ -46,6 +48,56 @@ from ..const import (
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 @typechecked
+class _Replacer:
+
+    def __init__(self, raw: str, old: str, new: str, node: str):
+
+        self._raw = raw
+        self._result = ''
+
+        self._start = f'<{node:s}'
+        self._end = f'</{node:s}>'
+        self._use_node = self._start in self._raw and self._end in self._raw
+
+        if self._use_node:
+            self._before, tmp = self._raw.split(self._start, 1)
+            self._relevant, self._after = tmp.split(self._end, 1)
+            assert isinstance(self._before, str)
+            assert isinstance(self._relevant, str)
+            assert isinstance(self._after, str)
+            assert self._relevant in self._raw
+        else:
+            self._before, self._after = '', ''
+            self._relevant = self._raw
+
+        self._relevant = self._replace(self._relevant, old, new)
+
+        if self._use_node:
+            self._result = f'{self._before:s}{self._start:s}{self._relevant:s}{self._end:s}{self._after:s}'
+        else:
+            self._result = self._relevant
+
+    @staticmethod
+    def _replace(raw: str, old: str, new: str) -> str:
+        return raw.replace(old, new)
+
+    @property
+    def result(self) -> str:
+        return self._result
+
+    def diff(self):
+        (_, a), (_, b) = mkstemp(), mkstemp()
+        with open(a, mode = 'w', encoding = 'utf-8') as f:
+            f.write(self._raw)
+        with open(b, mode = 'w', encoding = 'utf-8') as f:
+            f.write(self._result)
+        proc = Popen(['git', '--no-pager', 'diff', '--no-index', a, b])
+        proc.wait()
+        os.unlink(a)
+        os.unlink(b)
+
+
+@typechecked
 def run(context: Dict, options: Dict = None):
 
     if options is None:
@@ -56,9 +108,13 @@ def run(context: Dict, options: Dict = None):
     ):
 
         with open(os.path.join(file_path), "r", encoding = "utf-8") as f:
-            cnt = f.read()
+            cnt_before = f.read()
 
         print( file_path, options['old'], options['new'], options['node'] )
 
+        replacer = _Replacer(cnt_before, options['old'], options['new'], options['node'])
+        replacer.diff()
+        cnt_after = replacer.result
+
         with open(os.path.join(file_path), "w+", encoding = "utf-8") as f:
-            f.write(cnt)
+            f.write(cnt_after)
