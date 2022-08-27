@@ -30,6 +30,7 @@ specific language governing rights and limitations under the License.
 
 import glob
 import os
+import re
 from subprocess import Popen
 from tempfile import mkstemp
 from typing import Dict
@@ -57,7 +58,7 @@ class _Replacer:
 
         self._start = f'<{node:s}'
         self._end = f'</{node:s}>'
-        self._use_node = self._start in self._raw and self._end in self._raw
+        self._use_node = False # self._start in self._raw and self._end in self._raw
 
         if self._use_node:
             self._before, tmp = self._raw.split(self._start, 1)
@@ -78,8 +79,13 @@ class _Replacer:
             self._result = self._relevant
 
     @staticmethod
-    def _replace(raw: str, old: str, new: str) -> str:
+    def _replace0(raw: str, old: str, new: str) -> str:
         return raw.replace(old, new)
+
+    @staticmethod
+    def _replace(raw: str, old: str, new: str) -> str:
+        pattern = f'(?<!<[^>]*){old:s}(?<![^>]*<)'
+        return re.sub(pattern, raw, new)
 
     @property
     def result(self) -> str:
@@ -110,11 +116,13 @@ def run(context: Dict, options: Dict = None):
         with open(os.path.join(file_path), "r", encoding = "utf-8") as f:
             cnt_before = f.read()
 
-        print( file_path, options['old'], options['new'], options['node'] )
-
-        replacer = _Replacer(cnt_before, options['old'], options['new'], options['node'])
-        replacer.diff()
-        cnt_after = replacer.result
+        if options['old'] not in cnt_before:
+            cnt_after = cnt_before
+        else:
+            print( file_path, options['old'], options['new'], options['node'] )
+            replacer = _Replacer(cnt_before, options['old'], options['new'], options['node'])
+            replacer.diff()
+            cnt_after = replacer.result
 
         with open(os.path.join(file_path), "w+", encoding = "utf-8") as f:
             f.write(cnt_after)
