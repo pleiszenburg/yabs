@@ -1,6 +1,7 @@
 katex
-babel-cli
-babel-preset-env
+@babel/cli
+@babel/core
+@babel/preset-env
 core-js
 whatwg-fetch
 browserify
