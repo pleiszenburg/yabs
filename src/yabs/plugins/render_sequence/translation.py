@@ -46,6 +46,7 @@ from ...const import (
     KEY_AUTHORS,
     KEY_CONTENT,
     KEY_CTIME,
+    KEY_DESCRIPTION,
     KEY_EMAIL,
     KEY_FIRSTNAME,
     KEY_FN,
@@ -220,4 +221,7 @@ class Translation:
                 KEY_LANGUAGES: str(languages),
                 KEY_ABSTRACT: self._abstract_rendered,
                 KEY_CONTENT: self._content_rendered,
+                KEY_DESCRIPTION: BeautifulSoup(
+                    self._abstract_rendered, "html.parser"
+                ).get_text().replace('\n', ' ').replace('  ', ' ').replace('"', "'").strip(),
             }, **self._meta))
