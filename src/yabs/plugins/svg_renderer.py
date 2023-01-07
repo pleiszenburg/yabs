@@ -46,6 +46,8 @@ from ..const import (
 def _svg_to_raster(
     src: str,
     dest: str,
+    background_color: str = 'FFFFFF',
+    background_opacity: int = 0,
     width: Optional[int] = None,
     height: Optional[int] = None,
     dpi: Optional[int] = None,
@@ -58,7 +60,9 @@ def _svg_to_raster(
         'inkscape',
         src,  # source
         f'--export-filename={dest:s}',  # destination
-        '-D',  # export entire drawing area
+        '-C',  # export entire drawing area
+        f'--export-background={background_color:s}',
+        f'--export-background-opacity={background_opacity:d}',
     ]
 
     if width is not None:
