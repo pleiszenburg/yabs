@@ -28,7 +28,8 @@ specific language governing rights and limitations under the License.
 # IMPORT
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-from subprocess import Popen  # PIPE
+from logging import getLogger
+from subprocess import Popen, PIPE
 from typing import Dict, Optional
 
 from typeguard import typechecked
@@ -36,7 +37,10 @@ from typeguard import typechecked
 from ..const import (
     KEY_NAME,
     KEY_SVG,
+    LOGGER,
 )
+
+_log = getLogger(LOGGER)
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # ROUTINES
@@ -74,10 +78,19 @@ def _svg_to_raster(
 
     proc = Popen(
         cmd,
-        # stdout = PIPE,
-        # stderr = PIPE,
+        stdout = PIPE,
+        stderr = PIPE,
     )
-    proc.wait()
+    out, err = proc.communicate()
+
+    for name, msg in (
+        ('stdout', out.decode('utf-8')),
+        ('stderr', err.decode('utf-8')),
+    ):
+        for line in msg.split('\n'):
+            if len(line.strip()) == 0:
+                continue
+            _log.info(f'inkscape/{name:s}: {line:s}')
 
 @typechecked
 def run(context: Dict, options: Dict):
