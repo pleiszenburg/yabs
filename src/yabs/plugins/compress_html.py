@@ -102,7 +102,8 @@ def run(context: Dict, options: Dict[str, str]):
 
     sections = options # dict: {prefix: separator}
 
-    for file_path in glob.iglob(
-        os.path.join(context[KEY_OUT][KEY_ROOT], "**/*.htm*"), recursive=True
-    ):
-        _compress_html_file(file_path, sections)
+    for ext in ('htm', 'svg'):
+        for file_path in glob.iglob(
+            os.path.join(context[KEY_OUT][KEY_ROOT], f"**/*.{ext:s}*"), recursive=True
+        ):
+            _compress_html_file(file_path, sections)

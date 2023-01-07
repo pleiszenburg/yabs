@@ -115,6 +115,7 @@ def _validate_files(files: List[str], ignore: List[str]):
         os.path.join(os.environ["VIRTUAL_ENV"], BIN_FLD, VALIDATOR_FN),
         "--format",
         "json",
+        "--also-check-svg",
     ] + files
 
     proc = Popen(vnu_cmd, stdout = PIPE, stderr = PIPE)
@@ -173,8 +174,9 @@ def run(context: Dict, options: Dict):
 
     files = [
         fn
+        for ext in ('htm', 'svg')
         for fn in glob.glob(
-            os.path.join(context[KEY_OUT][KEY_ROOT], "**", "*.htm*"),
+            os.path.join(context[KEY_OUT][KEY_ROOT], "**", f"*.{ext:s}*"),
             recursive = True,
         )
         if not any(

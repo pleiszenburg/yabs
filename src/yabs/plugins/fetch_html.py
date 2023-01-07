@@ -56,13 +56,13 @@ def _find_files(context: Dict) -> List[str]:
     files = []
 
     for src in (KEY_HTML, KEY_STAGING):
-        files.extend(glob.glob(
-            os.path.join(context[KEY_SRC][src], "**", "*.htm*"),
-            recursive = True,
-        ))
+        for ext in ('htm', 'svg'):
+            files.extend(glob.glob(
+                os.path.join(context[KEY_SRC][src], "**", f"*.{ext:s}*"),
+                recursive = True,
+            ))
 
     return files
-
 
 @typechecked
 def run(context: Dict, options: Dict):
