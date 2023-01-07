@@ -28,7 +28,9 @@ specific language governing rights and limitations under the License.
 # IMPORT
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+from concurrent.futures import ThreadPoolExecutor
 import glob
+from multiprocessing import cpu_count
 from logging import getLogger
 import os
 from subprocess import Popen, PIPE
@@ -97,10 +99,12 @@ def _compress_scripts_in_html_file(path: str):
 @typechecked
 def run(context: Dict, options: None = None):
 
-    for file_path in glob.glob(os.path.join(context[KEY_OUT][KEY_SCRIPTS], "*.js")):
-        _compress_scripts_file(file_path)
+    with ThreadPoolExecutor(max_workers = cpu_count()) as pool:
 
-    for file_path in glob.iglob(
-        os.path.join(context[KEY_OUT][KEY_ROOT], "**/*.htm*"), recursive=True
-    ):
-        _compress_scripts_in_html_file(file_path)
+        for file_path in glob.glob(os.path.join(context[KEY_OUT][KEY_SCRIPTS], "*.js")):
+            pool.submit(_compress_scripts_file, file_path)
+
+        for file_path in glob.iglob(
+            os.path.join(context[KEY_OUT][KEY_ROOT], "**/*.htm*"), recursive=True
+        ):
+            pool.submit(_compress_scripts_in_html_file, file_path)
