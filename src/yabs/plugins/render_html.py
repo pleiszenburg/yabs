@@ -48,16 +48,18 @@ from ..const import (
 @typechecked
 def run(context: Dict, options: None = None):
 
-    for file_path in glob.glob(
-        os.path.join(context[KEY_OUT][KEY_ROOT], "**", "*.htm*"), recursive = True
-    ):
+    for ext in ('htm', 'svg'):
 
-        with open(os.path.join(file_path), "r", encoding = "utf-8") as f:
-            cnt = f.read()
+        for file_path in glob.glob(
+            os.path.join(context[KEY_OUT][KEY_ROOT], "**", f"*.{ext:s}*"), recursive = True
+        ):
 
-        cnt = context[KEY_JINJA].from_string(cnt).render(
-            sequences = context.get(KEY_SEQUENCES, {}),
-        )
+            with open(os.path.join(file_path), "r", encoding = "utf-8") as f:
+                cnt = f.read()
 
-        with open(os.path.join(file_path), "w+", encoding = "utf-8") as f:
-            f.write(cnt)
+            cnt = context[KEY_JINJA].from_string(cnt).render(
+                sequences = context.get(KEY_SEQUENCES, {}),
+            )
+
+            with open(os.path.join(file_path), "w+", encoding = "utf-8") as f:
+                f.write(cnt)
