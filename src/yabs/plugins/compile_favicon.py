@@ -29,18 +29,21 @@ specific language governing rights and limitations under the License.
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 import os
-from typing import Dict
+from typing import Callable, Dict, List, Optional, Union
 
 from PIL import Image
 from typeguard import typechecked
 
 from yabs.const import (
+    KEY_DELETE,
     KEY_IMAGES,
     KEY_NAME,
     KEY_OUT,
+    KEY_RENDERER,
     KEY_ROOT,
     KEY_SIZE,
     KEY_SRC,
+    KEY_SVG,
     KEY_VARIANTS,
 )
 
@@ -49,32 +52,69 @@ from yabs.const import (
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 @typechecked
+def _find_base(context: Dict, options: Dict) -> str:
+
+    for key in (KEY_IMAGES, KEY_ROOT):
+        fn = os.path.join(context[KEY_OUT][key], options[KEY_SRC])
+        if os.path.exists(fn):
+            return fn
+
+    raise ValueError('no favicon base found')
+
+@typechecked
+def _import_img(fn: str, delete: bool, renderer: Optional[Callable] = None) -> Image:
+
+    if fn.lower().endswith('.svg'):
+
+        tmp_fn = f'{fn:s}_tmp.png'
+        renderer(
+            src = fn,
+            dest = tmp_fn,
+            width = 1024,
+            height = 1024,
+        )
+        base = Image.open(tmp_fn)
+        base.load()
+        os.unlink(tmp_fn)
+
+    else:
+
+        base = Image.open(fn)
+        base.load()
+
+    if delete:
+        os.unlink(fn)
+
+    return base
+
+@typechecked
+def _export_img(fn: str, img: Image, sizes: Union[List[int], List[List[int]]]):
+
+    if fn.lower().endswith('.ico'):
+        img.save(
+            fn,
+            sizes = [tuple(size) for size in sizes],
+        )
+        return
+
+    resized = img.resize(tuple(sizes))
+    resized.save(fn)
+    resized.close()
+
+@typechecked
 def run(context: Dict, options: Dict):
 
-    src = options[KEY_SRC]
-    variants = options[KEY_VARIANTS]
+    base = _import_img(
+        fn = _find_base(context, options),
+        delete = options.get(KEY_DELETE, True),
+        renderer = context[KEY_SVG].get(options.get(KEY_RENDERER, None), None),
+    )
 
-    fn = os.path.join(context[KEY_OUT][KEY_IMAGES], src)
+    for variant in options[KEY_VARIANTS]:
+        _export_img(
+            fn = os.path.join(context[KEY_OUT][KEY_ROOT], variant[KEY_NAME]),
+            img = base,
+            sizes = variant[KEY_SIZE],
+        )
 
-    favicon_base = Image.open(fn)
-    favicon_base.load()
-    os.unlink(fn)
-
-    for variant in variants:
-
-        path = os.path.join(context[KEY_OUT][KEY_ROOT], variant[KEY_NAME])
-
-        if path.endswith('.ico'):
-
-            favicon_base.save(
-                path,
-                sizes = [tuple(size) for size in variant[KEY_SIZE]],
-            )
-
-        else:
-
-            favicon = favicon_base.resize(tuple(variant[KEY_SIZE]))
-            favicon.save(path)
-            favicon.close()
-
-    favicon_base.close()
+    base.close()
