@@ -93,6 +93,5 @@ def run(context: Dict, options: Optional[Dict] = None):
     if not options.get(KEY_DELETE, False):
         return
 
-    print(included)
     for fn in set(included):
         os.unlink(fn)
