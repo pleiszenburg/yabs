@@ -90,6 +90,10 @@ def _svg_to_raster(
         for line in msg.split('\n'):
             if len(line.strip()) == 0:
                 continue
+            if line.strip() == "Background RRGGBBAA: ffffff00":
+                continue
+            if line.lstrip().startswith('Area ') and ' exported to ' in line:
+                continue
             _log.info(f'inkscape/{name:s}: {line:s}')
 
 @typechecked
