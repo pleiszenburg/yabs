@@ -28,7 +28,9 @@ specific language governing rights and limitations under the License.
 # IMPORT
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+from concurrent.futures import ThreadPoolExecutor
 import glob
+from multiprocessing import cpu_count
 import os
 from typing import Callable, Dict
 
@@ -50,29 +52,33 @@ from yabs.const import (
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 @typechecked
-def _render_img(fn: str, delete: bool, renderer: Callable, width: int, height: int):
+def _render_img(src_fn: str, delete: bool, renderer: Callable, width: int, height: int):
 
-    out_fn = f"{fn.rsplit('.', 1)[0]:s}.png"
+    out_fn = f"{src_fn.rsplit('.', 1)[0]:s}.png"
     renderer(
-        src = fn,
+        src = src_fn,
         dest = out_fn,
         width = width,
         height = height,
     )
     if delete:
-        os.unlink(fn)
+        os.unlink(src_fn)
 
 @typechecked
 def run(context: Dict, options: Dict):
 
-    for fn in glob.glob(
-        os.path.join(context[KEY_OUT][KEY_ROOT], "**", f"{options[KEY_PREFIX]:s}*.svg*"),
-        recursive = True,
-    ):
-        _render_img(
-            fn = fn,
-            delete = options.get(KEY_DELETE, True),
-            renderer = context[KEY_SVG][options[KEY_RENDERER]],
-            width = options.get(KEY_WIDTH, 1200),
-            height = options.get(KEY_HEIGHT, 600)
-        )
+    with ThreadPoolExecutor(max_workers = cpu_count()) as pool:
+
+        for fn in glob.glob(
+            os.path.join(context[KEY_OUT][KEY_ROOT], "**", f"{options[KEY_PREFIX]:s}*.svg*"),
+            recursive = True,
+        ):
+
+            pool.submit(
+                _render_img,
+                src_fn = fn,
+                delete = options.get(KEY_DELETE, True),
+                renderer = context[KEY_SVG][options[KEY_RENDERER]],
+                width = options.get(KEY_WIDTH, 1200),
+                height = options.get(KEY_HEIGHT, 600)
+            )
