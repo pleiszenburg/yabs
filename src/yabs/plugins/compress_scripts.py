@@ -89,7 +89,7 @@ def _compress_scripts_in_html_file(path: str):
         if uncompressed_tag.has_attr("src"):
             continue
         uncompressed_str = uncompressed_tag.decode_contents()
-        compressed_str = _compress_scripts(uncompressed_str)
+        compressed_str = _compress_scripts(uncompressed_str).strip()
         cnt = cnt.replace(uncompressed_str, compressed_str)
 
     with open(path, "w", encoding = "utf-8") as f:
