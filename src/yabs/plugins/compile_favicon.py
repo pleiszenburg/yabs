@@ -104,10 +104,15 @@ def _export_img(fn: str, img: Image, sizes: Union[List[int], List[List[int]]]):
 @typechecked
 def run(context: Dict, options: Dict):
 
+    renderer = None
+    renderers = context.get(KEY_SVG, None)
+    if renderers is not None:
+        renderer = renderers.get(options.get(KEY_RENDERER, None), None)
+
     base = _import_img(
         fn = _find_base(context, options),
         delete = options.get(KEY_DELETE, True),
-        renderer = context[KEY_SVG].get(options.get(KEY_RENDERER, None), None),
+        renderer = renderer,
     )
 
     for variant in options[KEY_VARIANTS]:
