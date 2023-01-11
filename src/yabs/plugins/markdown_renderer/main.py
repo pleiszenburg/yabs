@@ -50,6 +50,7 @@ from ...const import (
     KEY_OUT,
     KEY_PLOT,
     KEY_ROOT,
+    KEY_SVG,
     KEY_VIDEO,
 )
 from .markdown import YabsMarkdown
@@ -87,6 +88,7 @@ def run(context: Dict, options: Dict):
             KEY_FOOTNOTES,
             KEY_MAP,
             KEY_MAPFRAME,
+            KEY_SVG,
         )
     }
     templates = {k: v for k, v in templates.items() if v is not None}

@@ -31,6 +31,7 @@ specific language governing rights and limitations under the License.
 from logging import getLogger
 import os
 from random import randint
+from typing import Any
 
 from bs4 import BeautifulSoup
 from mistune import Renderer, Markdown
@@ -44,6 +45,7 @@ from ...const import (
     KEY_FIGURE,
     KEY_FOOTNOTES,
     KEY_FORMULA,
+    KEY_HEIGHT,
     KEY_IMAGE,
     KEY_IMAGES,
     KEY_MAP,
@@ -53,7 +55,9 @@ from ...const import (
     KEY_PLOT,
     KEY_ROOT,
     KEY_SRC,
+    KEY_SVG,
     KEY_VIDEO,
+    KEY_WIDTH,
     LOGGER,
 )
 from .katex import render_formula
@@ -93,7 +97,7 @@ class YabsRenderer(Renderer):
 
     def block_code(self, code: str, lang: str) -> str:
         """
-        Renders a block of code as a figure or dispatches to map block
+        Renders a block of code as a figure or dispatches to map/svg block
         """
 
         if not lang:
@@ -111,6 +115,9 @@ class YabsRenderer(Renderer):
 
         if lang == 'javascript:map':
             return self._map(text, code)
+        if lang.startswith('xml:figure'):
+            width, height = lang.split(',')[1:3]
+            return self._figure(lang, "", text, **{KEY_CODE: code, KEY_WIDTH: int(width), KEY_HEIGHT: int(height)})
 
         self._counters[KEY_CODE] += 1
 
@@ -174,7 +181,7 @@ class YabsRenderer(Renderer):
 
         return "<p>%s</p>\n" % text_strip
 
-    def _figure(self, src: str, title: str, text: str) -> str:
+    def _figure(self, src: str, title: str, text: str, **kwargs: Any) -> str:
         """
         Applies figure templates
         """
@@ -186,6 +193,18 @@ class YabsRenderer(Renderer):
                 alt_html=text,
                 number=self._counters[KEY_MAP],
                 mapid=src.split(":")[1],
+                language=self.options[KEY_LANGUAGE],
+            )
+
+        if src.startswith("xml:"):
+
+            self._counters[KEY_FIGURE] += 1
+            return self.options[KEY_SVG].render(
+                alt_html=Markdown()(text).strip()[3:-4],  # HACK,
+                vectorxml=kwargs[KEY_CODE],
+                figurewidth=str(kwargs[KEY_WIDTH]),
+                figureheight=str(kwargs[KEY_HEIGHT]),
+                number=self._counters[KEY_FIGURE],
                 language=self.options[KEY_LANGUAGE],
             )
 
