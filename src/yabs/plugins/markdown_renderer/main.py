@@ -29,7 +29,7 @@ specific language governing rights and limitations under the License.
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 import os
-from typing import Dict
+from typing import Any, Dict
 
 from typeguard import typechecked
 
@@ -61,25 +61,41 @@ from .markdown import YabsMarkdown
 @typechecked
 def run(context: Dict, options: Dict):
 
+    def _get_template(name: str) -> Any:
+        option = options.get(name, None)
+        if option is None:
+            return None
+        try:
+            return context[KEY_TEMPLATES][option]
+        except KeyError as e:
+            raise ValueError(f'Markdown renderer missing specified template "{option:s}"') from e
+
     if KEY_MARKDOWN not in context.keys():
         context[KEY_MARKDOWN] = {}
 
     assert isinstance(context[KEY_MARKDOWN], dict)
     assert options[KEY_NAME] not in context[KEY_MARKDOWN].keys()
 
+    templates = {
+        name: _get_template(name)
+        for name in (
+            KEY_IMAGE,
+            KEY_VIDEO,
+            KEY_PLOT,
+            KEY_CODE,
+            KEY_FORMULA,
+            KEY_FOOTNOTES,
+            KEY_MAP,
+            KEY_MAPFRAME,
+        )
+    }
+    templates = {k: v for k, v in templates.items() if v is not None}
+
     context[KEY_MARKDOWN][options[KEY_NAME]] = { # name of renderer
         language: YabsMarkdown.with_renderer(**{
             KEY_CONTEXT: context,
             KEY_LANGUAGE: language,
-            KEY_IMAGE: context[KEY_TEMPLATES][options[KEY_IMAGE]],
             KEY_IMAGES: os.path.relpath(context[KEY_OUT][KEY_IMAGES], context[KEY_OUT][KEY_ROOT]),
-            KEY_VIDEO: context[KEY_TEMPLATES][options[KEY_VIDEO]],
-            KEY_PLOT: context[KEY_TEMPLATES][options[KEY_PLOT]],
-            KEY_CODE: context[KEY_TEMPLATES][options[KEY_CODE]],
-            KEY_FORMULA: context[KEY_TEMPLATES][options[KEY_FORMULA]],
-            KEY_FOOTNOTES: context[KEY_TEMPLATES][options[KEY_FOOTNOTES]],
-            KEY_MAP: context[KEY_TEMPLATES][options[KEY_MAP]],
-            KEY_MAPFRAME: context[KEY_TEMPLATES][options[KEY_MAPFRAME]],
-        })
+        }, **templates)
         for language in context[KEY_LANGUAGES]
     }
