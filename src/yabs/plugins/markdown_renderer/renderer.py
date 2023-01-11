@@ -30,6 +30,7 @@ specific language governing rights and limitations under the License.
 
 from logging import getLogger
 import os
+from random import randint
 
 from bs4 import BeautifulSoup
 from mistune import Renderer, Markdown
@@ -45,8 +46,12 @@ from ...const import (
     KEY_FORMULA,
     KEY_IMAGE,
     KEY_IMAGES,
+    KEY_MAP,
+    KEY_MAPFRAME,
     KEY_LANGUAGE,
+    KEY_OUT,
     KEY_PLOT,
+    KEY_ROOT,
     KEY_SRC,
     KEY_VIDEO,
     LOGGER,
@@ -78,6 +83,7 @@ class YabsRenderer(Renderer):
                 KEY_VIDEO,
                 KEY_FORMULA,
                 KEY_CODE,
+                KEY_MAP,
             )
         }
 
@@ -87,14 +93,12 @@ class YabsRenderer(Renderer):
 
     def block_code(self, code: str, lang: str) -> str:
         """
-        Renders a block of code as a figure
+        Renders a block of code as a figure or dispatches to map block
         """
 
         if not lang:
             # return '\n<pre><code>%s</code></pre>\n' % mistune.escape(code)
             raise ValueError('no language specified')
-
-        self._counters[KEY_CODE] += 1
 
         text = ''
         lines = code.rstrip().rsplit('\n', 1)
@@ -104,6 +108,11 @@ class YabsRenderer(Renderer):
                 raise ValueError('new lines in code caption not supported')
             text = Markdown()(text).strip()[3:-4] # HACK
             code = '\n'.join(lines)
+
+        if lang == 'javascript:map':
+            return self._map(text, code)
+
+        self._counters[KEY_CODE] += 1
 
         return self.options[KEY_CODE].render(
             **{KEY_CODE: render_code(code, lang)},
@@ -170,6 +179,16 @@ class YabsRenderer(Renderer):
         Applies figure templates
         """
 
+        if src.startswith("map:"):
+
+            self._counters[KEY_MAP] += 1
+            return self.options[KEY_MAP].render(
+                alt_html=text,
+                number=self._counters[KEY_MAP],
+                mapid=src.split(":")[1],
+                language=self.options[KEY_LANGUAGE],
+            )
+
         if any(src.endswith(item) for item in IMAGE_SUFFIX_LIST):
 
             self._counters[KEY_FIGURE] += 1
@@ -219,3 +238,24 @@ class YabsRenderer(Renderer):
             )
 
         raise ValueError('unknown type of figure', src)
+
+    def _map(self, text: str, code: str) -> str:
+        """
+        Renders HTML file for map iframe and dispatches to `_figure`
+        """
+
+        mapid = f"{randint(2**16, 2**20):x}"
+        fn = os.path.join(self.options[KEY_CONTEXT][KEY_OUT][KEY_ROOT], f"map_{mapid:s}.htm")
+
+        with open(fn, mode = "w", encoding="utf-8") as f:
+            f.write(self.options[KEY_MAPFRAME].render(
+                mapid=mapid,
+                mapcode=code,
+                language=self.options[KEY_LANGUAGE],
+            ))
+
+        return self._figure(
+            src = f"map:{mapid:s}",
+            title = "",
+            text = text,
+        )
