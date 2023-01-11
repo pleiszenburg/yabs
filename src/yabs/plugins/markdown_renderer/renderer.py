@@ -106,7 +106,7 @@ class YabsRenderer(Renderer):
             text = lines.pop(-1)[3:-3]
             if '\n' in text:
                 raise ValueError('new lines in code caption not supported')
-            text = Markdown()(text).strip()[3:-4] # HACK
+            text = Markdown()(text).strip()[3:-4]  # HACK
             code = '\n'.join(lines)
 
         if lang == 'javascript:map':
@@ -191,10 +191,15 @@ class YabsRenderer(Renderer):
 
         if any(src.endswith(item) for item in IMAGE_SUFFIX_LIST):
 
+            alt_html = Markdown()(text).strip()[3:-4]  # HACK
+            alt_attr = BeautifulSoup(
+                    alt_html, "html.parser"
+            ).get_text().replace('\n', ' ').replace('  ', ' ').replace('"', "'").strip()
+
             self._counters[KEY_FIGURE] += 1
             return self.options[KEY_IMAGE].render(
-                alt_attr=text,
-                alt_html=text,
+                alt_attr=alt_attr,
+                alt_html=alt_html,
                 number=self._counters[KEY_FIGURE],
                 src=os.path.join(self.options[KEY_IMAGES], src)
                 if not src.startswith("http")
