@@ -42,6 +42,8 @@ from ...const import (
     KEY_IMAGES,
     KEY_LANGUAGE,
     KEY_LANGUAGES,
+    KEY_MAP,
+    KEY_MAPFRAME,
     KEY_MARKDOWN,
     KEY_NAME,
     KEY_TEMPLATES,
@@ -76,6 +78,8 @@ def run(context: Dict, options: Dict):
             KEY_CODE: context[KEY_TEMPLATES][options[KEY_CODE]],
             KEY_FORMULA: context[KEY_TEMPLATES][options[KEY_FORMULA]],
             KEY_FOOTNOTES: context[KEY_TEMPLATES][options[KEY_FOOTNOTES]],
+            KEY_MAP: context[KEY_TEMPLATES][options[KEY_MAP]],
+            KEY_MAPFRAME: context[KEY_TEMPLATES][options[KEY_MAPFRAME]],
         })
         for language in context[KEY_LANGUAGES]
     }
