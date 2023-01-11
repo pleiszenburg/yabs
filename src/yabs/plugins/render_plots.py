@@ -41,6 +41,7 @@ from typeguard import typechecked
 from yabs.const import (
     KEY_HTML,
     KEY_ID,
+    KEY_LANGUAGE,
     KEY_OUT,
     KEY_PLOT,
     KEY_PLOTS,
@@ -97,7 +98,7 @@ def _render(context: Dict, plot_name: str, plot_dict: Dict):
         )
 
         plot_out = context[KEY_TEMPLATES][f"{KEY_PLOT:s}_{plot_type:s}"].render(
-            **{KEY_SCRIPTS: scripts_path, KEY_STYLES: styles_path, KEY_ID: plot_id},
+            **{KEY_SCRIPTS: scripts_path, KEY_STYLES: styles_path, KEY_ID: plot_id, KEY_LANGUAGE: language_id},
             **plot_languages[language_id],
             **plot_dict
         )

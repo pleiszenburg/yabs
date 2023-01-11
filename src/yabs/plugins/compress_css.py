@@ -66,7 +66,11 @@ def _compress_css_in_html_file(path: str):
     with open(path, "r", encoding = "utf-8") as f:
         cnt = f.read()
 
-    soup = BeautifulSoup(cnt, "html.parser")
+    if path.lower().endswith('svg'):
+        soup = BeautifulSoup(cnt, "xml")
+    else:
+        soup = BeautifulSoup(cnt, "html.parser")
+
     for uncompressed_tag in soup.find_all("style"):
         uncompressed_str = uncompressed_tag.decode_contents()
         compressed_str = _compress_css(uncompressed_str)
@@ -82,7 +86,8 @@ def run(context: Dict, options: None = None):
     for file_path in glob.glob(os.path.join(context[KEY_OUT][KEY_STYLES], "*.css")):
         _compress_css_file(file_path)
 
-    for file_path in glob.iglob(
-        os.path.join(context[KEY_OUT][KEY_ROOT], "**/*.htm*"), recursive=True
-    ):
-        _compress_css_in_html_file(file_path)
+    for ext in ('htm', 'svg'):
+        for file_path in glob.iglob(
+            os.path.join(context[KEY_OUT][KEY_ROOT], f"**/*.{ext:s}*"), recursive=True
+        ):
+            _compress_css_in_html_file(file_path)

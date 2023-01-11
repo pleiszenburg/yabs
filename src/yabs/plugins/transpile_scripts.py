@@ -32,6 +32,7 @@ import glob
 import json
 from logging import getLogger
 import os
+import site
 from subprocess import Popen, PIPE
 from typing import Dict
 
@@ -53,6 +54,11 @@ def run(context: Dict, options: Dict):
     with open(babelrc_fn, "w", encoding = "utf-8") as f:
         json.dump(options, f, indent = 4, sort_keys = True, separators = (",", ": "))
 
+    node_modules = os.path.abspath(os.path.join(site.getsitepackages()[0], '..', '..', 'node_modules'))
+
+    if not os.path.exists('node_modules'):  # HACK: https://github.com/babel/babel/issues/7381
+        os.symlink(node_modules, 'node_modules')
+
     for file_path in glob.glob(os.path.join(context[KEY_OUT][KEY_SCRIPTS], "*.js")):
 
         proc = Popen(
@@ -68,5 +74,8 @@ def run(context: Dict, options: Dict):
             _log.error("babel: %s", err.decode("utf-8"))
         if proc.returncode != 0:
             raise SystemError("babel failed")
+
+    if os.path.islink('node_modules'):
+        os.unlink('node_modules')
 
     os.unlink(babelrc_fn)

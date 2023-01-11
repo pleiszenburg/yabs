@@ -36,6 +36,7 @@ from typeguard import typechecked
 
 from yabs.const import (
     KEY_EXTENDS,
+    KEY_EXTENSION,
     KEY_HTML,
     KEY_OUT,
     KEY_PLACEHOLDER,
@@ -56,13 +57,13 @@ def _find_files(context: Dict) -> List[str]:
     files = []
 
     for src in (KEY_HTML, KEY_STAGING):
-        files.extend(glob.glob(
-            os.path.join(context[KEY_SRC][src], "**", "*.htm*"),
-            recursive = True,
-        ))
+        for ext in ('htm', 'svg'):
+            files.extend(glob.glob(
+                os.path.join(context[KEY_SRC][src], "**", f"*.{ext:s}*"),
+                recursive = True,
+            ))
 
     return files
-
 
 @typechecked
 def run(context: Dict, options: Dict):
@@ -70,19 +71,29 @@ def run(context: Dict, options: Dict):
     for path in _find_files(context):
 
         with open(path, "r", encoding = "utf-8") as f:
-            cnt = f.read()
+            raw = f.read()
 
         fn = os.path.basename(path)
 
-        if options[KEY_PLACEHOLDER] in cnt:
+        if options[KEY_PLACEHOLDER] in raw:
             for extends in options[KEY_EXTENDS]:
-                out = cnt.replace(options[KEY_PLACEHOLDER], extends[KEY_TEMPLATE])
+
+                cnt = raw.replace(options[KEY_PLACEHOLDER], extends[KEY_TEMPLATE])
+
+                extension = extends.get(KEY_EXTENSION, 'htm')
+
+                extension_placeholder = options.get(KEY_EXTENSION, None)
+                if extension_placeholder is not None:
+                    cnt = cnt.replace(extension_placeholder, extension)
+
+                extended_fn = f"{extends.get(KEY_PREFIX, ''):s}{fn.rsplit('.', 1)[0]:s}.{extension:s}"
+
                 with open(
-                    os.path.join(context[KEY_OUT][KEY_ROOT], f"{extends[KEY_PREFIX]:s}{fn:s}"),
+                    os.path.join(context[KEY_OUT][KEY_ROOT], extended_fn),
                     "w",
                     encoding = "utf-8",
                 ) as f:
-                    f.write(out)
+                    f.write(cnt)
         else:
             with open(os.path.join(context[KEY_OUT][KEY_ROOT], fn), "w", encoding = "utf-8") as f:
-                f.write(cnt)
+                f.write(raw)

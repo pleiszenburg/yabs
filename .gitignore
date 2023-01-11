@@ -4,3 +4,4 @@ __*__
 TODO.md
 *.ipynb
 .ipynb_checkpoints/
+.vscode/

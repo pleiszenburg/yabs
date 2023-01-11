@@ -6,6 +6,7 @@ daemonocle
 htmlmin
 Jinja2
 libsass
+lxml
 mistune<2.0
 nodeenv
 numpy

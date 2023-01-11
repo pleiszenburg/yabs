@@ -6,7 +6,7 @@ YABS
 Yet Another Build System
 https://github.com/pleiszenburg/yabs
 
-    src/yabs/plugins/render_html.py: Renders HTML files
+    src/yabs/plugins/compile_cards.py: Generates Twitter cards and og images (LinkedIn ...)
 
     Copyright (C) 2018-2021 Sebastian M. Ernst <ernst@pleiszenburg.de>
 
@@ -28,17 +28,23 @@ specific language governing rights and limitations under the License.
 # IMPORT
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+from concurrent.futures import ThreadPoolExecutor
 import glob
+from multiprocessing import cpu_count
 import os
-from typing import Dict
+from typing import Callable, Dict
 
 from typeguard import typechecked
 
-from ..const import (
-    KEY_JINJA,
+from yabs.const import (
+    KEY_DELETE,
+    KEY_HEIGHT,
     KEY_OUT,
+    KEY_PREFIX,
+    KEY_RENDERER,
     KEY_ROOT,
-    KEY_SEQUENCES,
+    KEY_SVG,
+    KEY_WIDTH,
 )
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -46,20 +52,33 @@ from ..const import (
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 @typechecked
-def run(context: Dict, options: None = None):
+def _render_img(src_fn: str, delete: bool, renderer: Callable, width: int, height: int):
 
-    for ext in ('htm', 'svg'):
+    out_fn = f"{src_fn.rsplit('.', 1)[0]:s}.png"
+    renderer(
+        src = src_fn,
+        dest = out_fn,
+        width = width,
+        height = height,
+    )
+    if delete:
+        os.unlink(src_fn)
 
-        for file_path in glob.glob(
-            os.path.join(context[KEY_OUT][KEY_ROOT], "**", f"*.{ext:s}*"), recursive = True
+@typechecked
+def run(context: Dict, options: Dict):
+
+    with ThreadPoolExecutor(max_workers = cpu_count()) as pool:
+
+        for fn in glob.glob(
+            os.path.join(context[KEY_OUT][KEY_ROOT], "**", f"{options[KEY_PREFIX]:s}*.svg*"),
+            recursive = True,
         ):
 
-            with open(os.path.join(file_path), "r", encoding = "utf-8") as f:
-                cnt = f.read()
-
-            cnt = context[KEY_JINJA].from_string(cnt).render(
-                sequences = context.get(KEY_SEQUENCES, {}),
+            pool.submit(
+                _render_img,
+                src_fn = fn,
+                delete = options.get(KEY_DELETE, True),
+                renderer = context[KEY_SVG][options[KEY_RENDERER]],
+                width = options.get(KEY_WIDTH, 1200),
+                height = options.get(KEY_HEIGHT, 600)
             )
-
-            with open(os.path.join(file_path), "w+", encoding = "utf-8") as f:
-                f.write(cnt)
