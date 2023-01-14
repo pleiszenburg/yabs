@@ -51,21 +51,15 @@ def run(context: Dict, options: None = None):
 
     for ext in ('htm', 'svg'):
 
-        root_path = os.path.abspath(context[KEY_OUT][KEY_ROOT])
-        shift = len(root_path)
-
         for file_path in glob.glob(
-            os.path.join(root_path, "**", f"*.{ext:s}*"), recursive = True
+            os.path.join(os.path.abspath(context[KEY_OUT][KEY_ROOT]), "**", f"*.{ext:s}*"), recursive = True
         ):
 
             with open(os.path.join(file_path), "r", encoding = "utf-8") as f:
                 cnt = f.read()
 
-            og_url = f'https://{context[KEY_DOMAIN]:s}{file_path[shift:]:s}'
-
             cnt = context[KEY_JINJA].from_string(cnt).render(
                 sequences = context.get(KEY_SEQUENCES, {}),
-                og_url = og_url,
             )
 
             with open(os.path.join(file_path), "w+", encoding = "utf-8") as f:
