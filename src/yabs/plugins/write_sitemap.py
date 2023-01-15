@@ -101,7 +101,7 @@ class _Sitemap:
     def _generate_entry(self, fn: str) -> str:
 
         return """<url>
-    	<loc>http://www.{domain:s}/{filename:s}</loc>
+    	<loc>https://{domain:s}/{filename:s}</loc>
     	<lastmod>{lastmod:s}</lastmod>
     	<changefreq>weekly</changefreq>
     	<priority>{priority:0.2f}</priority>
