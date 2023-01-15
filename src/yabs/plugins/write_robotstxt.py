@@ -77,7 +77,7 @@ def run(context: Dict, options: Dict):
 	User-agent: *
 	{allow_list}
 	{disallow_list}
-	Sitemap: http://www.{domain}/sitemap.xml
+	Sitemap: https://{domain}/sitemap.xml
 	""".format(
         revision = (
             (f"%0{HASH_DIGITS:d}x") % random.randrange(16 ** HASH_DIGITS)
