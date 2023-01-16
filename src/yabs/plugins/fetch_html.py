@@ -28,6 +28,7 @@ specific language governing rights and limitations under the License.
 # IMPORT
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+from datetime import timezone
 import glob
 from logging import getLogger
 import os
@@ -83,18 +84,18 @@ def run(context: Dict, options: Dict):
             raw = f.read()
 
         try:
-            ctime = get_git_ctime(path).isoformat()
+            ctime = get_git_ctime(path).astimezone(timezone.utc).isoformat()
         except NoGitTime:
             if not path.startswith(os.path.abspath(context[KEY_SRC][KEY_STAGING])):
                 _log.info(f'not git ctime: {path:s}')
-            ctime = get_fs_ctime(path).isoformat()
+            ctime = get_fs_ctime(path).astimezone(timezone.utc).isoformat()
 
         try:
-            mtime = get_git_mtime(path).isoformat()
+            mtime = get_git_mtime(path).astimezone(timezone.utc).isoformat()
         except NoGitTime:
             if not path.startswith(os.path.abspath(context[KEY_SRC][KEY_STAGING])):
                 _log.info(f'not git mtime: {path:s}')
-            mtime = get_fs_mtime(path).isoformat()
+            mtime = get_fs_mtime(path).astimezone(timezone.utc).isoformat()
 
         fn = os.path.basename(path)
 
