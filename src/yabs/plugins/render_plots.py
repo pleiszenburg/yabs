@@ -38,10 +38,12 @@ from typing import Any, Dict
 from bs4 import BeautifulSoup
 from typeguard import typechecked
 
-from yabs.const import (
+from ..const import (
+    KEY_CTIME,
     KEY_HTML,
     KEY_ID,
     KEY_LANGUAGE,
+    KEY_MTIME,
     KEY_OUT,
     KEY_PLOT,
     KEY_PLOTS,
@@ -54,6 +56,7 @@ from yabs.const import (
     KEY_TYPE,
     LOGGER,
 )
+from ..times import get_isotime
 
 _log = getLogger(LOGGER)
 
@@ -135,6 +138,19 @@ def run(context: Dict, options: Any = None):
         except:
             _log.exception('File "%s" caused an error while trying to plot.', plot_fn)
             continue
+
+        plot_dict.update({
+            f'og_{KEY_CTIME:s}': get_isotime(
+                fn = file_path,
+                tf = KEY_CTIME,
+                warn = True
+            ),
+            f'og_{KEY_MTIME:s}': get_isotime(
+                fn = file_path,
+                tf = KEY_MTIME,
+                warn = True
+            ),
+        })
 
         _render(context, plot_name, plot_dict)
 
