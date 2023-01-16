@@ -28,11 +28,13 @@ specific language governing rights and limitations under the License.
 # IMPORT
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-import datetime
+from datetime import datetime, timezone
 import glob
+from logging import getLogger
 import os
 from typing import Dict
 
+from bs4 import BeautifulSoup
 from typeguard import typechecked
 
 from .render_sequence.translation import Translation
@@ -46,7 +48,10 @@ from ..const import (
     KEY_PREFIX,
     KEY_ROOT,
     KEY_SEQUENCES,
+    LOGGER,
 )
+
+_log = getLogger(LOGGER)
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # ROUTINES
@@ -65,7 +70,6 @@ class _Sitemap:
         ignore_prefix = options[f"{KEY_IGNORE:s}_{KEY_PREFIX:s}"] # list
 
         self._context = context
-        self._today = self._get_datestring_now()
         self._sequence_names = list(context.get(KEY_SEQUENCES, {}).keys())
 
         files = []
@@ -113,19 +117,25 @@ class _Sitemap:
         )
 
 
-    @staticmethod
-    def _get_datestring_now() -> str:
-
-        today = datetime.datetime.now()
-        return f"{today.year:04d}-{today.month:02d}-{today.day:02d}"
-
-
     def _get_lastmod(self, fn: str) -> str:
 
-        if self._is_in_sequence(fn):
-            return self._get_lastmod_translation(fn)
-        else:
-            return self._today
+        with open(
+            os.path.join(self._context[KEY_OUT][KEY_ROOT], fn),
+            mode = "r",
+            encoding="utf-8",
+        ) as f:
+            soup = BeautifulSoup(f.read(), "html.parser")
+
+        mtime = soup.find("meta", property="og:modified_time")
+        if mtime is not None:
+            mtime = mtime["content"]
+            return datetime.fromisoformat(mtime).isoformat()[:10]  # validation
+
+        if self._is_in_sequence(fn):  # fallback to the above
+            return datetime.fromisoformat(self._get_lastmod_translation(fn)).isoformat()[:10]  # validation
+
+        _log.warning(f'No mtime, falling back to today: {fn:s}')
+        return datetime.now().astimezone(timezone.utc).isoformat()[:10]
 
 
     def _get_lastmod_translation(self, fn: str) -> str:
@@ -137,12 +147,12 @@ class _Sitemap:
 
         if fn.startswith("index"):
             return 1.0
-        elif self._is_in_sequence(fn):
+        if self._is_in_sequence(fn):
             return 0.75
-        elif fn.startswith("plot_"):
+        if fn.startswith("plot_") or fn.startswith("map_"):  # TODO expose to configuration
             return 0.25
-        else:
-            return 0.5
+
+        return 0.5  # default
 
 
     def _get_sequence_name(self, fn: str) -> str:
