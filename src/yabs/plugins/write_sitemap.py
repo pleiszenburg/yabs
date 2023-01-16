@@ -128,8 +128,7 @@ class _Sitemap:
 
         mtime = soup.find("meta", property="og:modified_time")
         if mtime is not None:
-            mtime = mtime["content"]
-            return datetime.fromisoformat(mtime).isoformat()[:10]  # validation
+            return datetime.fromisoformat(mtime["content"]).isoformat()[:10]  # validation
 
         if self._is_in_sequence(fn):  # fallback to the above
             return datetime.fromisoformat(self._get_lastmod_translation(fn)).isoformat()[:10]  # validation
