@@ -97,6 +97,9 @@ def run(context: Dict, options: Dict):
                 _log.info(f'not git mtime: {path:s}')
             mtime = get_fs_mtime(path).astimezone(timezone.utc).isoformat()
 
+        if ctime > mtime:
+            raise ValueError('ctime > mtime', path)
+
         fn = os.path.basename(path)
 
         for a, b in (

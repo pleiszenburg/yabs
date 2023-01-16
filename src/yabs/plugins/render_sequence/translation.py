@@ -113,6 +113,9 @@ class Translation:
         else:
             self._meta[KEY_MTIME] = datetime.fromisoformat(mtime.replace(' ', 'T') + ':00+00:00').isoformat()
 
+        if self._meta[KEY_CTIME] > self._meta[KEY_MTIME]:
+            raise ValueError('ctime > mtime', path)
+
         self._meta[KEY_TITLE] = self._meta.get(KEY_TITLE, f'{randint(2**0, (2**64)-1):016x}')
 
         self._meta[KEY_SLUG] = slugify(self._meta[KEY_TITLE])
