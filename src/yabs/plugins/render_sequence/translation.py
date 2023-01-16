@@ -29,6 +29,7 @@ specific language governing rights and limitations under the License.
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 from datetime import datetime
+from logging import getLogger
 import os
 from random import randint
 from typing import Any, Callable, Dict, List, Tuple
@@ -50,6 +51,7 @@ from ...const import (
     KEY_EMAIL,
     KEY_FIRSTNAME,
     KEY_FN,
+    KEY_HIDDEN,
     KEY_ID,
     KEY_MARKDOWN,
     KEY_LANGUAGE,
@@ -59,10 +61,13 @@ from ...const import (
     KEY_MTIME,
     KEY_TAGS,
     KEY_TITLE,
+    LOGGER,
     META_DELIMITER,
 )
 from ...slugify import slugify
 from ...times import get_isotime
+
+_log = getLogger(LOGGER)
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # CLASS
@@ -112,6 +117,10 @@ class Translation:
 
         self._meta[KEY_SLUG] = slugify(self._meta[KEY_TITLE])
         self._meta[KEY_FN] = f"{self._prefix:s}{self._meta[KEY_SLUG]:s}.htm"
+
+        self._meta[KEY_HIDDEN] = bool(self._meta.get(KEY_HIDDEN, False))
+        if self._meta[KEY_HIDDEN]:
+            _log.warn(f'hidden sequence entry "{path:s}"')
 
         tags = self._meta.get(KEY_TAGS, [])
         self._meta[KEY_TAGS] = sorted({tag for tag in tags if not tag.startswith('_')})
@@ -182,6 +191,12 @@ class Translation:
             raise ValueError('content has not been rendered')
 
         return self._content_rendered
+
+
+    @property
+    def hidden(self) -> bool:
+
+        return self._meta[KEY_HIDDEN]
 
 
     @staticmethod

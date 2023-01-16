@@ -108,9 +108,12 @@ class Sequence:
         entries = {
             translation.id: Entry(id = translation.id)
             for translation in translations
+            if not translation.hidden
         }
 
         for translation in translations:
+            if translation.hidden:
+                continue
             entries[translation.id].add(translation)
 
         return list(entries.values())
