@@ -215,6 +215,7 @@ class Translation:
 
         renderer = renderers[self._language]
         renderer.reset_counters()
+        renderer.set_times(ctime = self._meta[KEY_CTIME], mtime = self._meta[KEY_MTIME])
 
         self._abstract_rendered = renderer(self._abstract)
         self._content_rendered = self._fix_h_levels(renderer(self._content))

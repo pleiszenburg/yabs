@@ -42,6 +42,7 @@ from ...const import (
     IMAGE_SUFFIX_LIST,
     KEY_CODE,
     KEY_CONTEXT,
+    KEY_CTIME,
     KEY_FIGURE,
     KEY_FOOTNOTES,
     KEY_FORMULA,
@@ -50,6 +51,7 @@ from ...const import (
     KEY_IMAGES,
     KEY_MAP,
     KEY_MAPFRAME,
+    KEY_MTIME,
     KEY_LANGUAGE,
     KEY_OUT,
     KEY_PLOT,
@@ -90,10 +92,21 @@ class YabsRenderer(Renderer):
                 KEY_MAP,
             )
         }
+        self._times = {
+            KEY_CTIME: None,
+            KEY_MTIME: None,
+        }
 
     def reset_counters(self):
 
         self._counters = {key: 0 for key in self._counters.keys()}
+
+    def set_times(self, ctime: str, mtime: str):
+
+        self._times.update({
+            KEY_CTIME: ctime,
+            KEY_MTIME: mtime,
+        })
 
     def block_code(self, code: str, lang: str) -> str:
         """
@@ -271,11 +284,17 @@ class YabsRenderer(Renderer):
         mapid = f"{randint(2**16, 2**20):x}"
         fn = os.path.join(self.options[KEY_CONTEXT][KEY_OUT][KEY_ROOT], f"map_{mapid:s}.htm")
 
+        for k, v in self._times.items():
+            if v is not None:
+                continue
+            raise ValueError(f'time field {k:s} has not been set')
+
         with open(fn, mode = "w", encoding="utf-8") as f:
             f.write(self.options[KEY_MAPFRAME].render(
                 mapid=mapid,
                 mapcode=code,
                 language=self.options[KEY_LANGUAGE],
+                **{f'og_{k:s}': v for k, v in self._times.items()},
             ))
 
         return self._figure(

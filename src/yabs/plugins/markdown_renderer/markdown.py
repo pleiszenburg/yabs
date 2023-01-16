@@ -28,6 +28,8 @@ specific language governing rights and limitations under the License.
 # IMPORT
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+from typing import Any
+
 from mistune import Markdown
 from typeguard import typechecked
 
@@ -57,6 +59,10 @@ class YabsMarkdown(Markdown):
     def reset_counters(self):
 
         self.renderer.reset_counters()
+
+    def set_times(self, *args: Any, **kwargs: Any):
+
+        self.renderer.set_times(*args, **kwargs)
 
     def output_multiline_math(self):
 
