@@ -79,7 +79,7 @@ class _Sitemap:
                 files.append(fn)
 
         cnt = """<?xml version="1.0" encoding="UTF-8"?>
-        <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+        <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
         {entries}
         </urlset>
         """.format(
@@ -113,15 +113,38 @@ class _Sitemap:
 
         return """<url>
     	<loc>https://{domain:s}/{filename:s}</loc>
-    	<lastmod>{lastmod:s}</lastmod>
+    	{alternates:s}<lastmod>{lastmod:s}</lastmod>
     	<changefreq>weekly</changefreq>
     	<priority>{priority:0.2f}</priority>
     	</url>""".format(
             domain = self._context[KEY_DOMAIN],
             filename = fn,
+            alternates = self._get_alternates(soup),
             lastmod = self._get_lastmod(fn, soup),
             priority = self._get_priority(fn),
         )
+
+
+    def _get_alternates(self, soup: BeautifulSoup) -> str:
+
+        tags = soup.find_all("link", rel="alternate")
+        if len(tags) < 2:
+            return ''
+
+        alternates = []
+
+        for tag in tags:
+            href = tag['href']
+            hreflang = tag['hreflang']
+            alternates.append((
+                '<xhtml:link '
+                'rel="alternate" '
+                f'hreflang="{hreflang:s}" '
+                f'href="{href:s}"/>'
+                '\n'
+            ))
+
+        return ''.join(alternates)
 
 
     def _get_lastmod(self, fn: str, soup: BeautifulSoup) -> str:
