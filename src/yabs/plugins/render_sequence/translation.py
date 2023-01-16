@@ -88,10 +88,8 @@ class Translation:
 
         self._meta[KEY_AUTHORS] = [self._process_author(author) for author in self._meta.get(KEY_AUTHORS, [])]
 
-        self._meta[KEY_CTIME] = self._meta.get(KEY_CTIME, datetime.now().strftime('%Y-%m-%d %H:%M'))
+        self._meta[KEY_CTIME] = self._meta.get(KEY_CTIME, datetime.now().isoformat())
         self._meta[KEY_MTIME] = self._meta.get(KEY_MTIME, self._meta[KEY_CTIME])
-        for key in (KEY_CTIME, KEY_MTIME):
-            self._meta[f"{key:s}_datetime"] = self._meta[KEY_MTIME].replace(" ", "T")
 
         self._meta[KEY_TITLE] = self._meta.get(KEY_TITLE, f'{randint(2**0, (2**64)-1):016x}')
 

@@ -128,7 +128,7 @@ class Sequence:
     @staticmethod
     def _sort_translation_by(translation: Translation) -> datetime:
 
-        return datetime.fromisoformat(translation[f"{KEY_MTIME:s}_datetime"])
+        return datetime.fromisoformat(translation[KEY_MTIME])
 
 
     def _build_data(self):
