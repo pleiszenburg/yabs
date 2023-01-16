@@ -28,7 +28,8 @@ specific language governing rights and limitations under the License.
 # IMPORT
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-from datetime import datetime
+from datetime import datetime, timezone
+from logging import getLogger
 import os
 from random import randint
 from typing import Any, Callable, Dict, List, Tuple
@@ -59,9 +60,17 @@ from ...const import (
     KEY_MTIME,
     KEY_TAGS,
     KEY_TITLE,
+    LOGGER,
     META_DELIMITER,
 )
 from ...slugify import slugify
+from ...times import (
+    get_git_ctime,
+    get_fs_ctime,
+    NoGitTime,
+)
+
+_log = getLogger(LOGGER)
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # CLASS
@@ -88,8 +97,21 @@ class Translation:
 
         self._meta[KEY_AUTHORS] = [self._process_author(author) for author in self._meta.get(KEY_AUTHORS, [])]
 
-        self._meta[KEY_CTIME] = self._meta.get(KEY_CTIME, datetime.now().isoformat())
-        self._meta[KEY_MTIME] = self._meta.get(KEY_MTIME, self._meta[KEY_CTIME])
+        ctime = self._meta.get(KEY_CTIME, None)
+        if ctime is None:
+            try:
+                self._meta[KEY_CTIME] = get_git_ctime(path).astimezone(timezone.utc).isoformat()
+            except NoGitTime:
+                _log.info(f'not git ctime: {path:s}')
+                self._meta[KEY_CTIME] = get_fs_ctime(path).astimezone(timezone.utc).isoformat()
+        else:
+            self._meta[KEY_CTIME] = datetime.fromisoformat(ctime.replace(' ', 'T') + ':00+00:00').isoformat()
+
+        mtime = self._meta.get(KEY_MTIME, None)
+        if mtime is None:
+            self._meta[KEY_MTIME] = self._meta[KEY_CTIME]
+        else:
+            self._meta[KEY_MTIME] = datetime.fromisoformat(mtime.replace(' ', 'T') + ':00+00:00').isoformat()
 
         self._meta[KEY_TITLE] = self._meta.get(KEY_TITLE, f'{randint(2**0, (2**64)-1):016x}')
 
