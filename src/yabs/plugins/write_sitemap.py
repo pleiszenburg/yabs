@@ -104,6 +104,13 @@ class _Sitemap:
 
     def _generate_entry(self, fn: str) -> str:
 
+        with open(
+            os.path.join(self._context[KEY_OUT][KEY_ROOT], fn),
+            mode = "r",
+            encoding="utf-8",
+        ) as f:
+            soup = BeautifulSoup(f.read(), "html.parser")
+
         return """<url>
     	<loc>https://{domain:s}/{filename:s}</loc>
     	<lastmod>{lastmod:s}</lastmod>
@@ -112,19 +119,12 @@ class _Sitemap:
     	</url>""".format(
             domain = self._context[KEY_DOMAIN],
             filename = fn,
-            lastmod = self._get_lastmod(fn),
+            lastmod = self._get_lastmod(fn, soup),
             priority = self._get_priority(fn),
         )
 
 
-    def _get_lastmod(self, fn: str) -> str:
-
-        with open(
-            os.path.join(self._context[KEY_OUT][KEY_ROOT], fn),
-            mode = "r",
-            encoding="utf-8",
-        ) as f:
-            soup = BeautifulSoup(f.read(), "html.parser")
+    def _get_lastmod(self, fn: str, soup: BeautifulSoup) -> str:
 
         mtime = soup.find("meta", property="og:modified_time")
         if mtime is not None:
