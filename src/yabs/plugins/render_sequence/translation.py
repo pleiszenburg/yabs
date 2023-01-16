@@ -28,8 +28,7 @@ specific language governing rights and limitations under the License.
 # IMPORT
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-from datetime import datetime, timezone
-from logging import getLogger
+from datetime import datetime
 import os
 from random import randint
 from typing import Any, Callable, Dict, List, Tuple
@@ -60,17 +59,10 @@ from ...const import (
     KEY_MTIME,
     KEY_TAGS,
     KEY_TITLE,
-    LOGGER,
     META_DELIMITER,
 )
 from ...slugify import slugify
-from ...times import (
-    get_git_ctime,
-    get_fs_ctime,
-    NoGitTime,
-)
-
-_log = getLogger(LOGGER)
+from ...times import get_isotime
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # CLASS
@@ -99,11 +91,11 @@ class Translation:
 
         ctime = self._meta.get(KEY_CTIME, None)
         if ctime is None:
-            try:
-                self._meta[KEY_CTIME] = get_git_ctime(path).astimezone(timezone.utc).isoformat()
-            except NoGitTime:
-                _log.info(f'not git ctime: {path:s}')
-                self._meta[KEY_CTIME] = get_fs_ctime(path).astimezone(timezone.utc).isoformat()
+            self._meta[KEY_CTIME] = get_isotime(
+                fn = path,
+                tf = KEY_CTIME,
+                warn = True,
+            )
         else:
             self._meta[KEY_CTIME] = datetime.fromisoformat(ctime.replace(' ', 'T') + ':00+00:00').isoformat()
 

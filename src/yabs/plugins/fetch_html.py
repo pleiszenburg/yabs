@@ -28,7 +28,6 @@ specific language governing rights and limitations under the License.
 # IMPORT
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-from datetime import timezone
 import glob
 from logging import getLogger
 import os
@@ -51,13 +50,7 @@ from ..const import (
     KEY_TEMPLATE,
     LOGGER,
 )
-from ..times import (
-    get_fs_ctime,
-    get_fs_mtime,
-    get_git_ctime,
-    get_git_mtime,
-    NoGitTime,
-)
+from ..times import get_isotime
 
 _log = getLogger(LOGGER)
 
@@ -83,20 +76,16 @@ def run(context: Dict, options: Dict):
         with open(path, "r", encoding = "utf-8") as f:
             raw = f.read()
 
-        try:
-            ctime = get_git_ctime(path).astimezone(timezone.utc).isoformat()
-        except NoGitTime:
-            if not path.startswith(os.path.abspath(context[KEY_SRC][KEY_STAGING])):
-                _log.info(f'not git ctime: {path:s}')
-            ctime = get_fs_ctime(path).astimezone(timezone.utc).isoformat()
-
-        try:
-            mtime = get_git_mtime(path).astimezone(timezone.utc).isoformat()
-        except NoGitTime:
-            if not path.startswith(os.path.abspath(context[KEY_SRC][KEY_STAGING])):
-                _log.info(f'not git mtime: {path:s}')
-            mtime = get_fs_mtime(path).astimezone(timezone.utc).isoformat()
-
+        ctime = get_isotime(
+            fn = path,
+            tf = KEY_CTIME,
+            warn = not path.startswith(os.path.abspath(context[KEY_SRC][KEY_STAGING])),
+        )
+        mtime = get_isotime(
+            fn = path,
+            tf = KEY_MTIME,
+            warn = not path.startswith(os.path.abspath(context[KEY_SRC][KEY_STAGING])),
+        )
         if ctime > mtime:
             raise ValueError('ctime > mtime', path)
 
