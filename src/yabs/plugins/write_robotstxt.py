@@ -89,5 +89,5 @@ def run(context: Dict, options: Dict):
 
     cnt = "\n".join([line.strip() for line in cnt.split("\n")])
 
-    with open(os.path.join(context[KEY_OUT][KEY_ROOT], "robots.txt"), "w") as f:
+    with open(os.path.join(context[KEY_OUT][KEY_ROOT], "robots.txt"), mode = "w", encoding = "utf-8") as f:
         f.write(cnt)

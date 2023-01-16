@@ -84,7 +84,7 @@ class _Sitemap:
 
         cnt = "\n".join([line.strip() for line in cnt.split("\n")])
 
-        with open(os.path.join(context[KEY_OUT][KEY_ROOT], "sitemap.xml"), "w") as f:
+        with open(os.path.join(context[KEY_OUT][KEY_ROOT], "sitemap.xml"), mode = "w", encoding = "utf-8") as f:
             f.write(cnt)
 
 
