@@ -31,7 +31,7 @@ specific language governing rights and limitations under the License.
 import glob
 from logging import getLogger
 import os
-from typing import Dict, List
+from typing import Dict, Generator
 
 from typeguard import typechecked
 
@@ -65,18 +65,14 @@ _log = getLogger(LOGGER)
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 @typechecked
-def _find_files(context: Dict) -> List[str]:
-
-    files = []
+def _find_files(context: Dict) -> Generator[str, None, None]:
 
     for src in (KEY_HTML, KEY_STAGING):
         for ext in ('htm', 'svg'):
-            files.extend(glob.glob(
+            yield from glob.glob(
                 os.path.join(context[KEY_SRC][src], "**", f"*.{ext:s}*"),
                 recursive = True,
-            ))
-
-    return files
+            )
 
 @typechecked
 def run(context: Dict, options: Dict):
