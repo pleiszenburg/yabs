@@ -28,16 +28,14 @@ specific language governing rights and limitations under the License.
 # IMPORT
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-from datetime import datetime
 import glob
 from logging import getLogger
 import os
-from subprocess import Popen, PIPE
-from typing import Dict, List, Optional
+from typing import Dict, List
 
 from typeguard import typechecked
 
-from yabs.const import (
+from ..const import (
     KEY_CTIME,
     KEY_EXTENDS,
     KEY_EXTENSION,
@@ -52,9 +50,13 @@ from yabs.const import (
     KEY_TEMPLATE,
     LOGGER,
 )
-
-class NoGitTime(Exception):
-    pass
+from ..times import (
+    get_fs_ctime,
+    get_fs_mtime,
+    get_git_ctime,
+    get_git_mtime,
+    NoGitTime,
+)
 
 _log = getLogger(LOGGER)
 
@@ -77,42 +79,6 @@ def _find_files(context: Dict) -> List[str]:
     return files
 
 @typechecked
-def _iso2dt(raw: str) -> datetime:
-    raw = raw.replace(' ', 'T', 1).replace(' ', '')
-    return datetime.fromisoformat(f'{raw[:-2]:s}:{raw[-2:]:s}')
-
-@typechecked
-def _get_git_ctime(fn: str) -> Optional[datetime]:
-    proc = Popen([
-        'git',
-        'log',
-        '--diff-filter=A',
-        '--follow',
-        r'--format=%ci',
-        '-1',
-        '--',
-        fn,
-    ], stdout = PIPE)
-    out, _ = proc.communicate()
-    if len(out.strip()) == 0:
-        raise NoGitTime('failed to retrieve git ctime')
-    return _iso2dt(out.decode('utf-8').strip())
-
-@typechecked
-def _get_git_mtime(fn: str) -> Optional[datetime]:
-    proc = Popen([
-        'git',
-        'log',
-        '-1',
-        r'--pretty=%ci',
-        fn,
-    ], stdout = PIPE)
-    out, _ = proc.communicate()
-    if len(out.strip()) == 0:
-        raise NoGitTime('failed to retrieve git mtime')
-    return _iso2dt(out.decode('utf-8').strip())
-
-@typechecked
 def run(context: Dict, options: Dict):
 
     for path in _find_files(context):
@@ -121,20 +87,18 @@ def run(context: Dict, options: Dict):
             raw = f.read()
 
         try:
-            ctime = _get_git_ctime(path)
+            ctime = get_git_ctime(path).isoformat()
         except NoGitTime:
             if not path.startswith(os.path.abspath(context[KEY_SRC][KEY_STAGING])):
                 _log.info(f'not git ctime: {path:s}')
-            ctime = datetime.fromtimestamp(os.stat(path).st_ctime)
+            ctime = get_fs_ctime(path).isoformat()
 
         try:
-            mtime = _get_git_mtime(path)
+            mtime = get_git_mtime(path).isoformat()
         except NoGitTime:
             if not path.startswith(os.path.abspath(context[KEY_SRC][KEY_STAGING])):
                 _log.info(f'not git mtime: {path:s}')
-            mtime = datetime.fromtimestamp(os.stat(path).st_mtime)
-
-        ctime, mtime = ctime.isoformat(), mtime.isoformat()
+            mtime = get_fs_mtime(path).isoformat()
 
         fn = os.path.basename(path)
 
