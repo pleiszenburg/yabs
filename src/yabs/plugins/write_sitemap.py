@@ -108,7 +108,7 @@ class _Sitemap:
     	</url>""".format(
             domain = self._context[KEY_DOMAIN],
             filename = fn,
-            lastmod = self._get_lastmod(fn) if self._is_in_sequence(fn) else self._today,
+            lastmod = self._get_lastmod(fn),
             priority = self._get_priority(fn),
         )
 
@@ -121,6 +121,14 @@ class _Sitemap:
 
 
     def _get_lastmod(self, fn: str) -> str:
+
+        if self._is_in_sequence(fn):
+            return self._get_lastmod_translation(fn)
+        else:
+            return self._today
+
+
+    def _get_lastmod_translation(self, fn: str) -> str:
 
         return self._find_translation(fn)[KEY_MTIME].split(" ")[0]
 
