@@ -28,14 +28,18 @@ specific language governing rights and limitations under the License.
 # IMPORT
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-from datetime import datetime
+from datetime import datetime, timezone
 from logging import getLogger
 import os
 from subprocess import Popen, PIPE
 
 from typeguard import typechecked
 
-from .const import LOGGER
+from .const import (
+    KEY_CTIME,
+    KEY_MTIME,
+    LOGGER,
+)
 
 class NoGitTime(Exception):
     pass
@@ -94,3 +98,27 @@ def get_fs_ctime(fn: str) -> datetime:
 def get_fs_mtime(fn: str) -> datetime:
 
     return datetime.fromtimestamp(os.stat(fn).st_mtime)
+
+@typechecked
+def get_isotime(
+    fn: str,
+    tf: str,
+    tz: timezone = timezone.utc,
+    warn: bool = True,
+) -> str:
+
+    if tf == KEY_CTIME:
+        fs_time = get_fs_ctime
+        git_time = get_git_ctime
+    elif tf == KEY_MTIME:
+        fs_time = get_fs_mtime
+        git_time = get_git_mtime
+    else:
+        raise ValueError(f'unknown time field "{tf:s}"')
+
+    try:
+        return git_time(fn).astimezone(tz).isoformat()
+    except NoGitTime:
+        if warn:
+            _log.info(f'not git ctime: {fn:s}')
+        return fs_time(fn).astimezone(tz).isoformat()
